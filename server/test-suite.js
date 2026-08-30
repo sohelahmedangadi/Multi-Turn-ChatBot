@@ -1,9 +1,9 @@
-import { detectAmbiguity } from './server/services/ambiguityDetector.js';
+import { detectAmbiguity } from './services/ambiguityDetector.js';
 import {
   getSessionContext,
   estimateTokenCount,
   truncateHistoryToTokenBudget,
-} from './server/services/contextManager.js';
+} from './services/contextManager.js';
 import {
   extractFactsFromMessage,
   processAndSaveUserMemories,
@@ -12,21 +12,21 @@ import {
   vectorizeText,
   calculateVectorCosineSimilarity,
   MEMORY_MAX_TOKENS,
-} from './server/services/memoryManager.js';
-import { extractFactsWithLangChain } from './server/services/langchainMemory.js';
+} from './services/memoryManager.js';
+import { extractFactsWithLangChain } from './services/langchainMemory.js';
 import {
   calculateCoherenceScore,
   BENCHMARK_DATASET,
-} from './server/services/evaluationSuite.js';
+} from './services/evaluationSuite.js';
 import {
   hashPassword,
   verifyPassword,
   generateToken,
   verifyToken,
-} from './server/middleware/auth.js';
-import { initDatabase, db } from './server/db/store.js';
-import { parseFileContent } from './server/services/fileParser.js';
-import { indexDocument, retrieveRelevantChunks, getDocumentMetadata } from './server/services/ragService.js';
+} from './middleware/auth.js';
+import { initDatabase, db } from './db/store.js';
+import { parseFileContent } from './services/fileParser.js';
+import { indexDocument, retrieveRelevantChunks, getDocumentMetadata } from './services/ragService.js';
 import fs from 'fs';
 
 let passed = 0;

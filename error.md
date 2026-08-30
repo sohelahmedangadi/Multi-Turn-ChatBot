@@ -1,6 +1,6 @@
-# Test Run Report (2026-08-30T22:32:10.492Z)
+# Test Run Report (2026-08-30T22:56:56.379Z)
 
-Total: 38 | Passed: 38 | Failed: 0
+Total: 39 | Passed: 39 | Failed: 0
 
 - PASS: Detects empty string as ambiguous
 - PASS: Flags "What about that?" as ambiguous when context is empty
@@ -40,3 +40,4 @@ Total: 38 | Passed: 38 | Failed: 0
 - PASS: LangChain RAG: Top retrieved chunk contains relevant ambiguity filter details
 - PASS: Context Assembler: Successfully retrieves RAG document chunks for attached file
 - PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
+- PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty

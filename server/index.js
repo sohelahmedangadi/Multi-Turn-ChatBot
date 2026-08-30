@@ -3,34 +3,38 @@ import path from 'path';
 import cors from 'cors';
 import { rateLimit } from 'express-rate-limit';
 import dotenv from 'dotenv';
-import { createServer as createViteServer } from 'vite';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import multer from 'multer';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Auto-bootstrap .env if not found
-const envPath = path.join(process.cwd(), '.env');
-const envExamplePath = path.join(process.cwd(), '.env.example');
+const rootDir = path.resolve(__dirname, '..');
+const envPath = path.join(rootDir, '.env');
+const envExamplePath = path.join(rootDir, '.env.example');
 if (!fs.existsSync(envPath) && fs.existsSync(envExamplePath)) {
   fs.copyFileSync(envExamplePath, envPath);
 }
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: envPath });
 
-import { initDatabase, db, isDatabaseMongo } from './server/db/store.js';
-import { generateResponse, generateStreamResponse, getActiveProviderName } from './server/services/llmProvider.js';
-import { getSessionContext, estimateTokenCount } from './server/services/contextManager.js';
-import { processAndSaveUserMemories, searchUserMemories, searchKnowledgeBase } from './server/services/memoryManager.js';
-import { detectAmbiguity } from './server/services/ambiguityDetector.js';
-import { calculateCoherenceScore, BENCHMARK_DATASET, getEvaluationSummary } from './server/services/evaluationSuite.js';
-import { authenticateJWT, optionalJWT, generateToken, hashPassword, verifyPassword } from './server/middleware/auth.js';
-import { inputSanitizationMiddleware } from './server/middleware/sanitizer.js';
-import multer from 'multer';
-import { parseFileContent } from './server/services/fileParser.js';
-import { indexDocument, getDocumentMetadata, deleteDocument } from './server/services/ragService.js';
+import { initDatabase, db, isDatabaseMongo } from './db/store.js';
+import { generateResponse, generateStreamResponse, getActiveProviderName } from './services/llmProvider.js';
+import { getSessionContext, estimateTokenCount } from './services/contextManager.js';
+import { processAndSaveUserMemories, searchUserMemories, searchKnowledgeBase } from './services/memoryManager.js';
+import { detectAmbiguity } from './services/ambiguityDetector.js';
+import { calculateCoherenceScore, BENCHMARK_DATASET, getEvaluationSummary } from './services/evaluationSuite.js';
+import { authenticateJWT, optionalJWT, generateToken, hashPassword, verifyPassword } from './middleware/auth.js';
+import { inputSanitizationMiddleware } from './middleware/sanitizer.js';
+import { parseFileContent } from './services/fileParser.js';
+import { indexDocument, getDocumentMetadata, deleteDocument } from './services/ragService.js';
 
 async function startServer() {
   const app = express();
-  const PORT = Number(process.env.PORT) || 3000;
+  const PORT = Number(process.env.PORT) || 5000;
 
   // Configure trust proxy
   app.set('trust proxy', 1);
@@ -751,28 +755,22 @@ async function startServer() {
   });
 
   // ==========================================
-  // VITE & STATIC SERVING MIDDLEWARE
+  // STATIC SERVING (FOR BUILT PRODUCTION FRONTEND)
   // ==========================================
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+  const clientDistPath = path.resolve(__dirname, '../client/dist');
+  if (fs.existsSync(clientDistPath)) {
+    app.use(express.static(clientDistPath));
     app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(clientDistPath, 'index.html'));
     });
   }
 
   function listenWithRetry(portToTry, maxRetries = 10) {
     const serverInstance = app.listen(portToTry, '0.0.0.0', () => {
       console.log('\n======================================================');
-      console.log('🚀 Multi-Turn Conversational AI Server Ready!');
-      console.log(`➜ Local:   http://localhost:${portToTry}`);
-      console.log(`➜ Network: http://127.0.0.1:${portToTry}`);
+      console.log('🚀 CosmoAI Backend Server Ready!');
+      console.log(`➜ API URL: http://localhost:${portToTry}`);
+      console.log(`➜ Status:  http://localhost:${portToTry}/api/system/status`);
       console.log('======================================================\n');
     });
 
