@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Brain,
   Terminal,
+  Paperclip,
 } from 'lucide-react';
 import { CopyButton, stripMarkdown } from './CopyButton';
 
@@ -90,6 +91,14 @@ export const MessageItem = ({ message }) => {
               >
                 {metadata.provider === 'groq' && <Zap className="w-2.5 h-2.5 text-orange-600" />}
                 <span>{metadata.provider === 'groq' ? `Groq · ${metadata.model || 'LLaMA'}` : metadata.model || metadata.provider}</span>
+              </span>
+            )}
+
+            {/* Attached Document RAG Stamp */}
+            {metadata?.attachedFilename && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
+                <Paperclip className="w-2.5 h-2.5 text-amber-800" />
+                <span>{metadata.attachedFilename} {metadata.attachedChunksCount ? `(${metadata.attachedChunksCount} chunks)` : ''}</span>
               </span>
             )}
 

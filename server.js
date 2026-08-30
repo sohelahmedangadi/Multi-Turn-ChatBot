@@ -24,6 +24,9 @@ import { detectAmbiguity } from './server/services/ambiguityDetector.js';
 import { calculateCoherenceScore, BENCHMARK_DATASET, getEvaluationSummary } from './server/services/evaluationSuite.js';
 import { authenticateJWT, optionalJWT, generateToken, hashPassword, verifyPassword } from './server/middleware/auth.js';
 import { inputSanitizationMiddleware } from './server/middleware/sanitizer.js';
+import multer from 'multer';
+import { parseFileContent } from './server/services/fileParser.js';
+import { indexDocument, getDocumentMetadata, deleteDocument } from './server/services/ragService.js';
 
 async function startServer() {
   const app = express();
@@ -310,13 +313,83 @@ async function startServer() {
   });
 
   // ==========================================
+  // FILE UPLOAD & RAG DOCUMENT ROUTES
+  // ==========================================
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
+  });
+
+  // Upload and index document with LangChain RAG
+  app.post('/api/files/upload', optionalJWT, upload.single('file'), async (req, res) => {
+    try {
+      const userId = req.user?.id || 'guest-user-default';
+      let fileBuffer = req.file?.buffer;
+      let originalname = req.file?.originalname;
+      let mimetype = req.file?.mimetype;
+
+      if (!fileBuffer && req.body?.textContent) {
+        fileBuffer = Buffer.from(req.body.textContent, 'utf-8');
+        originalname = req.body.filename || 'document.txt';
+        mimetype = req.body.mimeType || 'text/plain';
+      } else if (!fileBuffer && req.body?.base64) {
+        fileBuffer = Buffer.from(req.body.base64, 'base64');
+        originalname = req.body.filename || 'document.pdf';
+        mimetype = req.body.mimeType || 'application/pdf';
+      }
+
+      if (!fileBuffer) {
+        return res.status(400).json({ error: 'No file uploaded or file content missing.' });
+      }
+
+      const parsed = await parseFileContent(fileBuffer, originalname, mimetype);
+      const fileId = 'doc_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7);
+
+      const indexed = await indexDocument(fileId, parsed, userId);
+
+      return res.status(201).json({
+        message: 'Document parsed and indexed successfully with LangChain RAG',
+        document: indexed,
+      });
+    } catch (err) {
+      console.error('File upload error:', err);
+      return res.status(500).json({ error: 'Failed to process document: ' + err.message });
+    }
+  });
+
+  // Get Document Metadata
+  app.get('/api/files/:fileId', async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      const meta = getDocumentMetadata(fileId);
+      if (!meta) {
+        return res.status(404).json({ error: 'Document not found or expired.' });
+      }
+      return res.json({ document: meta });
+    } catch (err) {
+      return res.status(500).json({ error: 'Failed to fetch document: ' + err.message });
+    }
+  });
+
+  // Delete Document
+  app.delete('/api/files/:fileId', async (req, res) => {
+    try {
+      const { fileId } = req.params;
+      const deleted = deleteDocument(fileId);
+      return res.json({ success: deleted });
+    } catch (err) {
+      return res.status(500).json({ error: 'Failed to delete document: ' + err.message });
+    }
+  });
+
+  // ==========================================
   // CHAT ROUTE (POST /api/chat or /chat)
   // Supports 3-Tier Memory Context Assembly + Streaming
   // ==========================================
 
   const handleChat = async (req, res) => {
     const startTime = Date.now();
-    const { sessionId, message, systemPrompt, providerOverride, modelOverride, stream } = req.body;
+    const { sessionId, message, systemPrompt, providerOverride, modelOverride, stream, fileId } = req.body;
     const userId = req.user?.id || 'guest-user-default';
 
     if (!sessionId) {
@@ -357,8 +430,8 @@ async function startServer() {
         console.warn('Memory auto-extraction notice:', memErr.message);
       }
 
-      // 3. Assemble 3-Tier Context (Tier 1 History + Tier 2 Memories + Tier 3 Knowledge)
-      const context = await getSessionContext(sessionId, message, userId);
+      // 3. Assemble 3-Tier Context + LangChain RAG Document Context
+      const context = await getSessionContext(sessionId, message, userId, { fileId });
 
       // 4. Ambiguity Detection Heuristic
       const ambiguity = detectAmbiguity(message, context.history);
@@ -373,6 +446,9 @@ async function startServer() {
         timestamp: new Date().toISOString(),
         metadata: {
           tokensEstimated: estimateTokenCount(message),
+          attachedFileId: fileId || null,
+          attachedFilename: context.attachedDocumentMeta?.filename || null,
+          attachedChunksCount: context.relevantDocumentChunks?.length || 0,
         },
       };
       await db.saveMessage(userMessageDoc);
@@ -476,6 +552,9 @@ async function startServer() {
               coherenceScore: coherence.score,
               isFallback: streamResult.isFallback,
               retrievedMemoriesCount: context.relevantMemories.length,
+              attachedFileId: fileId || null,
+              attachedFilename: context.attachedDocumentMeta?.filename || null,
+              attachedChunksCount: context.relevantDocumentChunks?.length || 0,
             },
           };
           await db.saveMessage(assistantMessageDoc);
@@ -493,6 +572,7 @@ async function startServer() {
             contextTurnsUsed: context.history.length,
             isFallback: streamResult.isFallback,
             retrievedMemories: context.relevantMemories,
+            attachedDocument: context.attachedDocumentMeta || null,
           })}\n\n`);
           return res.end();
         } catch (streamErr) {
@@ -528,6 +608,9 @@ async function startServer() {
           coherenceScore: coherence.score,
           isFallback: llmResult.isFallback,
           retrievedMemoriesCount: context.relevantMemories.length,
+          attachedFileId: fileId || null,
+          attachedFilename: context.attachedDocumentMeta?.filename || null,
+          attachedChunksCount: context.relevantDocumentChunks?.length || 0,
         },
       };
       await db.saveMessage(assistantMessageDoc);
@@ -546,6 +629,7 @@ async function startServer() {
         coherenceScore: coherence.score,
         isFallback: llmResult.isFallback,
         retrievedMemories: context.relevantMemories,
+        attachedDocument: context.attachedDocumentMeta || null,
       });
     } catch (err) {
       console.error('Chat processing error:', err);

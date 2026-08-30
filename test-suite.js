@@ -25,6 +25,8 @@ import {
   verifyToken,
 } from './server/middleware/auth.js';
 import { initDatabase, db } from './server/db/store.js';
+import { parseFileContent } from './server/services/fileParser.js';
+import { indexDocument, retrieveRelevantChunks, getDocumentMetadata } from './server/services/ragService.js';
 import fs from 'fs';
 
 let passed = 0;
@@ -239,6 +241,56 @@ async function runTestSuite() {
     'For React and TypeScript state management, Zustand and Redux Toolkit are top choices.'
   );
   assert(coh.score > 0.6, `Computes high coherence score (${coh.score}) for context-aligned responses`);
+
+  // ----------------------------------------------------
+  // 6. File Parser & LangChain RAG Document Analysis Tests
+  // ----------------------------------------------------
+  console.log('\n📦 Testing File Parser & LangChain RAG Document Pipeline:');
+  const sampleDocText = `
+CosmoAI Architecture Report
+Version: 2.5
+CosmoAI utilizes an advanced multi-turn state engine with LangChain integration.
+The system is built on a 3-tier memory hierarchy: Tier 1 Short-Term History, Tier 2 Long-Term User Facts, and Tier 3 Domain Knowledge.
+Additionally, the system includes a zero-latency heuristic ambiguity filter that asks clarifying questions.
+File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV datasets.
+`;
+
+  // 1. Test parsing text document
+  const parsedFile = await parseFileContent(Buffer.from(sampleDocText, 'utf-8'), 'architecture_report.txt', 'text/plain');
+  assert(parsedFile.fileType === 'text', 'File Parser: Detects text file type accurately');
+  assert(parsedFile.wordCount > 10, 'File Parser: Computes word count correctly');
+  assert(parsedFile.textContent.includes('CosmoAI Architecture Report'), 'File Parser: Extracts document body text cleanly');
+
+  // 2. Test LangChain indexing & chunking
+  const testDocId = 'doc_test_rag_' + Date.now();
+  const indexed = await indexDocument(testDocId, parsedFile, userA);
+  assert(indexed.totalChunks >= 1, 'LangChain RAG: Chunks document using RecursiveCharacterTextSplitter');
+
+  // 3. Test RAG Semantic Keyword Retrieval
+  const retrievedExcerpts = retrieveRelevantChunks(testDocId, 'How does ambiguity filter work?');
+  assert(retrievedExcerpts.length > 0, 'LangChain RAG: Retrieves relevant chunk matching query keywords');
+  assert(
+    retrievedExcerpts[0]?.content?.includes('ambiguity'),
+    'LangChain RAG: Top retrieved chunk contains relevant ambiguity filter details'
+  );
+
+  // 4. Test Context Manager RAG Integration
+  const ragSessionId = 'sess_rag_' + Date.now();
+  const ragContext = await getSessionContext(
+    ragSessionId,
+    'What does the report say about memory hierarchy?',
+    userA,
+    { fileId: testDocId }
+  );
+  assert(
+    ragContext.relevantDocumentChunks && ragContext.relevantDocumentChunks.length > 0,
+    'Context Assembler: Successfully retrieves RAG document chunks for attached file'
+  );
+  assert(
+    ragContext.contextualMemorySection.includes('[UPLOADED DOCUMENT CONTEXT (RAG)]') &&
+      ragContext.contextualMemorySection.includes('architecture_report.txt'),
+    'Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt'
+  );
 
   // Write results out to error.md
   const report = `# Test Run Report (${new Date().toISOString()})\n\nTotal: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n\n` +

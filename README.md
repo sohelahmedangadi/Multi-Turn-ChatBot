@@ -6,10 +6,10 @@
 [![LangChain.js](https://img.shields.io/badge/LangChain.js-Core_%26_OpenAI-1C3C3C?logo=langchain&logoColor=white)](https://js.langchain.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Groq](https://img.shields.io/badge/Groq-Fast_Inference-F55036?logo=groq&logoColor=white)](https://groq.com/)
-[![Tests](https://img.shields.io/badge/Tests-30%2F30_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/test-suite.js)
+[![Tests](https://img.shields.io/badge/Tests-38%2F38_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/test-suite.js)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A production-grade, full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
+A production-grade, full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **LangChain RAG Document Analysis (PDF, CSV, Code, Text)**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
 
 ---
 

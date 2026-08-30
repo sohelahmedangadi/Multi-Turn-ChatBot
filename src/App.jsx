@@ -189,7 +189,7 @@ export default function App() {
     }
   };
 
-  const handleSendMessage = async (text) => {
+  const handleSendMessage = async (text, fileId = null) => {
     if (!text.trim() || isLoading) return;
 
     let targetSessionId = currentSessionId;
@@ -225,6 +225,7 @@ export default function App() {
       timestamp: new Date().toISOString(),
       metadata: {
         tokensEstimated: Math.ceil(text.length / 4),
+        attachedFileId: fileId || null,
       },
     };
 
@@ -248,6 +249,7 @@ export default function App() {
           message: text,
           systemPrompt,
           stream: true,
+          fileId: fileId || undefined,
         }),
       });
 

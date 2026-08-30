@@ -9,8 +9,11 @@ import {
   Layers,
   MessageSquareQuote,
   Terminal,
+  Paperclip,
+  UploadCloud,
 } from 'lucide-react';
 import { MessageItem } from './MessageItem.jsx';
+import { FileAttachmentBadge } from './FileAttachmentBadge.jsx';
 
 function formatMarkdownContent(text) {
   if (!text) return '';
@@ -41,8 +44,14 @@ export const ChatWindow = ({
   systemPrompt,
 }) => {
   const [inputText, setInputText] = useState('');
+  const [attachedFile, setAttachedFile] = useState(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [fileError, setFileError] = useState(null);
+
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -52,12 +61,81 @@ export const ChatWindow = ({
     scrollToBottom();
   }, [messages, streamingText, isLoading]);
 
+  const handleFileProcess = async (file) => {
+    if (!file) return;
+    setFileError(null);
+    setIsUploadingFile(true);
+    setAttachedFile({
+      filename: file.name,
+      fileType: file.type || file.name.split('.').pop(),
+      sizeFormatted: `${(file.size / 1024).toFixed(1)} KB`,
+    });
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/files/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to parse and index document.');
+      }
+
+      setAttachedFile(data.document);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setFileError(err.message);
+      setAttachedFile(null);
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileProcess(file);
+    }
+    // reset input so the same file can be re-selected if needed
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileProcess(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!inputText.trim() || isLoading) return;
-    const text = inputText.trim();
+    if ((!inputText.trim() && !attachedFile) || isLoading || isUploadingFile) return;
+    const text = inputText.trim() || (attachedFile ? `Please analyze and summarize the attached document "${attachedFile.filename}".` : '');
+    const currentFileId = attachedFile?.fileId || null;
     setInputText('');
-    onSendMessage(text);
+    setAttachedFile(null);
+    onSendMessage(text, currentFileId);
   };
 
   const handleKeyDown = (e) => {
@@ -68,7 +146,26 @@ export const ChatWindow = ({
   };
 
   return (
-    <main id="chat-main-container" className="flex-1 flex flex-col h-full bg-[#FBF9F5] retro-grid text-stone-900 overflow-hidden">
+    <main
+      id="chat-main-container"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`relative flex-1 flex flex-col h-full bg-[#FBF9F5] retro-grid text-stone-900 overflow-hidden ${
+        isDraggingFile ? 'ring-4 ring-amber-500 ring-inset bg-amber-50/40' : ''
+      }`}
+    >
+      {/* Drag & Drop Visual Overlay */}
+      {isDraggingFile && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-amber-100/90 backdrop-blur-xs border-4 border-dashed border-amber-600 font-mono text-stone-950 p-6 animate-fade-in pointer-events-none">
+          <div className="text-center space-y-2">
+            <UploadCloud className="w-12 h-12 mx-auto text-amber-800 animate-bounce" />
+            <div className="text-lg font-bold uppercase tracking-wide">Drop Document to Analyze</div>
+            <p className="text-xs text-stone-700">Supported: PDF, Text, Markdown, CSV, JSON, and Source Code</p>
+          </div>
+        </div>
+      )}
+
       {/* Retro Classic Header */}
       <header className="h-14 border-b-2 border-stone-800 bg-[#F5EFEB] px-4 sm:px-6 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3 overflow-hidden">
@@ -104,7 +201,7 @@ export const ChatWindow = ({
                 CosmoAI Multi-Turn Studio
               </h2>
               <p className="text-xs sm:text-sm text-stone-600 mt-2 max-w-md mx-auto font-sans leading-relaxed">
-                Featuring short-term sliding history, persistent LangChain vector user memory with automatic updates, and cross-session past conversation access.
+                Featuring short-term sliding history, persistent LangChain vector user memory with automatic updates, LangChain RAG document analysis, and cross-session past conversation access.
               </p>
             </div>
 
@@ -172,7 +269,49 @@ export const ChatWindow = ({
       {/* Retro Command Input Dock */}
       <div className="p-4 bg-[#F5EFEB] border-t-2 border-stone-800">
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-1.5">
+          {/* Active File Attachment Chip or Error */}
+          {(attachedFile || fileError) && (
+            <div className="flex items-center gap-2 pb-1 flex-wrap">
+              {attachedFile && (
+                <FileAttachmentBadge
+                  file={attachedFile}
+                  isUploading={isUploadingFile}
+                  onRemove={() => setAttachedFile(null)}
+                />
+              )}
+              {fileError && (
+                <div className="px-2.5 py-1 rounded bg-rose-100 border border-rose-400 text-rose-900 text-xs font-mono font-bold animate-fade-in flex items-center gap-1.5">
+                  <span>⚠️ {fileError}</span>
+                  <button type="button" onClick={() => setFileError(null)} className="underline cursor-pointer">
+                    Dismiss
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            className="hidden"
+            accept=".pdf,.txt,.md,.markdown,.csv,.json,.js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.html,.css,.sql"
+          />
+
           <div className="relative flex items-end gap-2 bg-white rounded-lg border-2 border-stone-800 p-2 shadow-[3px_3px_0px_0px_#1C1917] focus-within:border-amber-600 focus-within:shadow-[4px_4px_0px_0px_#D97706] transition-all">
+            {/* File Attachment Button */}
+            <button
+              type="button"
+              id="btn-attach-file"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingFile}
+              title="Attach Document (PDF, TXT, MD, CSV, JSON, Code)"
+              className="p-2 text-stone-600 hover:text-stone-950 hover:bg-stone-100 rounded transition cursor-pointer flex-shrink-0"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+
             <textarea
               id="chat-input-textarea"
               ref={textareaRef}
@@ -180,7 +319,7 @@ export const ChatWindow = ({
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask CosmoAI anything... (Shift+Enter for new line)"
+              placeholder={attachedFile ? `Ask questions about ${attachedFile.filename}...` : 'Ask CosmoAI or drop a document to analyze... (Shift+Enter for new line)'}
               maxLength={2000}
               className="flex-1 max-h-32 min-h-[44px] bg-transparent text-sm font-sans text-stone-900 placeholder-stone-400 focus:outline-none resize-none px-2 py-2 leading-relaxed"
             />
@@ -200,7 +339,7 @@ export const ChatWindow = ({
                 <button
                   type="submit"
                   id="btn-send-message"
-                  disabled={!inputText.trim()}
+                  disabled={(!inputText.trim() && !attachedFile) || isUploadingFile}
                   className="px-3.5 py-2.5 rounded border-2 border-stone-900 bg-amber-400 hover:bg-amber-300 disabled:opacity-40 disabled:hover:bg-amber-400 text-stone-950 font-mono text-xs font-bold uppercase transition shadow-[2px_2px_0px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer flex items-center gap-1.5"
                   title="Send message (Enter)"
                 >

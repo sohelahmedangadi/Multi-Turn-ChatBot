@@ -1,6 +1,6 @@
-# Test Run Report (2026-08-30T22:06:31.745Z)
+# Test Run Report (2026-08-30T22:32:10.492Z)
 
-Total: 30 | Passed: 30 | Failed: 0
+Total: 38 | Passed: 38 | Failed: 0
 
 - PASS: Detects empty string as ambiguous
 - PASS: Flags "What about that?" as ambiguous when context is empty
@@ -32,3 +32,11 @@ Total: 30 | Passed: 30 | Failed: 0
 - PASS: Generates valid 3-part signed JWT token
 - PASS: Contains 5 comprehensive standard benchmark scenarios
 - PASS: Computes high coherence score (0.93) for context-aligned responses
+- PASS: File Parser: Detects text file type accurately
+- PASS: File Parser: Computes word count correctly
+- PASS: File Parser: Extracts document body text cleanly
+- PASS: LangChain RAG: Chunks document using RecursiveCharacterTextSplitter
+- PASS: LangChain RAG: Retrieves relevant chunk matching query keywords
+- PASS: LangChain RAG: Top retrieved chunk contains relevant ambiguity filter details
+- PASS: Context Assembler: Successfully retrieves RAG document chunks for attached file
+- PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt

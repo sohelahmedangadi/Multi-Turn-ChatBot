@@ -7,6 +7,7 @@ import {
   KNOWLEDGE_MAX_TOKENS,
   CONTEXT_MAX_TOKENS,
 } from './memoryManager.js';
+import { retrieveRelevantChunks, getDocumentMetadata } from './ragService.js';
 
 const CHARS_PER_TOKEN = 4;
 const DEFAULT_MAX_HISTORY_TOKENS = 1800;
@@ -51,12 +52,13 @@ export function truncateHistoryToTokenBudget(history, maxTokens = DEFAULT_MAX_HI
 }
 
 /**
- * 3-Tier Multi-Context Assembler with Token-Bounded Full Past Conversation History Access
+ * 3-Tier Multi-Context Assembler with Token-Bounded Full Past Conversation History Access & RAG Document Retrieval
  */
 export async function getSessionContext(sessionId, currentQuery = '', userId = 'guest-user-default', options = {}) {
   const maxHistoryTokens = options.maxHistoryTokens || DEFAULT_MAX_HISTORY_TOKENS;
   const maxMemoryTokens = options.maxMemoryTokens || MEMORY_MAX_TOKENS;
   const maxKnowledgeTokens = options.maxKnowledgeTokens || KNOWLEDGE_MAX_TOKENS;
+  const fileId = options.fileId || null;
 
   // 1. Tier 1: Load active session messages
   const rawMessages = await db.getMessagesBySession(sessionId);
@@ -89,8 +91,26 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
     ? await searchKnowledgeBase(currentQuery, maxKnowledgeTokens)
     : [];
 
+  // 4. RAG Document Retrieval from Attached File
+  let relevantDocumentChunks = [];
+  let attachedDocumentMeta = null;
+  if (fileId) {
+    attachedDocumentMeta = getDocumentMetadata(fileId);
+    relevantDocumentChunks = retrieveRelevantChunks(fileId, currentQuery, 5);
+  }
+
   // Build Enriched Context Prompt Fragment
   let contextualMemorySection = '';
+
+  // Injected RAG Document Context
+  if (relevantDocumentChunks.length > 0) {
+    contextualMemorySection += `\n\n[UPLOADED DOCUMENT CONTEXT (RAG)]: "${attachedDocumentMeta?.filename || 'Attached Document'}"\n`;
+    contextualMemorySection += 'The user has attached the document below for analysis. Ground your answers directly in the following extracted excerpts:\n';
+    for (const chunk of relevantDocumentChunks) {
+      contextualMemorySection += `--- Excerpt (Index ${chunk.chunkIndex + 1}) ---\n${chunk.content}\n`;
+    }
+    contextualMemorySection += '\nCRITICAL: Answer user questions based directly on the attached document context above. If the document provides the answer, cite its content clearly.\n';
+  }
 
   if (relevantMemories.length > 0) {
     contextualMemorySection += '\n\n[USER PROFILE & LONG-TERM MEMORIES STORE]:\n';
@@ -152,6 +172,8 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
     relevantPastChats,
     allPastConversations,
     relevantKnowledge,
+    relevantDocumentChunks,
+    attachedDocumentMeta,
     contextualMemorySection,
   };
 }

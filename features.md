@@ -102,3 +102,21 @@ The system implements a hierarchical 3-tier memory engine designed to provide ri
 - **Input Sanitization**: Enforces maximum message length (2,000 characters), strips null bytes, and sanitizes malformed Unicode control characters.
 - **Password Security**: Salted cryptographic password hashing with bcryptjs.
 - **Stateless Authentication**: Signed JSON Web Tokens (JWT) with 7-day expiration.
+
+---
+
+## 6. LangChain RAG Document Ingestion & Analysis Engine (server/services/fileParser.js & server/services/ragService.js)
+
+- **Multi-Format Document Extractor (parseFileContent)**:
+  - **PDF Documents**: Direct binary extraction with page metadata parsing via `pdf-parse`.
+  - **Text & Markdown**: Full plaintext parsing for `.txt`, `.md`, and `.markdown`.
+  - **Structured Datasets**: Parsing of tabular data (`.csv`) and nested object structures (`.json`, `.yaml`, `.yml`).
+  - **Source Code Files**: Full multi-language syntax extraction (`.js`, `.jsx`, `.ts`, `.tsx`, `.py`, `.java`, `.cpp`, `.c`, `.rs`, `.go`, `.html`, `.css`, `.sql`).
+- **LangChain Recursive Text Chunking**:
+  - Leverages `@langchain/textsplitters` (`RecursiveCharacterTextSplitter`) with an 800-character chunk size and 150-character overlap window.
+- **Semantic Keyword & Proximity Retrieval (retrieveRelevantChunks)**:
+  - Automatically scores and ranks document chunks based on query keyword frequency and co-occurrence proximity.
+  - Dynamically retrieves top-ranking excerpts and injects them into the `[UPLOADED DOCUMENT CONTEXT (RAG)]` prompt section.
+- **Tactile UI Attachment Dock & Drag-and-Drop**:
+  - Drag-and-drop document upload with active attachment chip preview, upload progress indicators, and instant removal button.
+

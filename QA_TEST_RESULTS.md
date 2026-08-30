@@ -85,6 +85,14 @@ The Multi-Turn Conversational AI system underwent end-to-end regression, unit, i
 | **28** | Auth & Cryptography | Generates valid 3-part signed JWT authentication token | **PASS** |
 | **29** | Evaluation Suite | Contains all 5 standard multi-turn benchmark scenarios | **PASS** |
 | **30** | Evaluation Suite | Computes accurate semantic coherence score (> 0.6) for context-aligned responses | **PASS** |
+| **31** | File Parser | Detects and parses text document file types accurately | **PASS** |
+| **32** | File Parser | Computes precise word count and token metrics for uploaded files | **PASS** |
+| **33** | File Parser | Extracts document body text cleanly across formats | **PASS** |
+| **34** | LangChain RAG Splitter | Chunks document using RecursiveCharacterTextSplitter | **PASS** |
+| **35** | LangChain RAG Retrieval | Retrieves relevant chunk matching query keywords | **PASS** |
+| **36** | LangChain RAG Retrieval | Top retrieved chunk contains relevant ambiguity filter details | **PASS** |
+| **37** | Context Assembler | Successfully retrieves RAG document chunks for attached file | **PASS** |
+| **38** | Context Assembler | Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt | **PASS** |
 
 ---
 
