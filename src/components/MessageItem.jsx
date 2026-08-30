@@ -27,15 +27,97 @@ function formatMarkdownContent(text) {
   return cleaned || text;
 }
 
+/**
+ * Fenced Code Block Component with ChatGPT-Style Header & Copy Button
+ */
+const CodeBlock = ({ className, children, ...props }) => {
+  const [copied, setCopied] = useState(false);
+  const match = /language-(\w+)/.exec(className || '');
+  const language = match ? match[1] : 'code';
+  const codeString = String(children).replace(/\n$/, '');
+
+  const handleCopyCode = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(codeString);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = codeString;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy code to clipboard:', err);
+    }
+  };
+
+  return (
+    <div className="my-3 rounded-xl border border-slate-800 bg-slate-950 overflow-hidden shadow-lg">
+      {/* Code Header Bar */}
+      <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/90 border-b border-slate-800 text-xs text-slate-400">
+        <span className="font-mono text-[11px] lowercase text-slate-400 font-medium">
+          {language}
+        </span>
+        <button
+          type="button"
+          onClick={handleCopyCode}
+          className="flex items-center gap-1.5 px-2 py-0.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition text-[11px]"
+          title="Copy code"
+        >
+          {copied ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-emerald-400 font-medium">Copied</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5" />
+              <span>Copy</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* Code Body */}
+      <pre className="p-3.5 overflow-x-auto font-mono text-xs text-slate-200 leading-relaxed bg-slate-950/60">
+        <code className={className} {...props}>
+          {children}
+        </code>
+      </pre>
+    </div>
+  );
+};
+
 export const MessageItem = ({ message, onOpenRubric }) => {
   const [copied, setCopied] = useState(false);
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(message.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(message.content);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = message.content;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy message to clipboard:', err);
+    }
   };
 
   const metadata = message.metadata;
@@ -147,7 +229,30 @@ export const MessageItem = ({ message, onOpenRubric }) => {
             <p className="whitespace-pre-wrap">{message.content}</p>
           ) : (
             <div className="markdown-content">
-              <Markdown remarkPlugins={[remarkGfm]}>{formatMarkdownContent(message.content)}</Markdown>
+              <Markdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code({ node, inline, className, children, ...props }) {
+                    if (inline) {
+                      return (
+                        <code
+                          className="px-1.5 py-0.5 rounded bg-slate-800/80 border border-slate-700/50 font-mono text-xs text-indigo-300"
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      );
+                    }
+                    return (
+                      <CodeBlock className={className} {...props}>
+                        {children}
+                      </CodeBlock>
+                    );
+                  },
+                }}
+              >
+                {formatMarkdownContent(message.content)}
+              </Markdown>
             </div>
           )}
         </div>
