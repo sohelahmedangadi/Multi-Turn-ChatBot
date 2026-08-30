@@ -37,9 +37,9 @@ export const Sidebar = ({
   };
 
   return (
-    <aside className="w-72 bg-[#F5EFEB] border-r-2 border-stone-800 flex flex-col h-screen select-none font-sans text-stone-900">
+    <aside className="w-72 bg-[#F5EFEB] border-r-2 border-stone-800 flex flex-col h-screen select-none font-sans text-stone-900 overflow-hidden">
       {/* Brand Header */}
-      <div className="p-4 border-b-2 border-stone-800 bg-[#EFE9E2] flex items-center justify-between">
+      <div className="p-4 border-b-2 border-stone-800 bg-[#EFE9E2] flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded border-2 border-stone-900 bg-amber-400 flex items-center justify-center text-stone-950 shadow-[2px_2px_0px_0px_#000]">
             <Terminal className="w-4 h-4" />
@@ -52,7 +52,7 @@ export const Sidebar = ({
       </div>
 
       {/* New Session Button */}
-      <div className="p-3 pb-2">
+      <div className="p-3 pb-2 flex-shrink-0">
         <button
           id="btn-new-conversation"
           onClick={onNewSession}
@@ -64,7 +64,7 @@ export const Sidebar = ({
       </div>
 
       {/* Sessions List */}
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5">
+      <div className="flex-1 min-h-0 overflow-y-auto px-3 py-2 space-y-1.5 scroll-smooth pb-4">
         <div className="text-[10px] font-bold font-mono tracking-wider text-stone-600 uppercase px-1 mb-1">
           DIALOGUE LOGS ({sessions.length})
         </div>
@@ -83,22 +83,22 @@ export const Sidebar = ({
                 key={sess.id}
                 id={`session-item-${sess.id}`}
                 onClick={() => onSelectSession(sess.id)}
-                className={`group relative flex items-center justify-between px-3 py-2 rounded text-xs cursor-pointer transition ${
+                className={`group relative flex items-center justify-between px-3 py-2 rounded text-xs cursor-pointer transition gap-2 ${
                   isSelected
                     ? 'bg-[#FEF3C7] text-stone-950 font-bold border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917]'
                     : 'text-stone-800 hover:bg-white hover:text-stone-950 border border-stone-300 hover:border-stone-800'
                 }`}
               >
-                <div className="flex items-center gap-2 overflow-hidden">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   <MessageSquare
                     className={`w-3.5 h-3.5 flex-shrink-0 ${
                       isSelected ? 'text-amber-800' : 'text-stone-500'
                     }`}
                   />
-                  <span className="truncate text-xs font-mono">{sess.title || 'Untitled Session'}</span>
+                  <span className="truncate text-xs font-mono block w-full">{sess.title || 'Untitled Session'}</span>
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
                   <span className="text-[10px] text-stone-400 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
                     [{sess.messageCount || 0}]
                   </span>
@@ -119,7 +119,7 @@ export const Sidebar = ({
       </div>
 
       {/* Navigation Buttons: Memory & Evaluation */}
-      <div className="px-3 py-2 border-t-2 border-stone-800 space-y-1.5 bg-[#EFE9E2]">
+      <div className="px-3 py-2 border-t-2 border-stone-800 space-y-1.5 bg-[#EFE9E2] flex-shrink-0">
         <button
           id="btn-open-memory-store"
           onClick={onOpenMemoryModal}
@@ -144,13 +144,13 @@ export const Sidebar = ({
             <span>EVALUATION SUITE</span>
           </div>
           <span className="text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-300 px-1.5 py-0.5 rounded font-mono font-bold">
-            5 BENCH
+            5 TESTS
           </span>
         </button>
       </div>
 
       {/* Footer / User Profile Area & Settings */}
-      <div className="p-3 border-t-2 border-stone-800 bg-[#E8E1D9] text-xs font-mono">
+      <div className="p-3 border-t-2 border-stone-800 bg-[#E8E1D9] text-xs font-mono flex-shrink-0">
         <div className="flex items-center justify-between w-full">
           {currentUser ? (
             <div className="flex items-center justify-between w-full">
