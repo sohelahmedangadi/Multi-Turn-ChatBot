@@ -49,22 +49,22 @@ export const RubricFeedbackModal = ({
   };
 
   const renderStarPicker = (label, description, value, onChange) => (
-    <div className="space-y-1 bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+    <div className="space-y-1 bg-white p-3 rounded-lg border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917]">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-200">{label}</span>
-        <span className="text-xs font-bold text-amber-400 font-mono">{value}/5</span>
+        <span className="text-xs font-mono font-bold text-stone-950 uppercase">{label}</span>
+        <span className="text-xs font-bold text-amber-800 font-mono">[{value}/5]</span>
       </div>
-      <p className="text-[11px] text-slate-400">{description}</p>
-      <div className="flex items-center gap-2 pt-1">
+      <p className="text-[11px] text-stone-600 font-sans">{description}</p>
+      <div className="flex items-center gap-1.5 pt-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
             onClick={() => onChange(star)}
-            className={`p-1.5 rounded-md transition ${
+            className={`p-1 rounded transition border cursor-pointer ${
               star <= value
-                ? 'text-amber-400 bg-amber-400/10 hover:bg-amber-400/20'
-                : 'text-slate-600 hover:text-slate-400 bg-slate-900'
+                ? 'text-amber-500 bg-amber-100 border-amber-400'
+                : 'text-stone-300 hover:text-stone-500 bg-stone-50 border-stone-200'
             }`}
           >
             <Star className="w-4 h-4 fill-current" />
@@ -75,16 +75,16 @@ export const RubricFeedbackModal = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden text-slate-100 p-6 space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in font-sans">
+      <div className="w-full max-w-lg bg-[#FBF9F5] border-2 border-stone-900 rounded-lg shadow-[6px_6px_0px_0px_#1C1917] overflow-hidden text-stone-900 p-6 space-y-4">
+        <div className="flex items-center justify-between border-b-2 border-stone-800 pb-3">
           <div className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-amber-400 fill-current" />
-            <h2 className="text-sm font-semibold text-slate-100">Response Evaluation Rubric</h2>
+            <Star className="w-5 h-5 text-amber-600 fill-amber-400" />
+            <h2 className="text-base font-bold font-mono text-stone-950 uppercase tracking-tight">Response Quality Scorecard</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+            className="p-1 rounded border border-stone-400 hover:border-stone-900 bg-white hover:bg-stone-100 text-stone-900 shadow-[1px_1px_0px_0px_#000] transition cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -92,60 +92,60 @@ export const RubricFeedbackModal = ({
 
         {submitted ? (
           <div className="py-8 text-center space-y-2">
-            <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto animate-bounce" />
-            <div className="text-sm font-semibold text-slate-200">Evaluation Saved!</div>
-            <p className="text-xs text-slate-400">Score added to the evaluation metrics database.</p>
+            <CheckCircle className="w-10 h-10 text-emerald-600 mx-auto animate-bounce" />
+            <div className="text-sm font-bold font-mono text-stone-950 uppercase">Evaluation Saved!</div>
+            <p className="text-xs font-mono text-stone-600">Score recorded in the evaluation database.</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-3">
             {renderStarPicker(
               '1. Relevance',
-              'Did the response directly address the user prompt and requested constraints?',
+              'Did the reply accurately address the user prompt and constraints?',
               relevance,
               setRelevance
             )}
 
             {renderStarPicker(
               '2. Coherence',
-              'Did the response maintain continuity and avoid contradicting earlier turns?',
+              'Did the reply maintain continuity with earlier conversation turns?',
               coherence,
               setCoherence
             )}
 
             {renderStarPicker(
               '3. Helpfulness & Accuracy',
-              'Was the answer clear, structured, and informative?',
+              'Was the answer well-structured, clear, and informative?',
               helpfulness,
               setHelpfulness
             )}
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
-                Optional Qualitative Feedback
+              <label className="block text-xs font-mono font-bold text-stone-700 uppercase mb-1">
+                Optional Qualitative Notes
               </label>
               <textarea
                 rows={2}
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                placeholder="e.g. Remembered all user constraints and provided good code..."
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                placeholder="e.g. Accurately recalled project details..."
+                className="w-full bg-white border-2 border-stone-800 rounded p-2.5 text-xs text-stone-900 placeholder-stone-400 focus:outline-none focus:border-amber-600 shadow-[2px_2px_0px_0px_#1C1917]"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t-2 border-stone-800">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200 rounded-lg transition"
+                className="px-3.5 py-1.5 text-xs font-mono font-bold text-stone-600 hover:text-stone-900 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold rounded-lg text-xs transition shadow-sm"
+                className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-stone-950 border-2 border-stone-900 rounded text-xs font-mono font-bold uppercase transition shadow-[2px_2px_0px_0px_#000] cursor-pointer"
               >
-                {loading ? 'Saving...' : 'Submit 1-5 Score'}
+                {loading ? 'SAVING...' : 'SUBMIT SCORE'}
               </button>
             </div>
           </form>

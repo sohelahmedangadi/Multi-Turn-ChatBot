@@ -388,7 +388,7 @@ export default function App() {
   const currentSession = sessions.find((s) => s.id === currentSessionId) || null;
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 font-sans text-slate-100 antialiased">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#FBF9F5] font-sans text-stone-900 antialiased">
       {/* Sidebar Navigation */}
       <Sidebar
         sessions={sessions}

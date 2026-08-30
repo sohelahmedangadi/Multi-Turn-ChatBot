@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Star,
   Brain,
+  Terminal,
 } from 'lucide-react';
 import { CopyButton, stripMarkdown } from './CopyButton';
 
@@ -31,38 +32,38 @@ export const MessageItem = ({ message, onOpenRubric }) => {
   const isAssistant = message.role === 'assistant';
   const metadata = message.metadata;
 
-  // For message bubble copy: plain text stripped of markdown
+  // Plain text representation for copying full message bubble
   const plainTextToCopy = isUser ? message.content : stripMarkdown(message.content);
 
   return (
     <div
       id={`message-bubble-${message.id}`}
-      className={`group flex gap-3.5 py-4 px-4 rounded-xl transition-colors ${
+      className={`group relative flex gap-3.5 p-4 sm:p-5 rounded-lg transition-all ${
         isUser
-          ? 'bg-slate-800/40 border border-slate-700/30'
-          : 'bg-slate-900/90 border border-slate-800'
+          ? 'bg-[#FEFCE8] border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917]'
+          : 'bg-white border-2 border-stone-800 shadow-[3px_3px_0px_0px_#1C1917]'
       }`}
     >
-      {/* Avatar */}
+      {/* Retro Avatar Stamp */}
       <div className="flex-shrink-0 pt-0.5">
         {isUser ? (
-          <div className="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center shadow-sm">
-            <User className="w-4 h-4" />
+          <div className="w-8 h-8 rounded border-2 border-stone-800 bg-amber-200 text-stone-900 flex items-center justify-center font-mono text-xs font-bold shadow-[1px_1px_0px_0px_#1C1917]">
+            <User className="w-4 h-4 text-stone-900" />
           </div>
         ) : (
           <div
-            className={`w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm ${
+            className={`w-8 h-8 rounded border-2 border-stone-800 flex items-center justify-center font-mono text-xs font-bold shadow-[1px_1px_0px_0px_#1C1917] ${
               metadata?.provider === 'heuristic'
-                ? 'bg-amber-600/80 border border-amber-500/50'
+                ? 'bg-amber-400 text-stone-950'
                 : metadata?.provider === 'groq'
-                ? 'bg-orange-600 border border-orange-500/50 shadow-orange-950/40'
-                : 'bg-indigo-600 border border-indigo-500/40'
+                ? 'bg-orange-500 text-white'
+                : 'bg-stone-900 text-amber-300'
             }`}
           >
             {metadata?.provider === 'heuristic' ? (
               <HelpCircle className="w-4 h-4" />
             ) : metadata?.provider === 'groq' ? (
-              <Zap className="w-4 h-4 text-amber-100" />
+              <Zap className="w-4 h-4" />
             ) : (
               <Bot className="w-4 h-4" />
             )}
@@ -71,73 +72,73 @@ export const MessageItem = ({ message, onOpenRubric }) => {
       </div>
 
       {/* Message Content & Metadata */}
-      <div className="flex-1 min-w-0 space-y-1.5">
-        {/* Header line */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-slate-200">
+      <div className="flex-1 min-w-0 space-y-2">
+        {/* Retro Header Strip */}
+        <div className="flex items-center justify-between text-xs border-b border-stone-200 pb-1.5">
+          <div className="flex items-center gap-2 flex-wrap font-mono">
+            <span className="font-bold text-stone-900 uppercase tracking-wide">
               {isUser
-                ? 'You'
+                ? 'YOU'
                 : metadata?.provider === 'heuristic'
-                ? 'Ambiguity Guard'
+                ? 'AMBIGUITY GUARD'
                 : metadata?.provider === 'groq'
-                ? 'AI Assistant'
-                : 'AI Assistant'}
+                ? 'AI ASSISTANT (GROQ)'
+                : 'AI ASSISTANT (GEMINI)'}
             </span>
 
-            {/* Provider and model badge */}
+            {/* Provider and Model Stamp */}
             {isAssistant && metadata?.provider && (
               <span
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium tracking-wider uppercase ${
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase border ${
                   metadata.provider === 'heuristic'
-                    ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                    ? 'bg-amber-100 text-amber-900 border-amber-400'
                     : metadata.provider === 'groq'
-                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/40 shadow-xs'
-                    : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30'
+                    ? 'bg-orange-100 text-orange-950 border-orange-400'
+                    : 'bg-stone-100 text-stone-900 border-stone-400'
                 }`}
               >
-                {metadata.provider === 'groq' && <Zap className="w-2.5 h-2.5 text-amber-300" />}
+                {metadata.provider === 'groq' && <Zap className="w-2.5 h-2.5 text-orange-600" />}
                 <span>{metadata.provider === 'groq' ? `Groq · ${metadata.model || 'LLaMA'}` : metadata.model || metadata.provider}</span>
               </span>
             )}
 
-            {/* Long-Term Memory Retrieval Badge */}
+            {/* Long-Term Memory Retrieval Stamp */}
             {isAssistant && metadata?.retrievedMemoriesCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-200 border border-purple-500/40 font-medium">
-                <Brain className="w-3 h-3 text-purple-300" />
-                <span>Memory Retrieved ({metadata.retrievedMemoriesCount})</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-purple-100 text-purple-950 border border-purple-300 font-bold uppercase">
+                <Brain className="w-3 h-3 text-purple-700" />
+                <span>Memory Recalled ({metadata.retrievedMemoriesCount})</span>
               </span>
             )}
 
-            {/* Ambiguity Flag */}
+            {/* Ambiguity Flag Stamp */}
             {metadata?.ambiguityFlag && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-200 border border-amber-500/40 font-medium">
-                <HelpCircle className="w-3 h-3 text-amber-300" />
-                <span>Clarification Heuristic Triggered</span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
+                <HelpCircle className="w-3 h-3 text-amber-700" />
+                <span>Clarification Triggered</span>
               </span>
             )}
           </div>
 
-          {/* Time & Bubble Copy Action */}
-          <div className="flex items-center gap-2 text-slate-400">
-            <span className="text-[10px] font-mono">
+          {/* Timestamp & Full Message Copy Button */}
+          <div className="flex items-center gap-2 text-stone-500 font-mono">
+            <span className="text-[10px]">
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
 
-            {/* Full Message Copy Button */}
+            {/* Full Message Copy Stamp Button */}
             <CopyButton
               text={plainTextToCopy}
-              title="Copy entire message (plain text)"
-              className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity"
-              iconClassName="w-3.5 h-3.5"
+              title="Copy entire message"
+              className="p-1 rounded border border-stone-300 hover:border-stone-800 bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 opacity-80 group-hover:opacity-100 transition-all shadow-[1px_1px_0px_0px_#292524]"
+              iconClassName="w-3 h-3"
             />
           </div>
         </div>
 
-        {/* Content body */}
-        <div className="text-sm text-slate-100 leading-relaxed break-words">
+        {/* Content Body */}
+        <div className="text-sm text-stone-900 leading-relaxed break-words">
           {isUser ? (
-            <p className="whitespace-pre-wrap">{message.content}</p>
+            <p className="whitespace-pre-wrap font-sans text-stone-900 font-medium">{message.content}</p>
           ) : (
             <div className="markdown-content">
               <Markdown
@@ -147,27 +148,30 @@ export const MessageItem = ({ message, onOpenRubric }) => {
                     const match = /language-(\w+)/.exec(className || '');
                     const codeString = String(children).replace(/\n$/, '');
 
-                    // Block code renderer
+                    // Block Code Renderer
                     if (!inline && (match || codeString.includes('\n'))) {
                       const language = match ? match[1] : '';
 
                       return (
-                        <div className="relative group/code my-3 rounded-lg overflow-hidden border border-slate-800 bg-slate-950/90 shadow-sm">
-                          {/* Code header with Language Tag & Copy Button */}
-                          <div className="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/90 border-b border-slate-800 text-[11px] font-mono text-slate-400">
-                            <span className="text-slate-400 font-medium">{language || 'code'}</span>
+                        <div className="relative group/code my-3.5 rounded-lg overflow-hidden border-2 border-stone-900 bg-stone-950 shadow-[3px_3px_0px_0px_#1C1917]">
+                          {/* Code Header Bar with Language Label & Copy Stamp Button */}
+                          <div className="flex items-center justify-between px-3.5 py-1.5 bg-stone-900 border-b-2 border-stone-800 text-[11px] font-mono text-stone-300">
+                            <div className="flex items-center gap-2">
+                              <Terminal className="w-3.5 h-3.5 text-amber-400" />
+                              <span className="font-bold text-amber-300 uppercase tracking-wider">{language || 'CODE'}</span>
+                            </div>
                             <CopyButton
                               text={codeString}
                               showLabel={true}
-                              label="Copy"
-                              copiedLabel="Copied!"
-                              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/60 text-[10px] opacity-70 group-hover/code:opacity-100 transition-all"
+                              label="COPY"
+                              copiedLabel="COPIED!"
+                              className="px-2.5 py-0.5 rounded border border-stone-700 hover:border-amber-400 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-amber-200 text-[10px] font-mono uppercase transition-all shadow-[1px_1px_0px_0px_#000]"
                               iconClassName="w-3 h-3"
                             />
                           </div>
 
                           {/* Code Content */}
-                          <pre className="p-3.5 overflow-x-auto text-xs font-mono text-slate-200 leading-relaxed m-0">
+                          <pre className="p-3.5 overflow-x-auto text-xs font-mono text-stone-100 leading-relaxed m-0 bg-stone-950">
                             <code className={className} {...props}>
                               {children}
                             </code>
@@ -176,10 +180,10 @@ export const MessageItem = ({ message, onOpenRubric }) => {
                       );
                     }
 
-                    // Inline code renderer
+                    // Inline Code Renderer
                     return (
                       <code
-                        className="px-1.5 py-0.5 rounded bg-slate-800/80 text-amber-300 font-mono text-xs border border-slate-700/40"
+                        className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold border border-amber-300"
                         {...props}
                       >
                         {children}
@@ -196,24 +200,24 @@ export const MessageItem = ({ message, onOpenRubric }) => {
 
         {/* Assistant Metrics Bar (Latency, Coherence, Tokens, Rubric Score) */}
         {isAssistant && (
-          <div className="pt-2 flex flex-wrap items-center gap-3 text-[11px] text-slate-400 border-t border-slate-800/80 mt-2">
+          <div className="pt-2.5 flex flex-wrap items-center gap-3 text-[11px] text-stone-600 border-t border-stone-200 mt-2 font-mono">
             {metadata?.latencyMs !== undefined && (
-              <div className="flex items-center gap-1 font-mono text-slate-300">
-                <Clock className="w-3 h-3 text-slate-400" />
+              <div className="flex items-center gap-1 text-stone-700">
+                <Clock className="w-3 h-3 text-stone-500" />
                 <span>{metadata.latencyMs}ms</span>
               </div>
             )}
 
             {metadata?.tokensEstimated !== undefined && (
-              <div className="flex items-center gap-1 font-mono text-slate-300">
-                <Zap className="w-3 h-3 text-amber-400" />
+              <div className="flex items-center gap-1 text-stone-700">
+                <Zap className="w-3 h-3 text-amber-600" />
                 <span>~{metadata.tokensEstimated} tokens</span>
               </div>
             )}
 
             {metadata?.coherenceScore !== undefined && (
-              <div className="flex items-center gap-1 text-slate-300">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <div className="flex items-center gap-1 text-stone-700">
+                <ShieldCheck className="w-3 h-3 text-emerald-600" />
                 <span>Coherence: {Math.round(metadata.coherenceScore * 100)}%</span>
               </div>
             )}
@@ -222,9 +226,9 @@ export const MessageItem = ({ message, onOpenRubric }) => {
             <button
               id={`btn-rate-message-${message.id}`}
               onClick={() => onOpenRubric(message.id)}
-              className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-amber-300 border border-slate-700 transition"
+              className="ml-auto flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold font-mono uppercase bg-amber-50 hover:bg-amber-100 text-stone-900 border-2 border-stone-800 shadow-[1px_1px_0px_0px_#1C1917] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition cursor-pointer"
             >
-              <Star className="w-3 h-3 text-amber-400" />
+              <Star className="w-3 h-3 text-amber-600 fill-amber-400" />
               <span>Score Quality (1-5)</span>
             </button>
           </div>

@@ -9,6 +9,7 @@ import {
   Star,
   Activity,
   BarChart2,
+  Terminal,
 } from 'lucide-react';
 
 export const EvaluationModal = ({
@@ -81,48 +82,50 @@ export const EvaluationModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in font-sans">
+      <div className="w-full max-w-4xl bg-[#FBF9F5] border-2 border-stone-900 rounded-lg shadow-[6px_6px_0px_0px_#1C1917] flex flex-col max-h-[90vh] overflow-hidden text-stone-900">
         {/* Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-b-2 border-stone-800 bg-[#F5EFEB] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded border-2 border-stone-900 bg-emerald-300 text-stone-950 flex items-center justify-center shadow-[2px_2px_0px_0px_#000]">
               <BarChart2 className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-slate-100">Evaluation & Benchmark Suite</h2>
-              <p className="text-xs text-slate-400">
-                Automated multi-turn context benchmarks and quality rubric metrics
+              <h2 className="text-base font-bold font-mono text-stone-950 uppercase tracking-tight">
+                Evaluation & Benchmark Suite
+              </h2>
+              <p className="text-xs font-mono text-stone-600">
+                Automated multi-turn context benchmarks and quality rubric scorecards
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+            className="p-1 rounded border border-stone-400 hover:border-stone-900 bg-white hover:bg-stone-100 text-stone-900 shadow-[1px_1px_0px_0px_#000] transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 px-5 pt-3 border-b border-slate-800 text-xs font-medium">
+        <div className="flex items-center gap-2 px-5 pt-3 border-b-2 border-stone-800 bg-[#EFE9E2] text-xs font-mono font-bold">
           <button
             onClick={() => setActiveTab('benchmarks')}
-            className={`pb-2.5 px-3 border-b-2 transition ${
+            className={`pb-2.5 px-3 border-b-2 transition uppercase cursor-pointer ${
               activeTab === 'benchmarks'
-                ? 'border-emerald-500 text-emerald-300 font-semibold'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-emerald-700 text-emerald-950 font-bold bg-white rounded-t border-t-2 border-x-2 border-stone-800 -mb-[2px]'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             Automated Benchmarks
           </button>
           <button
             onClick={() => setActiveTab('rubric-stats')}
-            className={`pb-2.5 px-3 border-b-2 transition ${
+            className={`pb-2.5 px-3 border-b-2 transition uppercase cursor-pointer ${
               activeTab === 'rubric-stats'
-                ? 'border-emerald-500 text-emerald-300 font-semibold'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-emerald-700 text-emerald-950 font-bold bg-white rounded-t border-t-2 border-x-2 border-stone-800 -mb-[2px]'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             Human Rubric Metrics (1-5)
@@ -130,16 +133,16 @@ export const EvaluationModal = ({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#FBF9F5]">
           {activeTab === 'benchmarks' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+              <div className="flex items-center justify-between bg-white p-4 rounded-lg border-2 border-stone-800 shadow-[3px_3px_0px_0px_#1C1917]">
                 <div>
-                  <div className="text-xs font-semibold text-slate-200">
-                    Active Evaluation Target: <span className="text-emerald-400 uppercase font-mono">Google Gemini 2.5</span>
+                  <div className="text-xs font-bold font-mono text-stone-900 uppercase">
+                    Evaluation Engine Target: <span className="text-emerald-800 font-bold">Gemini 2.5 Flash</span>
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Runs 5 test cases checking Context Memory, Ambiguity, Reasoning, and Constraints.
+                  <div className="text-[11px] font-mono text-stone-600 mt-0.5">
+                    Executes 5 benchmark scenarios validating Context Retention, Ambiguity, Reasoning, and Negative Constraints.
                   </div>
                 </div>
 
@@ -147,10 +150,10 @@ export const EvaluationModal = ({
                   id="btn-run-all-benchmarks"
                   onClick={runAllBenchmarks}
                   disabled={isRunningAll}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-lg text-xs font-medium transition shadow-sm"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-emerald-400 hover:bg-emerald-300 disabled:opacity-50 text-stone-950 border-2 border-stone-900 rounded text-xs font-mono font-bold uppercase transition shadow-[2px_2px_0px_0px_#000] cursor-pointer"
                 >
                   <Play className="w-3.5 h-3.5" />
-                  <span>{isRunningAll ? 'Executing Suite...' : 'Run All Tests'}</span>
+                  <span>{isRunningAll ? 'EXECUTING...' : 'RUN ALL 5 TESTS'}</span>
                 </button>
               </div>
 
@@ -163,60 +166,60 @@ export const EvaluationModal = ({
                   return (
                     <div
                       key={b.id}
-                      className="p-4 rounded-xl bg-slate-950/40 border border-slate-800/90 space-y-2.5"
+                      className="p-4 rounded-lg bg-white border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917] space-y-2.5"
                     >
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-slate-200">{b.name}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                            <span className="text-xs font-bold font-mono text-stone-950 uppercase">{b.name}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-stone-100 text-stone-800 border border-stone-400 font-mono font-bold uppercase">
                               {b.category}
                             </span>
                           </div>
-                          <p className="text-[11px] text-slate-400 mt-1">{b.name}</p>
+                          <p className="text-xs text-stone-600 mt-1 font-sans">{b.description || b.name}</p>
                         </div>
 
                         <button
                           onClick={() => runSingleBenchmark(b)}
                           disabled={isRunning || isRunningAll}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs text-slate-200 rounded-md border border-slate-700 transition"
+                          className="flex items-center gap-1 px-3 py-1 bg-stone-100 hover:bg-amber-100 disabled:opacity-50 text-xs font-mono font-bold uppercase text-stone-900 rounded border-2 border-stone-800 shadow-[1px_1px_0px_0px_#000] transition cursor-pointer"
                         >
-                          <Play className="w-3 h-3 text-emerald-400" />
-                          <span>{isRunning ? 'Running...' : 'Run Test'}</span>
+                          <Play className="w-3 h-3 text-emerald-700" />
+                          <span>{isRunning ? 'RUNNING...' : 'RUN TEST'}</span>
                         </button>
                       </div>
 
                       {/* Result Box */}
                       {res && (
                         <div
-                          className={`p-3 rounded-lg border text-xs space-y-2 ${
+                          className={`p-3.5 rounded border-2 text-xs font-mono space-y-2 ${
                             res.passed
-                              ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200'
-                              : 'bg-rose-950/20 border-rose-500/30 text-rose-200'
+                              ? 'bg-emerald-50 border-emerald-500 text-emerald-950'
+                              : 'bg-rose-50 border-rose-500 text-rose-950'
                           }`}
                         >
-                          <div className="flex items-center justify-between font-medium">
+                          <div className="flex items-center justify-between font-bold">
                             <div className="flex items-center gap-1.5">
                               {res.passed ? (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                               ) : (
-                                <XCircle className="w-4 h-4 text-rose-400" />
+                                <XCircle className="w-4 h-4 text-rose-700" />
                               )}
-                              <span>{res.passed ? 'PASSED Criteria' : 'FAILED Criteria'}</span>
+                              <span>{res.passed ? 'PASSED CRITERIA' : 'FAILED CRITERIA'}</span>
                             </div>
 
-                            <div className="flex items-center gap-3 text-[11px] font-mono text-slate-400">
+                            <div className="flex items-center gap-3 text-[11px] text-stone-700">
                               <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> {res.latencyMs}ms
+                                <Clock className="w-3 h-3 text-stone-600" /> {res.latencyMs}ms
                               </span>
                               <span className="flex items-center gap-1">
-                                <ShieldCheck className="w-3 h-3 text-emerald-400" /> Coherence:{' '}
+                                <ShieldCheck className="w-3 h-3 text-emerald-700" /> Coherence:{' '}
                                 {Math.round(res.coherenceScore * 100)}%
                               </span>
                             </div>
                           </div>
 
-                          <div className="text-slate-300 bg-slate-950/70 p-2 rounded text-[11px] font-mono leading-relaxed max-h-32 overflow-y-auto">
+                          <div className="text-stone-900 bg-white p-2.5 rounded border border-stone-300 text-[11px] leading-relaxed max-h-32 overflow-y-auto font-mono">
                             {res.response}
                           </div>
                         </div>
@@ -231,48 +234,48 @@ export const EvaluationModal = ({
           {activeTab === 'rubric-stats' && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-xs text-slate-400">Total Rubric Ratings</div>
-                  <div className="text-2xl font-bold text-slate-100 mt-1 font-mono">
+                <div className="p-4 rounded-lg bg-white border-2 border-stone-800 shadow-[3px_3px_0px_0px_#1C1917]">
+                  <div className="text-xs font-mono font-bold text-stone-600 uppercase">Total Evaluations</div>
+                  <div className="text-2xl font-bold text-stone-950 mt-1 font-mono">
                     {summary?.totalEvaluations || 0}
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-xs text-slate-400 flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 text-amber-400" />
+                <div className="p-4 rounded-lg bg-white border-2 border-stone-800 shadow-[3px_3px_0px_0px_#1C1917]">
+                  <div className="text-xs font-mono font-bold text-stone-600 flex items-center gap-1 uppercase">
+                    <Star className="w-3.5 h-3.5 text-amber-600 fill-amber-400" />
                     <span>Avg Relevance</span>
                   </div>
-                  <div className="text-2xl font-bold text-amber-300 mt-1 font-mono">
+                  <div className="text-2xl font-bold text-amber-800 mt-1 font-mono">
                     {summary?.averageRelevance || '4.8'}/5.0
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-xs text-slate-400 flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <div className="p-4 rounded-lg bg-white border-2 border-stone-800 shadow-[3px_3px_0px_0px_#1C1917]">
+                  <div className="text-xs font-mono font-bold text-stone-600 flex items-center gap-1 uppercase">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
                     <span>Avg Coherence</span>
                   </div>
-                  <div className="text-2xl font-bold text-emerald-300 mt-1 font-mono">
+                  <div className="text-2xl font-bold text-emerald-800 mt-1 font-mono">
                     {summary?.averageCoherence || '4.7'}/5.0
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800">
-                  <div className="text-xs text-slate-400 flex items-center gap-1">
-                    <Activity className="w-3.5 h-3.5 text-indigo-400" />
+                <div className="p-4 rounded-lg bg-white border-2 border-stone-800 shadow-[3px_3px_0px_0px_#1C1917]">
+                  <div className="text-xs font-mono font-bold text-stone-600 flex items-center gap-1 uppercase">
+                    <Activity className="w-3.5 h-3.5 text-stone-700" />
                     <span>Avg Helpfulness</span>
                   </div>
-                  <div className="text-2xl font-bold text-indigo-300 mt-1 font-mono">
+                  <div className="text-2xl font-bold text-stone-950 mt-1 font-mono">
                     {summary?.averageHelpfulness || '4.9'}/5.0
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-3">
-                <h3 className="text-xs font-semibold text-slate-200">How to Score Conversation Quality</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Click the <strong>"Score Quality (1-5)"</strong> button below any assistant message in the chat to grade its Relevance, Coherence across earlier turns, and Practical Helpfulness.
+              <div className="p-4 rounded-lg bg-white border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917] space-y-2">
+                <h3 className="text-xs font-mono font-bold text-stone-950 uppercase">Quality Scoring Procedure</h3>
+                <p className="text-xs text-stone-700 font-sans leading-relaxed">
+                  Click the <strong>"Score Quality (1-5)"</strong> button beneath any assistant reply in the dialogue canvas to rate Relevance, Multi-turn Coherence, and Overall Helpfulness.
                 </p>
               </div>
             </div>

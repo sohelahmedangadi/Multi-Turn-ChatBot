@@ -5,12 +5,13 @@ import {
   Trash2,
   Cpu,
   Settings,
-  Sparkles,
+  Terminal,
   BarChart3,
   User,
   LogOut,
   Database,
   Brain,
+  Folder,
 } from 'lucide-react';
 
 export const Sidebar = ({
@@ -38,16 +39,16 @@ export const Sidebar = ({
   };
 
   return (
-    <aside className="w-72 bg-slate-900 border-r border-slate-800 flex flex-col h-screen select-none">
+    <aside className="w-72 bg-[#F5EFEB] border-r-2 border-stone-800 flex flex-col h-screen select-none font-sans text-stone-900">
       {/* Brand Header */}
-      <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-4 border-b-2 border-stone-800 bg-[#EFE9E2] flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-            <Sparkles className="w-4 h-4" />
+          <div className="w-8 h-8 rounded border-2 border-stone-900 bg-amber-400 flex items-center justify-center text-stone-950 shadow-[2px_2px_0px_0px_#000]">
+            <Terminal className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="font-semibold text-sm text-slate-100 leading-none">OmniTurn AI</h1>
-            <p className="text-[11px] text-slate-400 mt-0.5">Multi-Turn Conversational Capstone</p>
+            <h1 className="font-bold font-mono text-sm text-stone-950 leading-none tracking-tight">OMNITURN AI</h1>
+            <p className="text-[10px] font-mono text-stone-600 mt-0.5 uppercase">Conversational Studio</p>
           </div>
         </div>
 
@@ -55,51 +56,51 @@ export const Sidebar = ({
           id="btn-system-prompt"
           onClick={onOpenSystemPromptModal}
           title="Configure System Prompt"
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+          className="p-1.5 rounded border border-stone-400 hover:border-stone-800 bg-white hover:bg-stone-100 text-stone-800 shadow-[1px_1px_0px_0px_#1C1917] transition cursor-pointer"
         >
           <Settings className="w-4 h-4" />
         </button>
       </div>
 
       {/* New Session Button */}
-      <div className="p-3 pb-1">
+      <div className="p-3 pb-2">
         <button
           id="btn-new-conversation"
           onClick={onNewSession}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition shadow-sm hover:shadow active:scale-[0.99]"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-stone-950 border-2 border-stone-900 rounded text-xs font-mono font-bold uppercase transition shadow-[2px_2px_0px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>New Conversation</span>
+          <span>+ New Dialogue</span>
         </button>
       </div>
 
       {/* Engine Status Card */}
-      <div className="px-3 py-2">
-        <div className="bg-slate-800/60 rounded-lg p-2.5 border border-slate-750">
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5 font-medium text-slate-300">
-              <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-              <span>AI Engine</span>
+      <div className="px-3 py-1">
+        <div className="bg-white rounded p-2.5 border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917]">
+          <div className="flex items-center justify-between text-xs font-mono">
+            <div className="flex items-center gap-1.5 font-bold text-stone-900">
+              <Cpu className="w-3.5 h-3.5 text-amber-700" />
+              <span>AI ENGINE</span>
             </div>
-            <div className="flex items-center gap-1 text-[11px] text-emerald-400 font-mono">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Gemini 2.5 Flash</span>
+            <div className="flex items-center gap-1 text-[11px] text-emerald-800 font-bold">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>ONLINE</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Sessions List */}
-      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
-        <div className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase px-2 mb-1.5">
-          History ({sessions.length})
+      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1.5">
+        <div className="text-[10px] font-bold font-mono tracking-wider text-stone-600 uppercase px-1 mb-1">
+          DIALOGUE LOGS ({sessions.length})
         </div>
 
         {sessions.length === 0 ? (
-          <div className="text-center py-8 px-4 text-slate-500 text-xs">
-            <MessageSquare className="w-6 h-6 mx-auto mb-2 opacity-40" />
-            <p>No conversations yet.</p>
-            <p className="mt-1 text-slate-600">Start typing to begin dialogue.</p>
+          <div className="text-center py-8 px-4 text-stone-500 text-xs font-mono">
+            <Folder className="w-6 h-6 mx-auto mb-2 opacity-50 text-stone-600" />
+            <p>NO ACTIVE SESSIONS.</p>
+            <p className="mt-1 text-stone-500 text-[11px]">Type a query to begin.</p>
           </div>
         ) : (
           sessions.map((sess) => {
@@ -109,31 +110,31 @@ export const Sidebar = ({
                 key={sess.id}
                 id={`session-item-${sess.id}`}
                 onClick={() => onSelectSession(sess.id)}
-                className={`group relative flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer transition ${
+                className={`group relative flex items-center justify-between px-3 py-2 rounded text-xs cursor-pointer transition ${
                   isSelected
-                    ? 'bg-indigo-600/15 text-indigo-200 font-medium border border-indigo-500/30'
-                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-slate-100 border border-transparent'
+                    ? 'bg-[#FEF3C7] text-stone-950 font-bold border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917]'
+                    : 'text-stone-800 hover:bg-white hover:text-stone-950 border border-stone-300 hover:border-stone-800'
                 }`}
               >
-                <div className="flex items-center gap-2.5 overflow-hidden">
+                <div className="flex items-center gap-2 overflow-hidden">
                   <MessageSquare
-                    className={`w-4 h-4 flex-shrink-0 ${
-                      isSelected ? 'text-indigo-400' : 'text-slate-500 group-hover:text-slate-400'
+                    className={`w-3.5 h-3.5 flex-shrink-0 ${
+                      isSelected ? 'text-amber-800' : 'text-stone-500'
                     }`}
                   />
-                  <span className="truncate text-xs">{sess.title || 'Untitled Chat'}</span>
+                  <span className="truncate text-xs font-mono">{sess.title || 'Untitled Session'}</span>
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-slate-500 font-mono">
-                    {sess.messageCount || 0}
+                  <span className="text-[10px] text-stone-500 font-mono">
+                    [{sess.messageCount || 0}]
                   </span>
                   <button
                     id={`btn-delete-session-${sess.id}`}
                     onClick={(e) => handleDelete(e, sess.id)}
                     disabled={isDeletingId === sess.id}
                     title="Delete session"
-                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 rounded transition"
+                    className="opacity-0 group-hover:opacity-100 p-0.5 text-stone-500 hover:text-rose-600 rounded transition cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -145,84 +146,84 @@ export const Sidebar = ({
       </div>
 
       {/* Navigation Buttons: Memory & Evaluation */}
-      <div className="px-3 py-2 border-t border-slate-800 space-y-1.5">
+      <div className="px-3 py-2 border-t-2 border-stone-800 space-y-1.5 bg-[#EFE9E2]">
         <button
           id="btn-open-memory-store"
           onClick={onOpenMemoryModal}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-800/80 hover:bg-slate-750 text-xs font-medium text-slate-200 border border-slate-700/60 transition"
+          className="w-full flex items-center justify-between px-3 py-2 rounded bg-white hover:bg-amber-50 text-xs font-mono font-bold text-stone-900 border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <Brain className="w-4 h-4 text-indigo-400" />
-            <span>3-Tier Memory Store</span>
+            <Brain className="w-4 h-4 text-purple-700" />
+            <span>3-TIER MEMORY</span>
           </div>
-          <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded font-mono">
-            {memoryCount} facts
+          <span className="text-[10px] bg-purple-100 text-purple-900 border border-purple-300 px-1.5 py-0.5 rounded font-mono font-bold">
+            {memoryCount} FACTS
           </span>
         </button>
 
         <button
           id="btn-open-evaluation-suite"
           onClick={onOpenEvalModal}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-slate-800/80 hover:bg-slate-750 text-xs font-medium text-slate-200 border border-slate-700/60 transition"
+          className="w-full flex items-center justify-between px-3 py-2 rounded bg-white hover:bg-emerald-50 text-xs font-mono font-bold text-stone-900 border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-emerald-400" />
-            <span>Evaluation & Benchmarks</span>
+            <BarChart3 className="w-4 h-4 text-emerald-700" />
+            <span>EVALUATION SUITE</span>
           </div>
-          <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono">
-            Suite
+          <span className="text-[10px] bg-emerald-100 text-emerald-900 border border-emerald-300 px-1.5 py-0.5 rounded font-mono font-bold">
+            5 BENCH
           </span>
         </button>
       </div>
 
       {/* Footer / User Profile & Database Status */}
-      <div className="p-3 border-t border-slate-800 bg-slate-950/40 text-xs space-y-2">
+      <div className="p-3 border-t-2 border-stone-800 bg-[#E8E1D9] text-xs space-y-2 font-mono">
         {/* DB Status */}
-        <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+        <div className="flex items-center justify-between text-[11px] text-stone-700 px-1">
           <div className="flex items-center gap-1.5">
-            <Database className="w-3 h-3 text-slate-400" />
-            <span className="capitalize">{systemStatus?.dbType === 'mongodb' ? 'MongoDB Atlas' : 'In-Memory Store'}</span>
+            <Database className="w-3.5 h-3.5 text-stone-600" />
+            <span className="font-bold">{systemStatus?.dbType === 'mongodb' ? 'MONGODB ATLAS' : 'IN-MEMORY STORE'}</span>
           </div>
-          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Active
+          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-800 font-bold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            ACTIVE
           </span>
         </div>
 
         {/* User Account / Auth status */}
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center justify-between pt-1 border-t border-stone-300">
           {currentUser ? (
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2 overflow-hidden">
-                <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-[10px] font-bold">
+                <div className="w-6 h-6 rounded border border-stone-800 bg-amber-300 text-stone-950 flex items-center justify-center text-[11px] font-bold">
                   {currentUser.username[0].toUpperCase()}
                 </div>
                 <div className="overflow-hidden">
-                  <div className="text-xs font-medium text-slate-200 truncate">{currentUser.username}</div>
-                  <div className="text-[10px] text-slate-400 truncate">{currentUser.email}</div>
+                  <div className="text-xs font-bold text-stone-900 truncate">{currentUser.username}</div>
+                  <div className="text-[10px] text-stone-600 truncate">{currentUser.email}</div>
                 </div>
               </div>
               <button
                 id="btn-logout"
                 onClick={onLogout}
                 title="Log out"
-                className="p-1 text-slate-400 hover:text-rose-400 transition"
+                className="p-1 text-stone-600 hover:text-rose-700 transition cursor-pointer"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
             <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-1.5 text-slate-400">
+              <div className="flex items-center gap-1.5 text-stone-600">
                 <User className="w-3.5 h-3.5" />
-                <span>Guest Mode</span>
+                <span className="text-[11px] font-bold">GUEST MODE</span>
               </div>
               <button
                 id="btn-open-auth"
                 onClick={onOpenAuth}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition"
+                className="text-xs text-amber-800 hover:text-amber-950 font-bold underline transition cursor-pointer"
               >
-                Sign In / Up
+                SIGN IN / UP
               </button>
             </div>
           )}

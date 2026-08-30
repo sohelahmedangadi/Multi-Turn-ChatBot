@@ -23,7 +23,7 @@ export function stripMarkdown(markdown) {
 }
 
 /**
- * Reusable CopyButton component with Clipboard API & execCommand fallback
+ * Reusable Retro CopyButton component with tactile feedback & fallback
  */
 export const CopyButton = ({
   text,
@@ -45,7 +45,7 @@ export const CopyButton = ({
 
     let success = false;
 
-    // 1. Primary: Clipboard API (supported on HTTPS / localhost)
+    // 1. Primary: Clipboard API (HTTPS / Localhost)
     if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(text);
@@ -86,12 +86,12 @@ export const CopyButton = ({
       onClick={handleCopy}
       title={copied ? copiedLabel : title}
       aria-label={copied ? copiedLabel : title}
-      className={`inline-flex items-center gap-1.5 transition-all duration-150 focus:outline-none cursor-pointer select-none ${className}`}
+      className={`inline-flex items-center gap-1.5 font-mono text-[11px] transition-all cursor-pointer select-none focus:outline-none ${className}`}
     >
       {copied ? (
         <>
-          <Check className={`${iconClassName} text-emerald-400`} />
-          {showLabel && <span className="text-emerald-400 font-medium">{copiedLabel}</span>}
+          <Check className={`${iconClassName} text-emerald-600`} />
+          {showLabel && <span className="text-emerald-700 font-bold">{copiedLabel}</span>}
         </>
       ) : (
         <>
