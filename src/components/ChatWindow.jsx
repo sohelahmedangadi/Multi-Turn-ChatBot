@@ -7,8 +7,6 @@ import {
   Sparkles,
   Bot,
   Layers,
-  Zap,
-  Brain,
   MessageSquareQuote,
   Terminal,
 } from 'lucide-react';
@@ -69,15 +67,10 @@ export const ChatWindow = ({
     }
   };
 
-  const totalTokensEstimated = messages.reduce(
-    (sum, m) => sum + (m.metadata?.tokensEstimated || Math.ceil(m.content.length / 4)),
-    0
-  );
-
   return (
     <main id="chat-main-container" className="flex-1 flex flex-col h-full bg-[#FBF9F5] retro-grid text-stone-900 overflow-hidden">
-      {/* Retro Classic Window Chrome Header */}
-      <header className="h-14 border-b-2 border-stone-800 bg-[#F5EFEB] px-4 sm:px-6 flex items-center justify-between flex-shrink-0 shadow-[0_2px_0px_0px_rgba(0,0,0,0.04)]">
+      {/* Retro Classic Header */}
+      <header className="h-14 border-b-2 border-stone-800 bg-[#F5EFEB] px-4 sm:px-6 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3 overflow-hidden">
           {/* Retro Window Dots */}
           <div className="hidden sm:flex items-center gap-1.5 mr-1">
@@ -92,32 +85,18 @@ export const ChatWindow = ({
             </span>
           </div>
 
-          <div className="hidden md:flex items-center gap-2 text-xs font-mono text-stone-600">
-            <span>•</span>
-            <div className="flex items-center gap-1">
-              <Layers className="w-3.5 h-3.5 text-stone-700" />
-              <span>[{messages.length} TURNS]</span>
+          {messages.length > 0 && (
+            <div className="hidden md:flex items-center gap-1 text-xs font-mono text-stone-500">
+              <span>•</span>
+              <div className="flex items-center gap-1">
+                <Layers className="w-3 h-3 text-stone-500" />
+                <span>{messages.length} turns</span>
+              </div>
             </div>
-            <span>•</span>
-            <div className="flex items-center gap-1">
-              <Zap className="w-3.5 h-3.5 text-amber-600" />
-              <span>[~{totalTokensEstimated} TOKENS]</span>
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Memory Store Pill */}
-          <button
-            id="btn-header-memory-store"
-            onClick={onOpenMemoryModal}
-            className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#FEF3C7] hover:bg-[#FDE68A] border-2 border-stone-800 text-xs font-mono font-bold text-amber-950 transition cursor-pointer shadow-[2px_2px_0px_0px_#1C1917] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-            title="View 3-Tier Long-Term Memory"
-          >
-            <Brain className="w-3.5 h-3.5 text-amber-800" />
-            <span>{memoryCount} MEMORIES</span>
-          </button>
-
           {/* Active Model Pill */}
           <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-stone-900 border-2 border-stone-900 text-xs font-mono text-amber-300 font-bold shadow-[2px_2px_0px_0px_#1C1917]">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -137,7 +116,7 @@ export const ChatWindow = ({
 
             <div>
               <h2 className="text-xl sm:text-2xl font-bold font-serif text-stone-950 tracking-tight">
-                3-Tier Conversational Memory Studio
+                CosmoAI Multi-Turn Studio
               </h2>
               <p className="text-xs sm:text-sm text-stone-600 mt-2 max-w-md mx-auto font-sans leading-relaxed">
                 Featuring short-term sliding history, persistent LangChain vector user memory with automatic updates, and cross-session past conversation access.
@@ -179,9 +158,9 @@ export const ChatWindow = ({
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2 text-xs border-b border-stone-200 pb-1 font-mono">
-                <span className="font-bold text-stone-900 uppercase">AI ASSISTANT</span>
+                <span className="font-bold text-stone-900 uppercase">ASSISTANT</span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-bold uppercase">
-                  STREAMING SSE
+                  STREAMING
                 </span>
               </div>
               <div className="markdown-content text-stone-900 leading-relaxed font-sans">
@@ -216,9 +195,9 @@ export const ChatWindow = ({
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Type your message... (Press Shift+Enter for new line)"
+              placeholder="Ask CosmoAI anything... (Shift+Enter for new line)"
               maxLength={2000}
-              className="flex-1 max-h-32 min-h-[44px] bg-transparent text-sm font-sans text-stone-900 placeholder-stone-500 focus:outline-none resize-none px-2 py-2 leading-relaxed"
+              className="flex-1 max-h-32 min-h-[44px] bg-transparent text-sm font-sans text-stone-900 placeholder-stone-400 focus:outline-none resize-none px-2 py-2 leading-relaxed"
             />
 
             <div className="flex items-center gap-1.5 pb-1">
@@ -247,12 +226,7 @@ export const ChatWindow = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] font-mono text-stone-600 px-1">
-            <div className="flex items-center gap-2">
-              <span>Press <kbd className="px-1.5 py-0.5 bg-stone-200 border border-stone-400 rounded text-stone-800 font-bold">Enter ↵</kbd> to transmit</span>
-              <span>•</span>
-              <span>MEMORY ENGINE: ACTIVE</span>
-            </div>
+          <div className="flex items-center justify-end text-[11px] font-mono text-stone-500 px-1">
             <span className={inputText.length > 1800 ? 'text-amber-700 font-bold font-mono' : 'font-mono'}>
               {inputText.length} / 2000
             </span>

@@ -3,13 +3,11 @@ import {
   MessageSquare,
   Plus,
   Trash2,
-  Cpu,
   Settings,
   Terminal,
   BarChart3,
   User,
   LogOut,
-  Database,
   Brain,
   Folder,
 } from 'lucide-react';
@@ -51,15 +49,6 @@ export const Sidebar = ({
             <p className="text-[10px] font-mono text-stone-600 mt-0.5 uppercase">Conversational Studio</p>
           </div>
         </div>
-
-        <button
-          id="btn-system-prompt"
-          onClick={onOpenSystemPromptModal}
-          title="Configure System Prompt"
-          className="p-1.5 rounded border border-stone-400 hover:border-stone-800 bg-white hover:bg-stone-100 text-stone-800 shadow-[1px_1px_0px_0px_#1C1917] transition cursor-pointer"
-        >
-          <Settings className="w-4 h-4" />
-        </button>
       </div>
 
       {/* New Session Button */}
@@ -72,22 +61,6 @@ export const Sidebar = ({
           <Plus className="w-4 h-4" />
           <span>+ New Dialogue</span>
         </button>
-      </div>
-
-      {/* Engine Status Card */}
-      <div className="px-3 py-1">
-        <div className="bg-white rounded p-2.5 border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917]">
-          <div className="flex items-center justify-between text-xs font-mono">
-            <div className="flex items-center gap-1.5 font-bold text-stone-900">
-              <Cpu className="w-3.5 h-3.5 text-amber-700" />
-              <span>AI ENGINE</span>
-            </div>
-            <div className="flex items-center gap-1 text-[11px] text-emerald-800 font-bold">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>ONLINE</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Sessions List */}
@@ -176,26 +149,13 @@ export const Sidebar = ({
         </button>
       </div>
 
-      {/* Footer / User Profile & Database Status */}
-      <div className="p-3 border-t-2 border-stone-800 bg-[#E8E1D9] text-xs space-y-2 font-mono">
-        {/* DB Status */}
-        <div className="flex items-center justify-between text-[11px] text-stone-700 px-1">
-          <div className="flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-stone-600" />
-            <span className="font-bold">{systemStatus?.dbType === 'mongodb' ? 'MONGODB ATLAS' : 'IN-MEMORY STORE'}</span>
-          </div>
-          <span className="inline-flex items-center gap-1 text-[10px] text-emerald-800 font-bold">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            ACTIVE
-          </span>
-        </div>
-
-        {/* User Account / Auth status */}
-        <div className="flex items-center justify-between pt-1 border-t border-stone-300">
+      {/* Footer / User Profile Area & Settings */}
+      <div className="p-3 border-t-2 border-stone-800 bg-[#E8E1D9] text-xs font-mono">
+        <div className="flex items-center justify-between w-full">
           {currentUser ? (
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2 overflow-hidden">
-                <div className="w-6 h-6 rounded border border-stone-800 bg-amber-300 text-stone-950 flex items-center justify-center text-[11px] font-bold">
+                <div className="w-7 h-7 rounded border border-stone-800 bg-amber-300 text-stone-950 flex items-center justify-center text-xs font-bold">
                   {currentUser.username[0].toUpperCase()}
                 </div>
                 <div className="overflow-hidden">
@@ -203,27 +163,46 @@ export const Sidebar = ({
                   <div className="text-[10px] text-stone-600 truncate">{currentUser.email}</div>
                 </div>
               </div>
-              <button
-                id="btn-logout"
-                onClick={onLogout}
-                title="Log out"
-                className="p-1 text-stone-600 hover:text-rose-700 transition cursor-pointer"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  id="btn-system-prompt-user"
+                  onClick={onOpenSystemPromptModal}
+                  title="Configure System Prompt"
+                  className="p-1 text-stone-600 hover:text-stone-950 hover:bg-white rounded transition cursor-pointer"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+                <button
+                  id="btn-logout"
+                  onClick={onLogout}
+                  title="Log out"
+                  className="p-1 text-stone-600 hover:text-rose-700 hover:bg-white rounded transition cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ) : (
             <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-1.5 text-stone-600">
-                <User className="w-3.5 h-3.5" />
-                <span className="text-[11px] font-bold">GUEST MODE</span>
+              <div className="flex items-center gap-1.5 text-stone-700">
+                <div className="w-6 h-6 rounded border border-stone-600 bg-stone-200 flex items-center justify-center text-stone-700">
+                  <User className="w-3.5 h-3.5" />
+                </div>
+                <button
+                  id="btn-open-auth"
+                  onClick={onOpenAuth}
+                  className="text-xs text-amber-800 hover:text-amber-950 font-bold underline transition cursor-pointer"
+                >
+                  Sign In / Register
+                </button>
               </div>
               <button
-                id="btn-open-auth"
-                onClick={onOpenAuth}
-                className="text-xs text-amber-800 hover:text-amber-950 font-bold underline transition cursor-pointer"
+                id="btn-system-prompt-guest"
+                onClick={onOpenSystemPromptModal}
+                title="Configure System Persona"
+                className="p-1.5 text-stone-600 hover:text-stone-950 hover:bg-white rounded transition cursor-pointer"
               >
-                SIGN IN / UP
+                <Settings className="w-4 h-4" />
               </button>
             </div>
           )}

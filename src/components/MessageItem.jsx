@@ -7,8 +7,6 @@ import {
   Zap,
   HelpCircle,
   Clock,
-  ShieldCheck,
-  Star,
   Brain,
   Terminal,
 } from 'lucide-react';
@@ -27,7 +25,7 @@ function formatMarkdownContent(text) {
   return cleaned || text;
 }
 
-export const MessageItem = ({ message, onOpenRubric }) => {
+export const MessageItem = ({ message }) => {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
   const metadata = message.metadata;
@@ -77,19 +75,13 @@ export const MessageItem = ({ message, onOpenRubric }) => {
         <div className="flex items-center justify-between text-xs border-b border-stone-200 pb-1.5">
           <div className="flex items-center gap-2 flex-wrap font-mono">
             <span className="font-bold text-stone-900 uppercase tracking-wide">
-              {isUser
-                ? 'YOU'
-                : metadata?.provider === 'heuristic'
-                ? 'AMBIGUITY GUARD'
-                : metadata?.provider === 'groq'
-                ? 'AI ASSISTANT (GROQ)'
-                : 'AI ASSISTANT (GEMINI)'}
+              {isUser ? 'YOU' : 'ASSISTANT'}
             </span>
 
             {/* Provider and Model Stamp */}
             {isAssistant && metadata?.provider && (
               <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase border ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase border ${
                   metadata.provider === 'heuristic'
                     ? 'bg-amber-100 text-amber-900 border-amber-400'
                     : metadata.provider === 'groq'
@@ -104,7 +96,7 @@ export const MessageItem = ({ message, onOpenRubric }) => {
 
             {/* Long-Term Memory Retrieval Stamp */}
             {isAssistant && metadata?.retrievedMemoriesCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-purple-100 text-purple-950 border border-purple-300 font-bold uppercase">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-purple-100 text-purple-950 border border-purple-300 font-bold uppercase">
                 <Brain className="w-3 h-3 text-purple-700" />
                 <span>Memory Recalled ({metadata.retrievedMemoriesCount})</span>
               </span>
@@ -112,7 +104,7 @@ export const MessageItem = ({ message, onOpenRubric }) => {
 
             {/* Ambiguity Flag Stamp */}
             {metadata?.ambiguityFlag && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
                 <HelpCircle className="w-3 h-3 text-amber-700" />
                 <span>Clarification Triggered</span>
               </span>
@@ -198,39 +190,13 @@ export const MessageItem = ({ message, onOpenRubric }) => {
           )}
         </div>
 
-        {/* Assistant Metrics Bar (Latency, Coherence, Tokens, Rubric Score) */}
-        {isAssistant && (
-          <div className="pt-2.5 flex flex-wrap items-center gap-3 text-[11px] text-stone-600 border-t border-stone-200 mt-2 font-mono">
-            {metadata?.latencyMs !== undefined && (
-              <div className="flex items-center gap-1 text-stone-700">
-                <Clock className="w-3 h-3 text-stone-500" />
-                <span>{metadata.latencyMs}ms</span>
-              </div>
-            )}
-
-            {metadata?.tokensEstimated !== undefined && (
-              <div className="flex items-center gap-1 text-stone-700">
-                <Zap className="w-3 h-3 text-amber-600" />
-                <span>~{metadata.tokensEstimated} tokens</span>
-              </div>
-            )}
-
-            {metadata?.coherenceScore !== undefined && (
-              <div className="flex items-center gap-1 text-stone-700">
-                <ShieldCheck className="w-3 h-3 text-emerald-600" />
-                <span>Coherence: {Math.round(metadata.coherenceScore * 100)}%</span>
-              </div>
-            )}
-
-            {/* Rubric Evaluation Button */}
-            <button
-              id={`btn-rate-message-${message.id}`}
-              onClick={() => onOpenRubric(message.id)}
-              className="ml-auto flex items-center gap-1 px-2.5 py-1 rounded text-[10px] font-bold font-mono uppercase bg-amber-50 hover:bg-amber-100 text-stone-900 border-2 border-stone-800 shadow-[1px_1px_0px_0px_#1C1917] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition cursor-pointer"
-            >
-              <Star className="w-3 h-3 text-amber-600 fill-amber-400" />
-              <span>Score Quality (1-5)</span>
-            </button>
+        {/* Subtle Latency Footer */}
+        {isAssistant && metadata?.latencyMs !== undefined && (
+          <div className="pt-1.5 flex items-center justify-end text-[10px] text-stone-500 font-mono">
+            <div className="flex items-center gap-1 text-stone-500">
+              <Clock className="w-2.5 h-2.5" />
+              <span>{metadata.latencyMs}ms</span>
+            </div>
           </div>
         )}
       </div>
