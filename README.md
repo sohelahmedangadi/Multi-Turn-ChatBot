@@ -6,31 +6,30 @@
 [![LangChain.js](https://img.shields.io/badge/LangChain.js-Core_%26_OpenAI-1C3C3C?logo=langchain&logoColor=white)](https://js.langchain.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Groq](https://img.shields.io/badge/Groq-Fast_Inference-F55036?logo=groq&logoColor=white)](https://groq.com/)
-[![Tests](https://img.shields.io/badge/Tests-38%2F38_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/test-suite.js)
+[![Tests](https://img.shields.io/badge/Tests-39%2F39_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A production-grade, full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **LangChain RAG Document Analysis (PDF, CSV, Code, Text)**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
+A production-grade, modular full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
 
 ---
 
 ## Table of Contents
 
 - [System Architecture](#system-architecture)
+- [Project Structure (Frontend & Backend Separation)](#project-structure)
 - [Core Capabilities](#core-capabilities)
   - [1. 3-Tier Memory Context Engine](#1-3-tier-memory-context-engine)
-  - [2. Zero-Cost Ambiguity Detection](#2-zero-cost-ambiguity-detection)
-  - [3. Dual-Engine LLM Resilience](#3-dual-engine-llm-resilience)
-  - [4. Evaluation Suite & Benchmark Analytics](#4-evaluation-suite--benchmark-analytics)
-  - [5. Security & Defensive Engineering](#5-security--defensive-engineering)
-- [Technology Stack](#technology-stack)
+  - [2. LangChain RAG & Multimodal Document Analysis Engine](#2-langchain-rag--multimodal-document-analysis-engine)
+  - [3. Zero-Cost Ambiguity Detection](#3-zero-cost-ambiguity-detection)
+  - [4. Dual-Engine LLM Resilience](#4-dual-engine-llm-resilience)
+  - [5. Evaluation Suite & Benchmark Analytics](#5-evaluation-suite--benchmark-analytics)
+  - [6. Security & Defensive Engineering](#6-security--defensive-engineering)
 - [Quick Start Guide](#quick-start-guide)
-  - [Prerequisites](#prerequisites)
   - [Installation & Setup](#installation--setup)
   - [Environment Configuration](#environment-configuration)
-  - [Running the App](#running-the-app)
+  - [Running the Application](#running-the-application)
 - [Automated Verification & Testing](#automated-verification--testing)
 - [REST API Reference](#rest-api-reference)
-- [Project File Structure](#project-file-structure)
 - [License & Credits](#license--credits)
 
 ---
@@ -38,44 +37,100 @@ A production-grade, full-stack multi-turn conversational AI system featuring **L
 ## System Architecture
 
 ```text
-                               +-----------------------------+
-                               |     User Interface (SPA)    |
-                               | React 19 + Tailwind v4 + SSE|
-                               +--------------+--------------+
-                                              |
-                                              | HTTP / SSE Stream
-                                              v
-+------------------------------------------------------------------------------+
-|                   Express API Gateway & Security Layer                       |
-|  - Rate Limiter (30 req/min/IP)  - Prompt Injection Defense & Sanitizer     |
-|  - JWT Authentication Middleware - MongoDB Atlas / In-Memory Session Store   |
-+--------------------------------------+---------------------------------------+
-                                       |
-                                       v
-+-----------------------------+                 +--------------------------------+
-|  Zero-Cost Ambiguity Engine |                 |  3-Tier Memory Context Manager |
-|  - Rule-based regex parser  |                 |                                |
-|  - Vague pronoun detector   |                 |  * Tier 1: Sliding Turns (1.8k)|
-|  - 0 token, 0ms LLM bypass  |                 |  * Tier 2: LangChain Long-Term |
-+-----------------------------+                 |    Memory (Vector Search)      |
-                                                |  * Tier 2.5: Cross-Session     |
-                                                |    Past Conversation Catalog   |
-                                                |  * Tier 3: RAG Knowledge Base  |
-                                                +----------------+---------------+
-                                                                 |
-                                                                 v
-+------------------------------------------------------------------------------+
-|                    Resilient LLM Inference Engine & Failover                 |
-|  - Primary: Google Gemini 2.5 Flash (`@google/genai`)                        |
-|  - Secondary: Groq Qwen / Compound / GPT-OSS (`groq-sdk`)                    |
-|  - Real-time Server-Sent Events (SSE) Streaming                              |
-+---------------------------------------+--------------------------------------+
-                                        |
-                                        v
-+------------------------------------------------------------------------------+
-|                 Resilient Dual Datastore (MongoDB Atlas / In-Memory)         |
-|  - Users  - Chat Sessions  - Message History  - Long-Term Memories  - Rubric |
-+------------------------------------------------------------------------------+
+                               +-------------------------------------+
+                               |         Frontend Client (SPA)       |
+                               |  React 19 + Tailwind v4 + Lucide    |
+                               +------------------+------------------+
+                                                  |
+                                                  | HTTP / SSE Stream
+                                                  v
++------------------------------------------------------------------------------------+
+|                         Express Backend API Gateway (server/)                      |
+|  - Rate Limiter (30 req/min/IP)      - Prompt Injection Defense & Sanitizer        |
+|  - JWT Authentication Middleware     - MongoDB Atlas / In-Memory Session Store      |
++------------------------------------------+-----------------------------------------+
+                                           |
+                                           v
++-----------------------------+                     +--------------------------------+
+|  Zero-Cost Ambiguity Engine |                     |  3-Tier Memory Context Manager |
+|  - Rule-based regex parser  |                     |                                |
+|  - Vague pronoun detector   |                     |  * Tier 1: Sliding Turns (1.8k)|
+|  - 0 token, 0ms LLM bypass  |                     |  * Tier 2: LangChain Long-Term |
++-----------------------------+                     |    Memory (Vector Search)      |
+                                                    |  * Tier 2.5: Cross-Session     |
++-----------------------------+                     |    Past Conversation Catalog   |
+| LangChain RAG & Multimodal  |                     |  * Tier 3: RAG Knowledge Base  |
+| - RecursiveTextSplitter     +-------------------->|  * RAG Document Excerpts       |
+| - Gemini 2.5 Multimodal OCR |                     |  * Anti-Hallucination Directives
++-----------------------------+                     +----------------+---------------+
+                                                                     |
+                                                                     v
++------------------------------------------------------------------------------------+
+|                        Resilient LLM Inference Engine & Failover                   |
+|  - Primary: Google Gemini 2.5 Flash (`@google/genai`)                              |
+|  - Secondary: Groq Qwen / Compound / GPT-OSS (`groq-sdk`)                          |
+|  - Real-time Server-Sent Events (SSE) Streaming                                    |
++------------------------------------------+-----------------------------------------+
+                                           |
+                                           v
++------------------------------------------------------------------------------------+
+|                     Resilient Dual Datastore (MongoDB Atlas / In-Memory)           |
+|  - Users  - Chat Sessions  - Message History  - Long-Term Memories  - Rubric Logs  |
++------------------------------------------------------------------------------------+
+```
+
+---
+
+## Project Structure
+
+The project is decoupled into independent **`client/` (Frontend)** and **`server/` (Backend)** directory trees:
+
+```text
+multi-turn-conversational-ai-capstone/
+├── client/                                # 🌐 DEDICATED FRONTEND (React 19 + Tailwind v4 + Vite)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── AuthModal.jsx             # User authentication modal
+│   │   │   ├── ChatWindow.jsx            # Main dialogue canvas & drag-and-drop attachment dock
+│   │   │   ├── CopyButton.jsx            # Clipboard copy button with fallback
+│   │   │   ├── EvaluationModal.jsx       # 5 benchmark automated evaluation modal
+│   │   │   ├── FileAttachmentBadge.jsx   # Document & image attachment badge
+│   │   │   ├── MemoryModal.jsx           # 3-tier memory inspector & editor
+│   │   │   ├── MessageItem.jsx           # Message bubbles with markdown & attachment tags
+│   │   │   ├── RubricFeedbackModal.jsx   # 1-5 scale quality evaluation modal
+│   │   │   ├── Sidebar.jsx               # Dialogue history & session manager
+│   │   │   └── SystemPromptModal.jsx     # Persona and system instruction editor
+│   │   ├── App.jsx                       # Main application shell
+│   │   ├── main.jsx                      # React 19 entrypoint
+│   │   └── index.css                     # Retro classic Tailwind CSS styles
+│   ├── index.html                        # HTML template
+│   ├── vite.config.js                    # Vite bundler & API proxy configuration
+│   └── package.json                      # Frontend dependencies
+│
+├── server/                                # ⚙️ DEDICATED BACKEND (Express + LangChain + Memory + RAG)
+│   ├── db/
+│   │   └── store.js                      # MongoDB Atlas & In-Memory persistence
+│   ├── middleware/
+│   │   ├── auth.js                       # JWT authentication & bcrypt hashing
+│   │   └── sanitizer.js                  # Prompt injection defense & input sanitization
+│   ├── services/
+│   │   ├── ambiguityDetector.js          # Zero-latency clarification heuristic
+│   │   ├── contextManager.js             # 3-tier context & anti-hallucination assembler
+│   │   ├── evaluationSuite.js            # Coherence scoring & 5 benchmark suites
+│   │   ├── fileParser.js                 # Multi-format parser & Gemini Vision OCR
+│   │   ├── langchainMemory.js            # LangChain durable fact extractor
+│   │   ├── llmProvider.js                # Gemini 2.5 Flash + Groq failover engine
+│   │   ├── memoryManager.js              # Vector search, forget & conflict resolution
+│   │   └── ragService.js                 # LangChain RecursiveTextSplitter chunking & RAG
+│   ├── index.js                          # Express REST API & SSE streaming server
+│   ├── test-suite.js                     # 39/39 Automated Unit & Integration Tests
+│   └── package.json                      # Backend dependencies & test runner
+│
+├── .env / .env.example                    # Environment secrets
+├── package.json                           # Root workspace runner
+├── README.md                              # Main project documentation
+├── QA_TEST_RESULTS.md                     # 39-test QA verification matrix
+└── features.md                            # Comprehensive architectural specifications
 ```
 
 ---
@@ -83,11 +138,9 @@ A production-grade, full-stack multi-turn conversational AI system featuring **L
 ## Core Capabilities
 
 ### 1. 3-Tier Memory Context Engine
-The system implements a hierarchical context composer to avoid sending raw chat histories that exhaust token budgets:
-
 - **Tier 1: Sliding-Window History (`server/services/contextManager.js`)**
   - Maintains dialogue context across active turns.
-  - Implements **token-aware truncation**: if token budget exceeds capacity (default 1,800 tokens), oldest turns are dropped cleanly in atomic `(user, assistant)` pairs to preserve coherence.
+  - Implements **token-aware truncation**: if token budget exceeds capacity (default 1,800 tokens), oldest turns are dropped cleanly in atomic `(user, assistant)` pairs.
 - **Tier 2: LangChain Long-Term User Memory Store (`server/services/langchainMemory.js`)**
   - Automatically extracts structured facts (name, project details, tech stacks, preferences, and roles) using LangChain prompt templates and LLM extractors.
   - **In-Place Conflict Resolution**: Updates existing keys (e.g. project renaming) without creating duplicates.
@@ -95,170 +148,166 @@ The system implements a hierarchical context composer to avoid sending raw chat 
   - **Vector Cosine Similarity Retrieval**: Matches queries against stored facts with term-frequency vector search.
   - **Strict Cross-User Isolation**: Scoped strictly by `userId` to ensure zero cross-tenant leakage.
 - **Tier 2.5: Cross-Session Full Conversation History Access**
-  - Provides full access to the user's past conversation sessions and message transcripts, bounded by a 1,200-token catalog to prevent context blowup or rate limits.
+  - Provides full access to the user's past conversation sessions and message transcripts, bounded by a 1,200-token catalog.
 - **Tier 3: Domain Knowledge Base RAG Chunks (`server/db/store.js`)**
   - Pre-seeded architectural and domain concepts retrieved via semantic vector search to augment model prompts.
 
-### 2. Zero-Cost Ambiguity Detection
-- Runs a fast local rule-based heuristic layer (`server/services/ambiguityDetector.js`) before calling external LLM APIs.
-- Queries that are short, pronoun-heavy, and lack entities (e.g., *"what about that?"*, *"tell me more"*) when no prior context exists immediately trigger a targeted clarifying question.
-- **Zero API token cost and zero LLM latency overhead**.
-- Seamlessly passes vague queries to the LLM when preceding turns provide sufficient contextual grounding.
+---
 
-### 3. Dual-Engine LLM Resilience
-- **Primary Engine**: Google Gemini API via official `@google/genai` SDK (`gemini-2.5-flash`, `gemini-flash-latest`, `gemini-3.7-flash`, `gemini-2.5-pro`).
-- **Secondary / Fallback Engine**: Groq SDK (`groq-sdk`) with ultra-fast inference (`qwen/qwen3.8-27b`, `groq/compound`, `openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `groq/compound-mini`).
-- **Automatic Multi-Model Failover**: Automatically catches upstream rate limits (`429 Too Many Requests`), model deprecation errors, or timeout spikes, cycling through candidate fallback models seamlessly.
-- **Real-Time SSE Streaming**: Server-Sent Events stream tokens incrementally to the client for responsive word-by-word visual output with abort controller support.
-
-### 4. Evaluation Suite & Benchmark Analytics
-- **Semantic Coherence Engine (`server/services/evaluationSuite.js`)**: Calculates entity and keyword overlap across history, query, and assistant response (score 0.0 to 1.0).
-- **5 Automated Multi-Turn Benchmark Scenarios**:
-  1. *Context Memory & Entity Retention*
-  2. *Ambiguity Clarification Trigger*
-  3. *Multi-Step Math & State Modification*
-  4. *Negative Constraint Adherence*
-  5. *Prompt Injection Safety*
-- **User Rubric Scoring**: Interactive 1–5 scale modal for scoring *Relevance*, *Coherence*, and *Helpfulness* with optional feedback notes.
-- **Evaluation Dashboard (`/api/evaluate/summary`)**: Aggregates rubric metrics, average response latencies, and benchmark pass rates.
-
-### 5. Security & Defensive Engineering
-- **Prompt Injection Defense (`server/middleware/sanitizer.js`)**: Strips adversarial prefixes and jailbreak patterns.
-- **IP Rate Limiting**: 30 requests/minute per IP via `express-rate-limit`.
-- **System Prompt Isolation**: Custom instructions and persona guidelines are delivered strictly through the model's dedicated `systemInstruction` or `system` channel.
-- **Cryptographic Security**: Salted bcrypt password hashing and signed JWT tokens with 7-day expiration.
+### 2. LangChain RAG & Multimodal Document Analysis Engine
+- **Universal Multi-Format Ingestion (`server/services/fileParser.js`)**:
+  - Ingests **PDFs**, **Images** (`.png`, `.jpg`, `.jpeg`, `.webp`), **Plaintext/Markdown** (`.txt`, `.md`), **Structured Data** (`.csv`, `.json`), and **Source Code** (`.js`, `.ts`, `.py`, `.java`, `.cpp`, `.c`, `.rs`, `.go`, `.html`, `.css`, `.sql`).
+- **Gemini Multimodal OCR Fallback**:
+  - Automatically invokes **Gemini 2.5 Flash Vision** to transcribe rasterized PowerPoint slides, scanned PDFs, diagrams, and visual charts.
+- **LangChain Recursive Text Chunking (`server/services/ragService.js`)**:
+  - Leverages `@langchain/textsplitters` (`RecursiveCharacterTextSplitter`) with 800-character chunk sizing and 150-character overlap.
+- **Strict Anti-Hallucination Guardrail (`server/services/contextManager.js`)**:
+  - If a file has empty or unreadable content, the system strictly forbids the LLM from guessing based on the filename alone.
+  - Enforces strict factual grounding on actual extracted excerpts.
 
 ---
 
-## Technology Stack
+### 3. Zero-Cost Ambiguity Detection (`server/services/ambiguityDetector.js`)
+- Intercepts vague, pronoun-heavy queries (e.g., *"What about that?"*, *"Explain it"*) when conversational context is empty.
+- Returns an immediate clarifying question in 0ms with **0 tokens consumed** from LLM APIs.
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 19 (JSX), Vite 6, Tailwind CSS v4, Lucide React, Motion, React Markdown + Remark GFM |
-| **Backend** | Node.js (ES Modules), Express.js 4, Server-Sent Events (SSE) |
-| **Memory & Orchestration** | LangChain.js (`@langchain/core`, `@langchain/openai`, `@langchain/google-genai`), Custom Term-Frequency Vector Cosine Search |
-| **AI / LLM Engines** | Google Gemini API (`@google/genai`), Groq SDK (`groq-sdk`) |
-| **Database** | MongoDB Atlas (via Mongoose 9) with In-Memory fallback store |
-| **Authentication & Security** | JWT (`jsonwebtoken`), bcryptjs, express-rate-limit, input sanitization |
+---
+
+### 4. Dual-Engine LLM Resilience (`server/services/llmProvider.js`)
+- **Primary Engine**: Google Gemini API via official `@google/genai` SDK (`gemini-2.5-flash`).
+- **Secondary / Fallback Engine**: Groq SDK (`groq-sdk`) with fast inference (`qwen/qwen3.8-27b`).
+- **Real-Time SSE Streaming**: Incremental Server-Sent Events (SSE) token delivery with client abort support.
+
+---
+
+### 5. Evaluation Suite & Benchmark Analytics (`server/services/evaluationSuite.js`)
+- **Semantic Coherence Metric (`calculateCoherenceScore`)**: Measures keyword and entity overlap across dialogue turns.
+- **5 Standard Benchmark Scenarios**: Context Memory, Ambiguity Interception, Multi-Step Math, Negative Constraint Adherence, and Prompt Injection Defense.
+
+---
+
+### 6. Security & Defensive Engineering
+- **Prompt Injection Defense (`server/middleware/sanitizer.js`)**: Neutralizes adversarial instruction overrides.
+- **Rate Limiting (`express-rate-limit`)**: 30 requests/minute ceiling per IP.
+- **Authentication**: Salted Bcrypt password hashing + signed JSON Web Tokens (JWT).
 
 ---
 
 ## Quick Start Guide
 
-### Prerequisites
-- Node.js v18 or higher
-- npm, pnpm, or yarn
-
 ### Installation & Setup
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-username/multi-turn-conversational-ai-capstone.git
-cd multi-turn-conversational-ai-capstone
+# Clone the repository
+git clone https://github.com/sohelahmedangadi/Multi-Turn-ChatBot.git
+cd Multi-Turn-ChatBot
 
-# 2. Install dependencies
+# Install dependencies
 npm install
-
-# 3. Configure environment variables
-# Windows PowerShell:
-Copy-Item .env.example .env
-# Linux / macOS:
-cp .env.example .env
 ```
 
 ### Environment Configuration
 
-Configure your `.env` file (refer to `.env.example`):
+Create a `.env` file in the root directory:
 
 ```env
-# Google Gemini API Key (Required for primary engine)
-GEMINI_API_KEY="your_gemini_api_key_here"
+PORT=5000
+NODE_ENV=development
 
-# Groq API Key (Required for high-speed fallback engine)
-GROQ_API_KEY="your_groq_api_key_here"
+# LLM Providers (At least one required)
+GEMINI_API_KEY=your_gemini_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 
-# MongoDB Connection String (Optional: falls back to resilient in-memory store if omitted)
-MONGO_URI="mongodb+srv://user:pass@cluster.mongodb.net/chatbot?retryWrites=true&w=majority"
+# JWT Security
+JWT_SECRET=your_super_secret_jwt_key_here
 
-# JWT Secret for authentication tokens
-JWT_SECRET="your_jwt_secret_key_here_min_32_chars"
-
-# Server Port
-PORT=3000
-APP_URL="http://localhost:3000"
+# Optional: MongoDB Atlas (falls back to in-memory store if omitted)
+MONGO_URI=
 ```
 
-### Running the App
+### Running the Application
 
 ```bash
-# Development Mode (Vite Frontend + Express Backend on Port 3000)
+# Start backend Express server
 npm run dev
 
-# Production Build & Run
+# Start frontend Vite dev server (in another terminal)
+npm run dev:client
+
+# Build client for production
 npm run build
-npm start
 ```
-Open `http://localhost:3000` in your browser.
 
 ---
 
 ## Automated Verification & Testing
 
-Run the automated test suite covering all 3-tier memory lifecycles, LangChain fact extraction, ambiguity detection, auth, and coherence scoring:
+Execute the complete **39-point test suite**:
 
 ```bash
 npm test
 ```
 
-### Test Suite Execution Output (30/30 Tests Passing)
+### Test Output (39/39 Tests Passing):
 
 ```text
 ======================================================
-RUNNING LANGCHAIN & 3-TIER MEMORY CAPSTONE TEST SUITE
+🧪 RUNNING LANGCHAIN & 3-TIER MEMORY CAPSTONE TEST SUITE
 ======================================================
 
-Testing Ambiguity Detector:
-  PASS: Detects empty string as ambiguous
-  PASS: Flags "What about that?" as ambiguous when context is empty
-  PASS: Returns targeted clarifying question
-  PASS: Passes vague question to LLM if prior context has sufficient detail
-  PASS: Recognizes specific non-ambiguous queries without needing clarification
+📦 Testing Ambiguity Detector:
+  ✅ PASS: Detects empty string as ambiguous
+  ✅ PASS: Flags "What about that?" as ambiguous when context is empty
+  ✅ PASS: Returns targeted clarifying question
+  ✅ PASS: Passes vague question to LLM if prior context has sufficient detail
+  ✅ PASS: Recognizes specific non-ambiguous queries without needing clarification
 
-Testing LangChain Fact Extractor:
-  PASS: LangChain Extractor: Identifies user name "Sohail"
-  PASS: LangChain Extractor: Identifies project name "CosmoAI"
-  PASS: LangChain Extractor: Identifies tech stack "React 19"
-  PASS: User A has exactly 3 structured long-term memories persisted
-  PASS: Conflict Resolution: Updates project_name in place without duplicate memory
-  PASS: Project memory value updated to "ApexBot"
-  PASS: Explicit Forget: Successfully deleted tech_stack memory upon user request
-  PASS: Cross-User Isolation: User B cannot access User A memories
-  PASS: Semantic Search: Retrieves relevant memory for User A
-  PASS: Retrieved memory contains correct project "ApexBot"
-  PASS: Context Assembler embeds retrieved Tier 2 memories into context
-  PASS: Context section contains both user name and project name for LLM grounding
-  PASS: Full Past History Access: Retrieves complete past conversation sessions with messages
-  PASS: Context Assembler embeds full past conversation history catalog into LLM context prompt
-  PASS: Tier 3 Knowledge Base: Retrieves domain architecture chunk
-  PASS: Tier 3 chunk matches Ambiguity Heuristic domain topic
+🦜 Testing LangChain Fact Extractor:
+  ✅ PASS: LangChain Extractor: Identifies user name "Sohail"
+  ✅ PASS: LangChain Extractor: Identifies project name "CosmoAI"
+  ✅ PASS: LangChain Extractor: Identifies tech stack "React 19"
+  ✅ PASS: User A has exactly 3 structured long-term memories persisted
+  ✅ PASS: Conflict Resolution: Updates project_name in place without duplicate memory
+  ✅ PASS: Project memory value updated to "ApexBot"
+  ✅ PASS: Explicit Forget: Successfully deleted tech_stack memory upon user request
+  ✅ PASS: Cross-User Isolation: User B cannot access User A memories
+  ✅ PASS: Semantic Search: Retrieves relevant memory for User A
+  ✅ PASS: Retrieved memory contains correct project "ApexBot"
+  ✅ PASS: Context Assembler embeds retrieved Tier 2 memories into context
+  ✅ PASS: Context section contains both user name and project name for LLM grounding
+  ✅ PASS: Full Past History Access: Retrieves complete past conversation sessions with messages
+  ✅ PASS: Context Assembler embeds full past conversation history catalog into LLM context prompt
+  ✅ PASS: Tier 3 Knowledge Base: Retrieves domain architecture chunk
+  ✅ PASS: Tier 3 chunk matches Ambiguity Heuristic domain topic
 
-Testing Context Truncation & Token Budgeting:
-  PASS: Estimates tokens correctly (text.length / 4)
-  PASS: Truncation strictly enforces token budget limit
-  PASS: Drops older turns in paired fashion to stay within budget
+📦 Testing Context Truncation & Token Budgeting:
+  ✅ PASS: Estimates tokens correctly (text.length / 4)
+  ✅ PASS: Truncation strictly enforces token budget limit
+  ✅ PASS: Drops older turns in paired fashion to stay within budget
 
-Testing Auth & Security:
-  PASS: Hashes password securely with bcrypt salt
-  PASS: Verifies valid password against bcrypt hash
-  PASS: Rejects invalid password attempt
-  PASS: Generates valid 3-part signed JWT token
+📦 Testing Auth & Security:
+  ✅ PASS: Hashes password securely with bcrypt salt
+  ✅ PASS: Verifies valid password against bcrypt hash
+  ✅ PASS: Rejects invalid password attempt
+  ✅ PASS: Generates valid 3-part signed JWT token
 
-Testing Evaluation Suite & Coherence Engine:
-  PASS: Contains 5 comprehensive standard benchmark scenarios
-  PASS: Computes high coherence score (0.93) for context-aligned responses
+📦 Testing Evaluation Suite & Coherence Engine:
+  ✅ PASS: Contains 5 comprehensive standard benchmark scenarios
+  ✅ PASS: Computes high coherence score (0.93) for context-aligned responses
+
+📦 Testing File Parser & LangChain RAG Document Pipeline:
+  ✅ PASS: File Parser: Detects text file type accurately
+  ✅ PASS: File Parser: Computes word count correctly
+  ✅ PASS: File Parser: Extracts document body text cleanly
+  ✅ PASS: LangChain RAG: Chunks document using RecursiveCharacterTextSplitter
+  ✅ PASS: LangChain RAG: Retrieves relevant chunk matching query keywords
+  ✅ PASS: LangChain RAG: Top retrieved chunk contains relevant ambiguity filter details
+  ✅ PASS: Context Assembler: Successfully retrieves RAG document chunks for attached file
+  ✅ PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
+  ✅ PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty
 
 ======================================================
-TEST RESULTS: 30 Passed, 0 Failed
+📊 TEST RESULTS: 39 Passed, 0 Failed
 ======================================================
 ```
 
@@ -266,70 +315,29 @@ TEST RESULTS: 30 Passed, 0 Failed
 
 ## REST API Reference
 
-All endpoints are mounted at both `/api/...` and root `/...` aliases for convenience.
-
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/system/status` | System health, active LLM provider, and DB connection state |
-| `POST` | `/api/auth/register` | Register a new user account with hashed password |
-| `POST` | `/api/auth/login` | Log in and receive signed JWT token |
-| `GET` | `/api/auth/me` | Fetch currently authenticated user profile |
+| `GET` | `/api/system/status` | System health, active LLM provider, and DB state |
+| `POST` | `/api/auth/register` | Register a new account |
+| `POST` | `/api/auth/login` | Log in and receive JWT token |
+| `GET` | `/api/auth/me` | Fetch authenticated profile |
 | `POST` | `/api/session` | Create a new chat session |
-| `GET` | `/api/sessions` | List all sessions for the active user |
+| `GET` | `/api/sessions` | List all sessions for user |
 | `DELETE` | `/api/session/:sessionId` | Delete a specific chat session |
-| `GET` | `/api/history/:sessionId` | Retrieve full message turn history for a session |
-| `POST` | `/api/chat` | Send a multi-turn message (supports Server-Sent Events with `stream: true`) |
-| `GET` | `/api/memories` | Retrieve Tier 2 structured memories for current user |
-| `POST` | `/api/memories` | Manually insert a structured memory record |
-| `PUT` | `/api/memories/:id` | Update an existing user memory record |
-| `DELETE` | `/api/memories/:id` | Delete a user memory record |
-| `GET` | `/api/knowledge` | Fetch seeded Tier 3 domain knowledge base chunks |
+| `GET` | `/api/history/:sessionId` | Retrieve message history for a session |
+| `POST` | `/api/chat` | Send message (supports SSE streaming with `stream: true` & document `fileId`) |
+| `POST` | `/api/files/upload` | Upload & index PDF, Image, CSV, JSON, Markdown, or Code file |
+| `GET` | `/api/files/:fileId` | Retrieve indexed document metadata |
+| `DELETE` | `/api/files/:fileId` | Remove indexed document from memory |
+| `GET` | `/api/memories` | Retrieve Tier 2 structured facts |
+| `POST` | `/api/memories` | Manually insert a memory record |
+| `PUT` | `/api/memories/:id` | Update an existing memory record |
+| `DELETE` | `/api/memories/:id` | Delete a memory record |
+| `GET` | `/api/knowledge` | Fetch seeded Tier 3 domain knowledge |
 | `GET` | `/api/evaluate/benchmarks` | List the 5 standard benchmark scenarios |
-| `POST` | `/api/evaluate/run-benchmark`| Execute a single automated benchmark test |
+| `POST` | `/api/evaluate/run-benchmark`| Execute an automated benchmark test |
 | `POST` | `/api/evaluate/rubric` | Submit a 1–5 quality rubric rating |
-| `GET` | `/api/evaluate/summary` | Retrieve aggregated evaluation statistics and rubric averages |
-
----
-
-## Project File Structure
-
-```text
-multi-turn-conversational-ai-capstone/
-├── server.js                          # Express server, middleware, routes & SSE streaming
-├── test-suite.js                      # Automated 30-test unit & integration validation suite
-├── package.json                       # Project scripts and dependencies
-├── vite.config.js                     # Vite configuration & proxy setup
-├── .env.example                       # Environment variables template
-├── README.md                          # Main project documentation
-├── features.md                        # Comprehensive architectural specifications
-├── QA_TEST_RESULTS.md                 # 48-test QA regression and sign-off report
-├── server/
-│   ├── db/
-│   │   └── store.js                   # Mongoose schemas & in-memory dual database layer
-│   ├── middleware/
-│   │   ├── auth.js                    # JWT verification & Bcrypt password hashing
-│   │   └── sanitizer.js               # Prompt injection defense & input sanitization
-│   └── services/
-│       ├── ambiguityDetector.js       # Zero-cost rule-based heuristic ambiguity engine
-│       ├── contextManager.js          # 3-tier context composer & token-budgeted truncation
-│       ├── evaluationSuite.js         # Semantic coherence metric & 5 benchmark scenarios
-│       ├── langchainMemory.js         # LangChain & LLM structured fact extraction
-│       ├── llmProvider.js             # Gemini + Groq dual-engine streaming & failover
-│       └── memoryManager.js           # Tier 2 vector search, conflict resolution & forget logic
-└── src/
-    ├── App.jsx                        # React root component & state management
-    ├── main.jsx                       # React DOM application entrypoint
-    ├── index.css                      # Tailwind CSS v4 styling & animations
-    └── components/
-        ├── AuthModal.jsx              # Sign-up and login modal
-        ├── BenchmarkModal.jsx         # Automated benchmark execution dashboard
-        ├── ChatWindow.jsx             # Main conversation view with streaming & badges
-        ├── MemoryModal.jsx            # 3-tier memory viewer with inline fact editing
-        ├── MessageItem.jsx            # Chat bubble component with markdown rendering
-        ├── RubricFeedbackModal.jsx    # 1-5 scale quality evaluation modal
-        ├── Sidebar.jsx                # Session history navigation & provider controls
-        └── SystemPromptModal.jsx      # Persona and system instruction editor
-```
+| `GET` | `/api/evaluate/summary` | Retrieve aggregated evaluation statistics |
 
 ---
 
