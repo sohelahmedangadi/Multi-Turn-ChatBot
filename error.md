@@ -1,0 +1,34 @@
+# Test Run Report (2026-08-30T20:07:23.615Z)
+
+Total: 30 | Passed: 30 | Failed: 0
+
+- PASS: Detects empty string as ambiguous
+- PASS: Flags "What about that?" as ambiguous when context is empty
+- PASS: Returns targeted clarifying question
+- PASS: Passes vague question to LLM if prior context has sufficient detail
+- PASS: Recognizes specific non-ambiguous queries without needing clarification
+- PASS: LangChain Extractor: Identifies user name "Sohail"
+- PASS: LangChain Extractor: Identifies project name "OmniTurn"
+- PASS: LangChain Extractor: Identifies tech stack "React 19"
+- PASS: User A has exactly 3 structured long-term memories persisted
+- PASS: Conflict Resolution: Updates project_name in place without creating duplicate memory
+- PASS: Project memory value updated to "ApexBot"
+- PASS: Explicit Forget: Successfully deleted tech_stack memory upon user request
+- PASS: Cross-User Isolation: User B cannot access User A memories
+- PASS: Semantic Search: Retrieves relevant memory for User A
+- PASS: Retrieved memory contains correct project "ApexBot"
+- PASS: Context Assembler embeds retrieved Tier 2 memories into context
+- PASS: Context section contains both user name and project name for LLM grounding
+- PASS: Full Past History Access: Retrieves complete past conversation sessions with messages
+- PASS: Context Assembler embeds full past conversation history catalog into LLM context prompt
+- PASS: Tier 3 Knowledge Base: Retrieves domain architecture chunk
+- PASS: Tier 3 chunk matches Ambiguity Heuristic domain topic
+- PASS: Estimates tokens correctly (text.length / 4)
+- PASS: Truncation strictly enforces token budget limit
+- PASS: Drops older turns in paired fashion to stay within budget
+- PASS: Hashes password securely with bcrypt salt
+- PASS: Verifies valid password against bcrypt hash
+- PASS: Rejects invalid password attempt
+- PASS: Generates valid 3-part signed JWT token
+- PASS: Contains 5 comprehensive standard benchmark scenarios
+- PASS: Computes high coherence score (0.93) for context-aligned responses

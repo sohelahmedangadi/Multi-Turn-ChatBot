@@ -1,0 +1,6 @@
+{
+  "name": "Multi-Turn Conversational AI Capstone",
+  "description": "Full-stack multi-turn conversational AI system with provider-agnostic LLM abstraction (Groq & Gemini), context management, ambiguity detection, SSE streaming, and evaluation suite.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
