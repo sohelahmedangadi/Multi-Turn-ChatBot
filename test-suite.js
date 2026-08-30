@@ -85,14 +85,14 @@ async function runTestSuite() {
   const userB = 'user_test_beta_' + Date.now();
 
   // Test LangChain extraction
-  const lcFacts = await extractFactsWithLangChain('My name is Sohail and I am building an AI capstone called OmniTurn. I use React 19.');
+  const lcFacts = await extractFactsWithLangChain('My name is Sohail and I am building an AI capstone called CosmoAI. I use React 19.');
   assert(
     lcFacts.some((f) => f.key === 'user_name' && f.fact.includes('Sohail')),
     'LangChain Extractor: Identifies user name "Sohail"'
   );
   assert(
-    lcFacts.some((f) => f.key === 'project_name' && f.fact.includes('OmniTurn')),
-    'LangChain Extractor: Identifies project name "OmniTurn"'
+    lcFacts.some((f) => f.key === 'project_name' && f.fact.includes('CosmoAI')),
+    'LangChain Extractor: Identifies project name "CosmoAI"'
   );
   assert(
     lcFacts.some((f) => f.key === 'tech_stack' && f.fact.includes('React 19')),
@@ -100,7 +100,7 @@ async function runTestSuite() {
   );
 
   // Save facts for User A
-  await processAndSaveUserMemories(userA, 'My name is Sohail and I am building an AI capstone called OmniTurn. I use React 19.', 'sess_1');
+  await processAndSaveUserMemories(userA, 'My name is Sohail and I am building an AI capstone called CosmoAI. I use React 19.', 'sess_1');
   const userAMemories = await db.getUserMemories(userA);
   assert(userAMemories.length === 3, 'User A has exactly 3 structured long-term memories persisted');
 

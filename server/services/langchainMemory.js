@@ -16,22 +16,23 @@ User Message:
 Extraction Guidelines:
 1. Extract permanent or semi-permanent user facts such as:
    - Name / Identity: (e.g. "My name is Sohail", "Myself Sohail", "Call me Sohail") -> key: "user_name", category: "profile"
-   - Project Name & Details: (e.g. "I am building OmniTurn AI", "My project is ApexBot") -> key: "project_name", category: "project"
-   - Tech Stack & Tools: (e.g. "I use React 19", "built with Python and FastAPI") -> key: "tech_stack", category: "tech_stack"
-   - Preferred Languages: (e.g. "I love Rust", "My favorite language is TypeScript") -> key: "favorite_language", category: "preference"
-   - User Role / Job: (e.g. "I work as a DevOps engineer") -> key: "user_role", category: "profile"
-   - Location: (e.g. "I live in Berlin") -> key: "location", category: "profile"
-   - Explicit Memory Directives: (e.g. "Remember that I prefer dark mode") -> key: "preference_dark_mode", category: "preference"
-   - Forget Directives: (e.g. "Forget my project name", "Delete my location") -> action: "delete"
-2. Detect Updates & Renaming:
-   - If user says "I renamed my project to Nexus" or "I moved to Tokyo", mark action: "update" for the existing key.
-3. If the user message contains NO personal facts or instructions to remember/forget (e.g. "What is 2+2?", "Explain quantum physics", "Hello", "How are you?"), return an empty array [].
+   - Project Name & Details: (e.g. "I am building CosmoAI", "My project is ApexBot") -> key: "project_name", category: "project"
+   - Tech Stack: (e.g. "I use React 19", "Our backend is in Go") -> key: "tech_stack", category: "tech_stack"
+   - User Preferences: (e.g. "I like dark mode", "Prefer TypeScript") -> key: "preferences", category: "preference"
+   - Other Profile Info: (e.g. "I am a software engineer") -> key: "role", category: "profile"
+
+2. Action Type:
+   - "create": New entity or fact mentioned.
+   - "update": Modification or rename of an existing entity (e.g. "I renamed my project to ApexBot", "Actually call me Jordan").
+   - "delete": User explicitly asks to forget or remove a fact (e.g. "Forget my tech stack", "Delete my location").
+
+If the user message contains NO personal facts or instructions to remember/forget (e.g. "What is 2+2?", "Explain quantum physics", "Hello", "How are you?"), return an empty array [].
 
 OUTPUT FORMAT:
 Return ONLY a valid JSON array of objects. Do not include markdown code blocks, think tags, or commentary.
 Each object must have:
 - "key": string (snake_case unique identifier, e.g. "user_name", "project_name", "tech_stack")
-- "fact": string (concise declarative fact, e.g. "User name is Sohail", "User project is OmniTurn AI")
+- "fact": string (concise declarative fact, e.g. "User name is Sohail", "User project is CosmoAI")
 - "category": "profile" | "project" | "preference" | "tech_stack" | "other"
 - "confidence": number (between 0.0 and 1.0)
 - "action": "create" | "update" | "delete"

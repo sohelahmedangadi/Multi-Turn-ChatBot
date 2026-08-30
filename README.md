@@ -1,4 +1,4 @@
-# Multi-Turn Conversational AI Capstone (OmniTurn AI)
+# Multi-Turn Conversational AI Capstone (CosmoAI)
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
@@ -226,7 +226,7 @@ Testing Ambiguity Detector:
 
 Testing LangChain Fact Extractor:
   PASS: LangChain Extractor: Identifies user name "Sohail"
-  PASS: LangChain Extractor: Identifies project name "OmniTurn"
+  PASS: LangChain Extractor: Identifies project name "CosmoAI"
   PASS: LangChain Extractor: Identifies tech stack "React 19"
   PASS: User A has exactly 3 structured long-term memories persisted
   PASS: Conflict Resolution: Updates project_name in place without duplicate memory

@@ -101,8 +101,8 @@ export const KnowledgeChunkModel = mongoose.models.KnowledgeChunk || model('Know
 const DEFAULT_KNOWLEDGE_CHUNKS = [
   {
     id: 'kb_1_architecture',
-    title: 'OmniTurn Multi-Turn Architecture',
-    content: 'OmniTurn AI uses a 3-tier memory system: Tier 1 is recent turn history, Tier 2 is long-term user memories extracted across sessions, and Tier 3 is domain knowledge.',
+    title: 'CosmoAI Multi-Turn Architecture',
+    content: 'CosmoAI uses a 3-tier memory system: Tier 1 is recent turn history, Tier 2 is long-term user memories extracted across sessions, and Tier 3 is domain knowledge.',
     category: 'architecture',
     tags: ['architecture', 'memory', 'tiers', 'context'],
   },

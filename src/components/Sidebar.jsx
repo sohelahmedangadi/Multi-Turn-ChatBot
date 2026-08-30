@@ -47,7 +47,7 @@ export const Sidebar = ({
             <Terminal className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="font-bold font-mono text-sm text-stone-950 leading-none tracking-tight">OMNITURN AI</h1>
+            <h1 className="font-bold font-mono text-sm text-stone-950 leading-none tracking-tight">COSMOAI</h1>
             <p className="text-[10px] font-mono text-stone-600 mt-0.5 uppercase">Conversational Studio</p>
           </div>
         </div>

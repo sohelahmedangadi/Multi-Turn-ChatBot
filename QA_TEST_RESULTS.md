@@ -61,7 +61,7 @@ The Multi-Turn Conversational AI system underwent end-to-end regression, unit, i
 | **4** | Ambiguity Detector | Passes vague queries to LLM when prior context provides clear referent | **PASS** |
 | **5** | Ambiguity Detector | Recognizes specific non-ambiguous questions without false positive triggers | **PASS** |
 | **6** | LangChain Fact Extractor | Accurately extracts user name entity (`"Sohail"`) | **PASS** |
-| **7** | LangChain Fact Extractor | Accurately extracts project name entity (`"OmniTurn"`) | **PASS** |
+| **7** | LangChain Fact Extractor | Accurately extracts project name entity (`"CosmoAI"`) | **PASS** |
 | **8** | LangChain Fact Extractor | Accurately extracts tech stack entity (`"React 19"`) | **PASS** |
 | **9** | Tier 2 User Memory Store | Persists exactly 3 structured long-term memories for User A | **PASS** |
 | **10** | Memory Conflict Resolution | Updates `project_name` in place without creating redundant duplicate keys | **PASS** |

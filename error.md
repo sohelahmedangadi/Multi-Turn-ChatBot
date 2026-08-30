@@ -1,4 +1,4 @@
-# Test Run Report (2026-08-30T20:07:23.615Z)
+# Test Run Report (2026-08-30T22:06:31.745Z)
 
 Total: 30 | Passed: 30 | Failed: 0
 
@@ -8,7 +8,7 @@ Total: 30 | Passed: 30 | Failed: 0
 - PASS: Passes vague question to LLM if prior context has sufficient detail
 - PASS: Recognizes specific non-ambiguous queries without needing clarification
 - PASS: LangChain Extractor: Identifies user name "Sohail"
-- PASS: LangChain Extractor: Identifies project name "OmniTurn"
+- PASS: LangChain Extractor: Identifies project name "CosmoAI"
 - PASS: LangChain Extractor: Identifies tech stack "React 19"
 - PASS: User A has exactly 3 structured long-term memories persisted
 - PASS: Conflict Resolution: Updates project_name in place without creating duplicate memory

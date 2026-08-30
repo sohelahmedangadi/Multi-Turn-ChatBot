@@ -27,7 +27,7 @@ const STARTER_PROMPTS = [
   'My project is named ApexEngine and I am using React 19.',
   'What is the name of my project?',
   'I renamed my project from ApexEngine to NebulaCore.',
-  'What architecture does OmniTurn use for multi-turn memory?',
+  'What architecture does CosmoAI use for multi-turn memory?',
 ];
 
 export const ChatWindow = ({
