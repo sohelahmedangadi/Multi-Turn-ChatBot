@@ -130,8 +130,10 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
       for (const chunk of relevantDocumentChunks) {
         contextualMemorySection += `--- Excerpt (Index ${chunk.chunkIndex + 1}) ---\n${chunk.content}\n`;
       }
-      contextualMemorySection += '\nSTRICT FACTUAL GROUNDING & ANTI-HALLUCINATION DIRECTIVES:\n';
-      contextualMemorySection += '- Answer ONLY using the factual statements present in the document excerpts above.\n';
+      contextualMemorySection += '\nSTRICT FACTUAL GROUNDING & SUBSTANTIVE CONTENT DIRECTIVES (MANDATORY):\n';
+      contextualMemorySection += '- Focus ENTIRELY on the substantive text, slide content, topics, data, code, and explanations in the excerpts above.\n';
+      contextualMemorySection += '- DO NOT describe or output file metadata, creation dates, PDF versions, font properties, or file headers.\n';
+      contextualMemorySection += '- Answer the user query thoroughly and accurately based on the actual subject matter inside the file.\n';
       contextualMemorySection += '- If the excerpts do NOT contain information needed to answer the question, explicitly state: "The attached document does not contain details regarding [topic]."\n';
       contextualMemorySection += '- DO NOT invent facts, extrapolate, or bring in outside assumptions not substantiated by the document.\n';
     }

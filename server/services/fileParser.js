@@ -25,8 +25,29 @@ async function getPdfParser() {
 }
 
 /**
+ * Strips raw PDF internal dictionary metadata lines, header tags, and font artifacts
+ */
+function stripPdfMetadataArtifacts(text) {
+  if (!text) return '';
+  return text
+    .split('\n')
+    .filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return true;
+      // Strip internal PDF dictionary keys and properties
+      if (/^\s*\/(CreationDate|ModDate|Producer|Creator|Author|Title|Subject|Keywords|Trapped|PTFilter|FontDescriptor|Type|Subtype)/i.test(trimmed)) return false;
+      if (/^\s*PDF-\d\.\d/i.test(trimmed)) return false;
+      if (/^\s*%(PDF|EOF|\w+)/i.test(trimmed)) return false;
+      if (/^\s*(<<|>>|\/Root|\/Info|\/Size|\/Prev)/i.test(trimmed)) return false;
+      return true;
+    })
+    .join('\n')
+    .trim();
+}
+
+/**
  * Multimodal Image & Document Transcriber using Gemini Vision
- * Extracts text, diagrams, and visual contents from images or rasterized PDFs
+ * Extracts substantive content, slide text, tables, and explanations of diagrams
  */
 async function transcribeVisualContentWithGemini(fileBuffer, originalName, mimeType) {
   try {
@@ -35,8 +56,8 @@ async function transcribeVisualContentWithGemini(fileBuffer, originalName, mimeT
     const base64Data = fileBuffer.toString('base64');
 
     const promptText = mimeType.startsWith('image/')
-      ? 'Analyze this image in detail. Transcribe all text, numbers, code, labels, diagrams, charts, UI elements, and key visual information accurately and completely.'
-      : 'Transcribe and extract all content from this document slide by slide / page by page. Include all slide titles, headings, bullet points, body text, tables, numbers, and descriptive summaries of diagrams or visual charts in full detail.';
+      ? 'Analyze this image thoroughly. Transcribe and explain all substantive text, content, code, data points, diagrams, and visual components in full detail. Do NOT output file attributes or metadata.'
+      : 'Open and read all slides/pages of this document. Transcribe the full substantive content slide by slide / page by page: include all slide headlines, bullet points, body paragraphs, tables, instructions, steps, numbers, and descriptive explanations of any diagrams or images. Do NOT output file properties, creation dates, or font metadata.';
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -105,22 +126,22 @@ export async function parseFileContent(fileBuffer, originalName = 'document.txt'
       if (typeof parser === 'function') {
         try {
           const pdfData = await parser(fileBuffer);
-          extractedPdfText = (pdfData.text || '').trim();
+          const rawText = pdfData.text || '';
+          extractedPdfText = stripPdfMetadataArtifacts(rawText);
 
           console.log(`\n======================================================`);
           console.log(`📄 [PDF EXTRACTION DIAGNOSTIC]: "${originalName}"`);
-          console.log(`   - Raw data.text length: ${extractedPdfText.length} characters`);
+          console.log(`   - Clean substantive text length: ${extractedPdfText.length} characters`);
           console.log(`   - First 500 chars:\n${extractedPdfText.substring(0, 500) || '[EMPTY STRING]'}`);
-          console.log(`   - data.info (Metadata):\n`, JSON.stringify(pdfData.info || {}, null, 2));
           console.log(`======================================================\n`);
         } catch (pdfErr) {
           console.warn(`[PDF PARSE NOTICE] Native pdf-parse failed (${pdfErr.message}). Switching to Gemini Multimodal OCR...`);
         }
       }
 
-      // If text layer is empty / rasterized PowerPoint slides, trigger Gemini Vision OCR
-      if (!extractedPdfText || extractedPdfText.length < 50) {
-        console.log(`⚠️ [PDF OCR TRIGGER] "${originalName}" text is under 50 chars. Invoking Gemini Multimodal OCR on PDF...`);
+      // If text layer is empty or only had stripped metadata (under 80 substantive chars), invoke Gemini Vision OCR
+      if (!extractedPdfText || extractedPdfText.length < 80) {
+        console.log(`⚠️ [PDF OCR TRIGGER] "${originalName}" substantive text is under 80 chars. Invoking Gemini Multimodal OCR on PDF...`);
         const ocrText = await transcribeVisualContentWithGemini(fileBuffer, originalName, 'application/pdf');
         textContent = ocrText || extractedPdfText;
       } else {
