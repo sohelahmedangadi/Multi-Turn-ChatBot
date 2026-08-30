@@ -6,7 +6,6 @@ import {
   Bot,
   Zap,
   HelpCircle,
-  Clock,
   Brain,
   Terminal,
 } from 'lucide-react';
@@ -96,7 +95,7 @@ export const MessageItem = ({ message }) => {
 
             {/* Long-Term Memory Retrieval Stamp */}
             {isAssistant && metadata?.retrievedMemoriesCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-purple-100 text-purple-950 border border-purple-300 font-bold uppercase">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-purple-100 text-purple-950 border border-purple-300 font-bold uppercase">
                 <Brain className="w-3 h-3 text-purple-700" />
                 <span>Memory Recalled ({metadata.retrievedMemoriesCount})</span>
               </span>
@@ -104,16 +103,16 @@ export const MessageItem = ({ message }) => {
 
             {/* Ambiguity Flag Stamp */}
             {metadata?.ambiguityFlag && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
                 <HelpCircle className="w-3 h-3 text-amber-700" />
                 <span>Clarification Triggered</span>
               </span>
             )}
           </div>
 
-          {/* Timestamp & Full Message Copy Button */}
+          {/* Timestamp (Shows on Hover) & Full Message Copy Button */}
           <div className="flex items-center gap-2 text-stone-500 font-mono">
-            <span className="text-[10px]">
+            <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
               {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
 
@@ -121,7 +120,7 @@ export const MessageItem = ({ message }) => {
             <CopyButton
               text={plainTextToCopy}
               title="Copy entire message"
-              className="p-1 rounded border border-stone-300 hover:border-stone-800 bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 opacity-80 group-hover:opacity-100 transition-all shadow-[1px_1px_0px_0px_#292524]"
+              className="p-1 rounded border border-stone-300 hover:border-stone-800 bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 opacity-0 group-hover:opacity-100 transition-opacity shadow-[1px_1px_0px_0px_#292524]"
               iconClassName="w-3 h-3"
             />
           </div>
@@ -189,16 +188,6 @@ export const MessageItem = ({ message }) => {
             </div>
           )}
         </div>
-
-        {/* Subtle Latency Footer */}
-        {isAssistant && metadata?.latencyMs !== undefined && (
-          <div className="pt-1.5 flex items-center justify-end text-[10px] text-stone-500 font-mono">
-            <div className="flex items-center gap-1 text-stone-500">
-              <Clock className="w-2.5 h-2.5" />
-              <span>{metadata.latencyMs}ms</span>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

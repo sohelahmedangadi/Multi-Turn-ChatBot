@@ -72,13 +72,6 @@ export const ChatWindow = ({
       {/* Retro Classic Header */}
       <header className="h-14 border-b-2 border-stone-800 bg-[#F5EFEB] px-4 sm:px-6 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3 overflow-hidden">
-          {/* Retro Window Dots */}
-          <div className="hidden sm:flex items-center gap-1.5 mr-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-stone-300 border border-stone-600" />
-            <span className="w-2.5 h-2.5 rounded-full bg-stone-300 border border-stone-600" />
-            <span className="w-2.5 h-2.5 rounded-full bg-stone-300 border border-stone-600" />
-          </div>
-
           <div className="flex items-center gap-2">
             <span className="font-bold font-mono text-xs sm:text-sm text-stone-900 truncate max-w-xs sm:max-w-md uppercase tracking-wider">
               {currentSession?.title || 'NEW DIALOGUE SESSION'}
@@ -89,19 +82,11 @@ export const ChatWindow = ({
             <div className="hidden md:flex items-center gap-1 text-xs font-mono text-stone-500">
               <span>•</span>
               <div className="flex items-center gap-1">
-                <Layers className="w-3 h-3 text-stone-500" />
+                <Layers className="w-3 h-3 text-stone-400" />
                 <span>{messages.length} turns</span>
               </div>
             </div>
           )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Active Model Pill */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-stone-900 border-2 border-stone-900 text-xs font-mono text-amber-300 font-bold shadow-[2px_2px_0px_0px_#1C1917]">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>GEMINI 2.5</span>
-          </div>
         </div>
       </header>
 
@@ -186,7 +171,7 @@ export const ChatWindow = ({
 
       {/* Retro Command Input Dock */}
       <div className="p-4 bg-[#F5EFEB] border-t-2 border-stone-800">
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-2">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-1.5">
           <div className="relative flex items-end gap-2 bg-white rounded-lg border-2 border-stone-800 p-2 shadow-[3px_3px_0px_0px_#1C1917] focus-within:border-amber-600 focus-within:shadow-[4px_4px_0px_0px_#D97706] transition-all">
             <textarea
               id="chat-input-textarea"
@@ -226,11 +211,14 @@ export const ChatWindow = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-end text-[11px] font-mono text-stone-500 px-1">
-            <span className={inputText.length > 1800 ? 'text-amber-700 font-bold font-mono' : 'font-mono'}>
-              {inputText.length} / 2000
-            </span>
-          </div>
+          {/* Fade in character counter only past 70% of 2000 limit */}
+          {inputText.length >= 1400 && (
+            <div className="flex items-center justify-end text-[11px] font-mono text-stone-500 px-1 animate-fade-in">
+              <span className={inputText.length > 1800 ? 'text-amber-700 font-bold' : ''}>
+                {inputText.length} / 2000
+              </span>
+            </div>
+          )}
         </form>
       </div>
     </main>

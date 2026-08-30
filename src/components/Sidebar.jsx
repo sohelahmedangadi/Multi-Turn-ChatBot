@@ -99,7 +99,7 @@ export const Sidebar = ({
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] text-stone-500 font-mono">
+                  <span className="text-[10px] text-stone-400 font-mono opacity-0 group-hover:opacity-100 transition-opacity">
                     [{sess.messageCount || 0}]
                   </span>
                   <button
