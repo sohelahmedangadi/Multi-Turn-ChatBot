@@ -292,6 +292,19 @@ File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV da
     'Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt'
   );
 
+  // 5. Test Anti-Hallucination Guardrail on Empty/Missing File
+  const emptyGuardContext = await getSessionContext(
+    ragSessionId,
+    'What does this document contain?',
+    userA,
+    { fileId: 'doc_empty_dummy_123' }
+  );
+  assert(
+    emptyGuardContext.contextualMemorySection.includes('[ATTACHED DOCUMENT NOTICE - EXTRACTION FAILED / EMPTY]') &&
+      emptyGuardContext.contextualMemorySection.includes('DO NOT GUESS'),
+    'Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty'
+  );
+
   // Write results out to error.md
   const report = `# Test Run Report (${new Date().toISOString()})\n\nTotal: ${passed + failed} | Passed: ${passed} | Failed: ${failed}\n\n` +
     results.map((r) => `- ${r}`).join('\n');
