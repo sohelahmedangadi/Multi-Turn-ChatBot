@@ -296,7 +296,7 @@ export const ChatWindow = ({
             ref={fileInputRef}
             onChange={handleFileSelect}
             className="hidden"
-            accept=".pdf,.txt,.md,.markdown,.csv,.json,.js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.html,.css,.sql"
+            accept=".pdf,.png,.jpg,.jpeg,.webp,.bmp,.gif,.txt,.md,.markdown,.csv,.json,.js,.jsx,.ts,.tsx,.py,.java,.cpp,.c,.html,.css,.sql"
           />
 
           <div className="relative flex items-end gap-2 bg-white rounded-lg border-2 border-stone-800 p-2 shadow-[3px_3px_0px_0px_#1C1917] focus-within:border-amber-600 focus-within:shadow-[4px_4px_0px_0px_#D97706] transition-all">
@@ -306,7 +306,7 @@ export const ChatWindow = ({
               id="btn-attach-file"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingFile}
-              title="Attach Document (PDF, TXT, MD, CSV, JSON, Code)"
+              title="Attach Document or Image (PDF, Images, TXT, CSV, JSON, Code)"
               className="p-2 text-stone-600 hover:text-stone-950 hover:bg-stone-100 rounded transition cursor-pointer flex-shrink-0"
             >
               <Paperclip className="w-4 h-4" />

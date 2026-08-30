@@ -25,14 +25,18 @@ async function getPdfParser() {
 }
 
 /**
- * Fallback OCR & Multimodal Transcriber using Gemini Vision
- * Extracts text from rasterized/image-only PDFs (e.g. PowerPoint slide exports)
+ * Multimodal Image & Document Transcriber using Gemini Vision
+ * Extracts text, diagrams, and visual contents from images or rasterized PDFs
  */
-async function transcribePdfWithGemini(fileBuffer, originalName) {
+async function transcribeVisualContentWithGemini(fileBuffer, originalName, mimeType) {
   try {
-    console.log(`[PDF OCR] Triggering Gemini Multimodal OCR for rasterized PDF: "${originalName}"...`);
+    console.log(`[MULTIMODAL OCR] Analyzing visual content via Gemini Vision for "${originalName}" (${mimeType})...`);
     const ai = getGeminiClient();
-    const base64Pdf = fileBuffer.toString('base64');
+    const base64Data = fileBuffer.toString('base64');
+
+    const promptText = mimeType.startsWith('image/')
+      ? 'Analyze this image in detail. Transcribe all text, numbers, code, labels, diagrams, charts, UI elements, and key visual information accurately and completely.'
+      : 'Transcribe and extract all content from this document slide by slide / page by page. Include all slide titles, headings, bullet points, body text, tables, numbers, and descriptive summaries of diagrams or visual charts in full detail.';
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -42,12 +46,12 @@ async function transcribePdfWithGemini(fileBuffer, originalName) {
           parts: [
             {
               inlineData: {
-                mimeType: 'application/pdf',
-                data: base64Pdf,
+                mimeType,
+                data: base64Data,
               },
             },
             {
-              text: 'Transcribe and extract all content from this document slide by slide / page by page. Include all slide titles, headings, bullet points, body text, tables, numbers, and descriptive summaries of diagrams or visual charts.',
+              text: promptText,
             },
           ],
         },
@@ -55,10 +59,10 @@ async function transcribePdfWithGemini(fileBuffer, originalName) {
     });
 
     const transcribed = response.text || '';
-    console.log(`[PDF OCR] Successfully transcribed ${transcribed.length} chars from "${originalName}" via Gemini.`);
+    console.log(`[MULTIMODAL OCR] Successfully transcribed ${transcribed.length} chars from "${originalName}".`);
     return transcribed;
   } catch (ocrErr) {
-    console.error(`[PDF OCR ERROR] Gemini PDF transcription failed for ${originalName}:`, ocrErr.message);
+    console.error(`[MULTIMODAL OCR ERROR] Gemini vision analysis failed for ${originalName}:`, ocrErr.message);
     return '';
   }
 }
@@ -75,33 +79,52 @@ export async function parseFileContent(fileBuffer, originalName = 'document.txt'
   let textContent = '';
   let fileType = 'text';
 
+  const isImage =
+    ['.png', '.jpg', '.jpeg', '.webp', '.bmp', '.gif'].includes(ext) ||
+    mimeType.startsWith('image/');
+
   try {
-    if (ext === '.pdf' || mimeType === 'application/pdf') {
+    if (isImage) {
+      fileType = 'image';
+      const effectiveMime =
+        mimeType ||
+        (ext === '.png'
+          ? 'image/png'
+          : ext === '.webp'
+          ? 'image/webp'
+          : ext === '.gif'
+          ? 'image/gif'
+          : 'image/jpeg');
+
+      textContent = await transcribeVisualContentWithGemini(fileBuffer, originalName, effectiveMime);
+    } else if (ext === '.pdf' || mimeType === 'application/pdf') {
       fileType = 'pdf';
       const parser = await getPdfParser();
+      let extractedPdfText = '';
+
       if (typeof parser === 'function') {
-        const pdfData = await parser(fileBuffer);
+        try {
+          const pdfData = await parser(fileBuffer);
+          extractedPdfText = (pdfData.text || '').trim();
 
-        // 1. Diagnostic Logging
-        console.log(`\n======================================================`);
-        console.log(`📄 [PDF EXTRACTION DIAGNOSTIC]: "${originalName}"`);
-        console.log(`   - Raw data.text length: ${pdfData.text?.length || 0} characters`);
-        console.log(`   - First 500 chars of data.text:\n${(pdfData.text || '').substring(0, 500) || '[EMPTY STRING]'}`);
-        console.log(`   - data.info (Document Metadata Object):\n`, JSON.stringify(pdfData.info || {}, null, 2));
-        console.log(`======================================================\n`);
-
-        textContent = pdfData.text || '';
-
-        // 2. Fallback to Gemini Multimodal OCR if text layer is empty / rasterized slides
-        if (!textContent || textContent.trim().length < 50) {
-          console.warn(`⚠️ [PDF NOTICE] "${originalName}" has no selectable text layer (likely PowerPoint rasterized slides). Invoking Gemini OCR fallback...`);
-          const ocrText = await transcribePdfWithGemini(fileBuffer, originalName);
-          if (ocrText && ocrText.trim().length > 0) {
-            textContent = ocrText;
-          }
+          console.log(`\n======================================================`);
+          console.log(`📄 [PDF EXTRACTION DIAGNOSTIC]: "${originalName}"`);
+          console.log(`   - Raw data.text length: ${extractedPdfText.length} characters`);
+          console.log(`   - First 500 chars:\n${extractedPdfText.substring(0, 500) || '[EMPTY STRING]'}`);
+          console.log(`   - data.info (Metadata):\n`, JSON.stringify(pdfData.info || {}, null, 2));
+          console.log(`======================================================\n`);
+        } catch (pdfErr) {
+          console.warn(`[PDF PARSE NOTICE] Native pdf-parse failed (${pdfErr.message}). Switching to Gemini Multimodal OCR...`);
         }
+      }
+
+      // If text layer is empty / rasterized PowerPoint slides, trigger Gemini Vision OCR
+      if (!extractedPdfText || extractedPdfText.length < 50) {
+        console.log(`⚠️ [PDF OCR TRIGGER] "${originalName}" text is under 50 chars. Invoking Gemini Multimodal OCR on PDF...`);
+        const ocrText = await transcribeVisualContentWithGemini(fileBuffer, originalName, 'application/pdf');
+        textContent = ocrText || extractedPdfText;
       } else {
-        textContent = fileBuffer.toString('utf-8');
+        textContent = extractedPdfText;
       }
     } else if (ext === '.json' || mimeType === 'application/json') {
       fileType = 'json';
@@ -131,14 +154,14 @@ export async function parseFileContent(fileBuffer, originalName = 'document.txt'
   }
 
   // Clean and sanitize extracted text
-  const cleanText = textContent
+  const cleanText = (textContent || '')
     .replace(/\r\n/g, '\n')
     .replace(/\0/g, '')
     .trim();
 
-  // 3. Clear error if document produces near-empty text
+  // Clear error if document produces near-empty text
   if (!cleanText || cleanText.length < 10) {
-    throw new Error(`Document "${originalName}" contains no readable text or transcribeable content. If it is an image or scan, ensure it contains clear visual text.`);
+    throw new Error(`Document "${originalName}" contains no readable text or transcribeable visual content.`);
   }
 
   const wordCount = cleanText.length > 0 ? cleanText.split(/\s+/).length : 0;

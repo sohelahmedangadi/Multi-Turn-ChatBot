@@ -4,6 +4,7 @@ import {
   FileCode,
   FileSpreadsheet,
   File,
+  Image as ImageIcon,
   X,
   Loader2,
   CheckCircle2,
@@ -11,6 +12,9 @@ import {
 
 function getFileIcon(fileType = '', filename = '') {
   const ext = filename.split('.').pop()?.toLowerCase();
+  if (fileType === 'image' || ['png', 'jpg', 'jpeg', 'webp', 'bmp', 'gif'].includes(ext)) {
+    return <ImageIcon className="w-3.5 h-3.5 text-purple-700" />;
+  }
   if (fileType === 'pdf' || ext === 'pdf') {
     return <FileText className="w-3.5 h-3.5 text-rose-700" />;
   }
