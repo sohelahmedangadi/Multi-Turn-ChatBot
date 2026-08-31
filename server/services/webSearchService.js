@@ -126,6 +126,7 @@ export function formatSearchResultsForContext(searchResult) {
   }
 
   formatted += '\nINSTRUCTION: Synthesize a natural-language answer from these search results. Cite specific source URLs when referencing facts. Do NOT dump raw results.\n';
+  formatted += 'CRITICAL RULE: If the search results do NOT explicitly contain the answer (e.g. real name is unlisted or N/A), DO NOT guess, fabricate, or invent a name. Explicitly state that the information has not been publicly disclosed or documented.\n';
 
   return formatted;
 }

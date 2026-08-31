@@ -205,7 +205,10 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
   contextualMemorySection += '- Questions about the user\'s own project, memories, or uploaded documents\n';
   contextualMemorySection += 'After receiving search results, synthesize a helpful natural-language answer and CITE the source URL(s). Do NOT dump raw search results.\n';
   contextualMemorySection += 'If native function calling is unavailable, you may output "[SEARCH: <query>]" on a line by itself to request real-time web search results.\n';
-  contextualMemorySection += 'If the search returns no results or fails, say so honestly instead of guessing.\n';
+  contextualMemorySection += 'STRICT FACTUAL GROUNDING RULES FOR SEARCH RESULTS:\n';
+  contextualMemorySection += '1. ONLY state facts, names, numbers, or dates that are EXPLICITLY present in the search snippets.\n';
+  contextualMemorySection += '2. If the user asks for a real/legal name, birthdate, or private info and the search results do NOT explicitly contain it (or show N/A), DO NOT GUESS or invent plausible names. You MUST state plainly: "The real/legal name of [artist/person] has not been publicly disclosed or officially documented."\n';
+  contextualMemorySection += '3. If the search returns no results or fails, say so honestly instead of guessing.\n';
 
   return {
     history: truncatedHistory,
