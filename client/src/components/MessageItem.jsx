@@ -11,6 +11,7 @@ import {
   Paperclip,
   Search,
   ExternalLink,
+  AlertTriangle,
 } from 'lucide-react';
 import { CopyButton, stripMarkdown } from './CopyButton';
 
@@ -127,6 +128,17 @@ export const MessageItem = ({ message }) => {
                 <span>Web Search</span>
               </span>
             )}
+
+            {/* Unverified Claim Alert Badge */}
+            {isAssistant && metadata?.unverifiedClaim && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase shadow-[1px_1px_0px_0px_#f59e0b]"
+                title={metadata.unverifiedWarning || 'This claim could not be verified by search'}
+              >
+                <AlertTriangle className="w-3 h-3 text-amber-700" />
+                <span>Unverified Fact Warning</span>
+              </span>
+            )}
           </div>
 
           {/* Timestamp (Shows on Hover) & Full Message Copy Button */}
@@ -227,6 +239,14 @@ export const MessageItem = ({ message }) => {
                       </a>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* Unverified Claim Alert Banner */}
+              {isAssistant && metadata?.unverifiedWarning && (
+                <div className="mt-2.5 p-2 rounded bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-2 font-mono">
+                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
+                  <span>{metadata.unverifiedWarning}</span>
                 </div>
               )}
             </div>

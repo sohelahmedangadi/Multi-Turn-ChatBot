@@ -190,17 +190,21 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
     }
   }
 
-  // Web Search Grounding Instructions
-  contextualMemorySection += '\n\n[WEB SEARCH GROUNDING INSTRUCTIONS]:\n';
+  // Web Search Grounding & Anti-Hallucination Instructions
+  contextualMemorySection += '\n\n[WEB SEARCH GROUNDING & ANTI-HALLUCINATION INSTRUCTIONS]:\n';
   contextualMemorySection += 'You have access to real-time Web Search Grounding for current information.\n';
   contextualMemorySection += 'Grounding is used when the user asks about:\n';
   contextualMemorySection += '- Current events, recent news, or live data\n';
   contextualMemorySection += '- Recent software releases, version numbers, or changelogs\n';
-  contextualMemorySection += '- People, organizations, or entities you don\'t recognize or are unsure about\n';
-  contextualMemorySection += '- Anything time-sensitive that your training data may not cover\n';
-  contextualMemorySection += 'After receiving search results or grounding data, synthesize a helpful natural-language answer and CITE the source URL(s). Do NOT dump raw search results.\n';
-  contextualMemorySection += 'If running in a fallback environment without native search grounding, you may output "[SEARCH: <query>]" on a single line to request real-time web search verification.\n';
-  contextualMemorySection += 'If the search returns no results or fails, state clearly that information could not be found rather than hallucinating.\n';
+  contextualMemorySection += '- People, organizations, reality show contestants, or entities you don\'t recognize\n';
+  contextualMemorySection += '- Specific biographical details, real names, aliases, ages, or origins\n';
+  contextualMemorySection += 'STRICT FACTUAL GROUNDING MANDATE:\n';
+  contextualMemorySection += '- When answering questions about a specific person\'s real name, identity, or biographical facts, only state information that is explicitly present in the search results provided.\n';
+  contextualMemorySection += '- If the search results do not confirm a specific fact (e.g., a person\'s real name), respond that this information could not be verified, rather than guessing or inferring a plausible-sounding answer.\n';
+  contextualMemorySection += '- Never invent names, aliases, or biographical details not present in the source material.\n';
+  contextualMemorySection += '- After receiving search results or grounding data, synthesize a helpful natural-language answer and CITE the source URL(s). Do NOT dump raw search results.\n';
+  contextualMemorySection += '- If running in a fallback environment without native search grounding, you may output "[SEARCH: <query>]" on a single line to request real-time web search verification.\n';
+  contextualMemorySection += '- If the search returns no results or fails, state clearly that information could not be found rather than hallucinating.\n';
 
   return {
     history: truncatedHistory,

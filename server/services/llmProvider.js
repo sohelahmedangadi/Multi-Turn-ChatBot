@@ -3,8 +3,11 @@ import Groq from 'groq-sdk';
 import {
   tavilySearch,
   formatTavilyResultsForContext,
+  formatThinResultsWarning,
   extractGeminiGroundingSources,
   extractSearchQueryFromText,
+  isIdentityOrFactualQuery,
+  checkForUnverifiedFactualClaims,
   isTavilyConfigured,
 } from './webSearchService.js';
 
@@ -106,7 +109,7 @@ export function tripGeminiCircuitBreaker() {
 
 /**
  * Universal Non-Streaming Response Generator
- * Primary: Google Gemini with Native Google Search Grounding.
+ * Primary: Google Gemini with Native Google Search Grounding & Mandatory Identity Search Injection.
  * Fallback: Groq with Tavily Search API.
  */
 export async function generateResponse(
@@ -116,6 +119,37 @@ export async function generateResponse(
   options = {}
 ) {
   const startTime = Date.now();
+
+  // Check if query asks for identity / real name / biographical facts
+  const isFactualOrIdentity = isIdentityOrFactualQuery(message);
+  let proactiveSearchContext = '';
+  let proactiveSources = [];
+  let forcedSearch = false;
+  let searchQuery = null;
+
+  if (isFactualOrIdentity && isTavilyConfigured()) {
+    forcedSearch = true;
+    searchQuery = message.trim();
+    console.log(`[Mandatory Search] Identified factual/identity query: "${searchQuery}". Proactively querying Tavily...`);
+    try {
+      const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
+      if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
+        proactiveSources = (searchResult.results || []).map((r) => ({
+          title: r.title || 'Web Source',
+          url: r.url || '',
+        })).filter((s) => s.url);
+
+        proactiveSearchContext = '\n\n' + formatTavilyResultsForContext(searchResult);
+      } else {
+        proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
+      }
+    } catch (err) {
+      console.warn('[Mandatory Search] Proactive search error:', err.message);
+      proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
+    }
+  }
+
+  const effectiveSystemPromptWithSearch = systemPrompt + proactiveSearchContext;
 
   // 1. Primary Engine: Gemini with Native Google Search Grounding
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
@@ -148,7 +182,7 @@ export async function generateResponse(
                 model,
                 contents,
                 config: {
-                  systemInstruction: systemPrompt,
+                  systemInstruction: effectiveSystemPromptWithSearch,
                   temperature: 0.7,
                   tools: [{ googleSearch: {} }],
                 },
@@ -164,6 +198,22 @@ export async function generateResponse(
             // Extract Google Search Grounding citations and queries
             const groundingInfo = extractGeminiGroundingSources(response);
 
+            // Merge proactive Tavily sources with Gemini grounding sources (deduplicating URLs)
+            const combinedSourcesMap = new Map();
+            for (const s of [...proactiveSources, ...(groundingInfo.sources || [])]) {
+              if (s.url && !combinedSourcesMap.has(s.url)) {
+                combinedSourcesMap.set(s.url, s);
+              }
+            }
+            const sources = Array.from(combinedSourcesMap.values());
+            const usedWebSearch = Boolean(groundingInfo.usedWebSearch || forcedSearch || sources.length > 0);
+            const activeSearchQuery = groundingInfo.searchQueries[0] || searchQuery || null;
+
+            // Zero-Source / Unverified claim post-processing guard
+            const claimCheck = checkForUnverifiedFactualClaims(text, sources, usedWebSearch);
+
+            console.log(`[LLM Response] Provider: gemini, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
+
             return {
               text,
               provider: 'gemini',
@@ -171,9 +221,12 @@ export async function generateResponse(
               latencyMs,
               tokensEstimated,
               isFallback: false,
-              usedWebSearch: groundingInfo.usedWebSearch,
-              searchQuery: groundingInfo.searchQueries[0] || null,
-              sources: groundingInfo.sources || [],
+              usedWebSearch,
+              forcedSearch,
+              searchQuery: activeSearchQuery,
+              sources,
+              unverifiedClaim: claimCheck.hasUnverifiedClaim,
+              unverifiedWarning: claimCheck.warning,
             };
           } catch (err) {
             const errMsg = err?.message || String(err);
@@ -200,8 +253,8 @@ export async function generateResponse(
     try {
       const groq = getGroqClient();
       const safeSystemPrompt =
-        typeof systemPrompt === 'string' && systemPrompt.trim()
-          ? systemPrompt.trim()
+        typeof effectiveSystemPromptWithSearch === 'string' && effectiveSystemPromptWithSearch.trim()
+          ? effectiveSystemPromptWithSearch.trim()
           : 'You are a helpful, precise multi-turn conversational AI assistant.';
 
       const messages = [
@@ -229,19 +282,19 @@ export async function generateResponse(
           );
 
           let text = completion.choices[0]?.message?.content || '';
-          let usedWebSearch = false;
-          let searchQuery = null;
-          let sources = [];
+          let usedWebSearch = forcedSearch;
+          let activeSearchQuery = searchQuery;
+          let sources = [...proactiveSources];
 
-          // Detect if Groq requested web search via [SEARCH: query] or markdown block
+          // If proactive search didn't run, check if Groq requested search via [SEARCH: ...]
           const extractedQuery = extractSearchQueryFromText(text);
 
-          if (extractedQuery && isTavilyConfigured()) {
-            searchQuery = extractedQuery;
-            console.log(`[Groq Fallback] Detected search request: "${searchQuery}". Querying Tavily Search API...`);
+          if (!forcedSearch && extractedQuery && isTavilyConfigured()) {
+            activeSearchQuery = extractedQuery;
+            console.log(`[Groq Fallback] Detected search request: "${activeSearchQuery}". Querying Tavily Search API...`);
 
             try {
-              const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
+              const searchResult = await tavilySearch(activeSearchQuery, { maxResults: 5, timeoutMs: 7000 });
 
               if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
                 usedWebSearch = true;
@@ -258,7 +311,7 @@ export async function generateResponse(
                   { role: 'assistant', content: text },
                   {
                     role: 'user',
-                    content: `Search Results for "${searchQuery}":\n\n${searchContext}\n\nUse these verified search results to synthesize an accurate, direct answer to the original user question. Cite sources with markdown links.`,
+                    content: `Search Results for "${activeSearchQuery}":\n\n${searchContext}\n\nUse these verified search results to synthesize an accurate, direct answer to the original user question. If the information is not present in the search results, state clearly that it could not be verified. Do NOT invent names, aliases, or details. Cite sources with markdown links.`,
                   },
                 ];
 
@@ -278,13 +331,18 @@ export async function generateResponse(
                 console.warn(`[Groq Fallback] Tavily search returned no results or error:`, searchResult?.error);
               }
             } catch (searchErr) {
-              console.warn('[Groq Fallback] Search integration error (continuing with base response):', searchErr?.message || searchErr);
+              console.warn('[Groq Fallback] Search integration error:', searchErr?.message || searchErr);
             }
           }
 
           const latencyMs = Date.now() - startTime;
           const tokensEstimated =
             completion.usage?.total_tokens || Math.ceil((text.length + message.length) / 4);
+
+          // Zero-Source / Unverified claim post-processing guard
+          const claimCheck = checkForUnverifiedFactualClaims(text, sources, usedWebSearch);
+
+          console.log(`[LLM Response] Provider: groq, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
 
           return {
             text,
@@ -294,8 +352,11 @@ export async function generateResponse(
             tokensEstimated,
             isFallback: true,
             usedWebSearch,
-            searchQuery,
+            forcedSearch,
+            searchQuery: activeSearchQuery,
             sources,
+            unverifiedClaim: claimCheck.hasUnverifiedClaim,
+            unverifiedWarning: claimCheck.warning,
           };
         } catch (groqModelErr) {
           console.warn(`[Groq Fallback] Model ${model} failed (${groqModelErr?.message}), trying next candidate...`);
@@ -311,7 +372,7 @@ export async function generateResponse(
 
 /**
  * Universal Streaming Response Generator
- * Primary: Google Gemini with Native Google Search Grounding.
+ * Primary: Google Gemini with Native Google Search Grounding & Mandatory Identity Search Injection.
  * Fallback: Groq with Tavily Search API.
  */
 export async function generateStreamResponse(
@@ -322,6 +383,37 @@ export async function generateStreamResponse(
   options = {}
 ) {
   const startTime = Date.now();
+
+  // Check if query asks for identity / real name / biographical facts
+  const isFactualOrIdentity = isIdentityOrFactualQuery(message);
+  let proactiveSearchContext = '';
+  let proactiveSources = [];
+  let forcedSearch = false;
+  let searchQuery = null;
+
+  if (isFactualOrIdentity && isTavilyConfigured()) {
+    forcedSearch = true;
+    searchQuery = message.trim();
+    console.log(`[Mandatory Stream Search] Identified factual/identity query: "${searchQuery}". Proactively querying Tavily...`);
+    try {
+      const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
+      if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
+        proactiveSources = (searchResult.results || []).map((r) => ({
+          title: r.title || 'Web Source',
+          url: r.url || '',
+        })).filter((s) => s.url);
+
+        proactiveSearchContext = '\n\n' + formatTavilyResultsForContext(searchResult);
+      } else {
+        proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
+      }
+    } catch (err) {
+      console.warn('[Mandatory Stream Search] Proactive search error:', err.message);
+      proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
+    }
+  }
+
+  const effectiveSystemPromptWithSearch = systemPrompt + proactiveSearchContext;
 
   // 1. Primary Engine: Gemini Streaming with Native Google Search Grounding
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
@@ -353,7 +445,7 @@ export async function generateStreamResponse(
                 model,
                 contents,
                 config: {
-                  systemInstruction: systemPrompt,
+                  systemInstruction: effectiveSystemPromptWithSearch,
                   temperature: 0.7,
                   tools: [{ googleSearch: {} }],
                 },
@@ -380,6 +472,22 @@ export async function generateStreamResponse(
             // Extract Google Search Grounding info from the streaming response
             const groundingInfo = extractGeminiGroundingSources(lastChunk);
 
+            // Merge proactive Tavily sources with Gemini grounding sources (deduplicating URLs)
+            const combinedSourcesMap = new Map();
+            for (const s of [...proactiveSources, ...(groundingInfo.sources || [])]) {
+              if (s.url && !combinedSourcesMap.has(s.url)) {
+                combinedSourcesMap.set(s.url, s);
+              }
+            }
+            const sources = Array.from(combinedSourcesMap.values());
+            const usedWebSearch = Boolean(groundingInfo.usedWebSearch || forcedSearch || sources.length > 0);
+            const activeSearchQuery = groundingInfo.searchQueries[0] || searchQuery || null;
+
+            // Zero-Source / Unverified claim post-processing guard
+            const claimCheck = checkForUnverifiedFactualClaims(fullText, sources, usedWebSearch);
+
+            console.log(`[LLM Stream Response] Provider: gemini, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
+
             return {
               text: fullText,
               provider: 'gemini',
@@ -387,9 +495,12 @@ export async function generateStreamResponse(
               latencyMs,
               tokensEstimated,
               isFallback: false,
-              usedWebSearch: groundingInfo.usedWebSearch,
-              searchQuery: groundingInfo.searchQueries[0] || null,
-              sources: groundingInfo.sources || [],
+              usedWebSearch,
+              forcedSearch,
+              searchQuery: activeSearchQuery,
+              sources,
+              unverifiedClaim: claimCheck.hasUnverifiedClaim,
+              unverifiedWarning: claimCheck.warning,
             };
           } catch (err) {
             const errMsg = err?.message || String(err);
@@ -416,8 +527,8 @@ export async function generateStreamResponse(
     try {
       const groq = getGroqClient();
       const safeSystemPrompt =
-        typeof systemPrompt === 'string' && systemPrompt.trim()
-          ? systemPrompt.trim()
+        typeof effectiveSystemPromptWithSearch === 'string' && effectiveSystemPromptWithSearch.trim()
+          ? effectiveSystemPromptWithSearch.trim()
           : 'You are a helpful, precise multi-turn conversational AI assistant.';
 
       const messages = [
@@ -454,19 +565,19 @@ export async function generateStreamResponse(
             }
           }
 
-          let usedWebSearch = false;
-          let searchQuery = null;
-          let sources = [];
+          let usedWebSearch = forcedSearch;
+          let activeSearchQuery = searchQuery;
+          let sources = [...proactiveSources];
 
-          // Detect search trigger from Groq stream
+          // Detect search trigger from Groq stream if not already forced
           const extractedStreamQuery = extractSearchQueryFromText(fullText);
 
-          if (extractedStreamQuery && isTavilyConfigured()) {
-            searchQuery = extractedStreamQuery;
-            console.log(`[Groq Stream Fallback] Detected search request: "${searchQuery}". Querying Tavily Search API...`);
+          if (!forcedSearch && extractedStreamQuery && isTavilyConfigured()) {
+            activeSearchQuery = extractedStreamQuery;
+            console.log(`[Groq Stream Fallback] Detected search request: "${activeSearchQuery}". Querying Tavily Search API...`);
 
             try {
-              const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
+              const searchResult = await tavilySearch(activeSearchQuery, { maxResults: 5, timeoutMs: 7000 });
 
               if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
                 usedWebSearch = true;
@@ -483,7 +594,7 @@ export async function generateStreamResponse(
                   { role: 'assistant', content: fullText },
                   {
                     role: 'user',
-                    content: `Search Results for "${searchQuery}":\n\n${searchContext}\n\nUse these verified search results to synthesize an accurate, direct answer to the original user question. Cite sources with markdown links.`,
+                    content: `Search Results for "${activeSearchQuery}":\n\n${searchContext}\n\nUse these verified search results to synthesize an accurate, direct answer to the original user question. If the information is not present in the search results, state clearly that it could not be verified. Do NOT invent names, aliases, or details. Cite sources with markdown links.`,
                   },
                 ];
 
@@ -518,6 +629,11 @@ export async function generateStreamResponse(
           const latencyMs = Date.now() - startTime;
           const tokensEstimated = Math.ceil((fullText.length + message.length) / 4);
 
+          // Zero-Source / Unverified claim post-processing guard
+          const claimCheck = checkForUnverifiedFactualClaims(fullText, sources, usedWebSearch);
+
+          console.log(`[LLM Stream Response] Provider: groq, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
+
           return {
             text: fullText,
             provider: 'groq',
@@ -526,8 +642,11 @@ export async function generateStreamResponse(
             tokensEstimated,
             isFallback: true,
             usedWebSearch,
-            searchQuery,
+            forcedSearch,
+            searchQuery: activeSearchQuery,
             sources,
+            unverifiedClaim: claimCheck.hasUnverifiedClaim,
+            unverifiedWarning: claimCheck.warning,
           };
         } catch (groqModelErr) {
           console.warn(`[Groq Stream Fallback] Model ${model} failed (${groqModelErr?.message}), trying next candidate...`);

@@ -560,8 +560,11 @@ async function startServer() {
               attachedFilename: context.attachedDocumentMeta?.filename || null,
               attachedChunksCount: context.relevantDocumentChunks?.length || 0,
               usedWebSearch: streamResult.usedWebSearch || false,
+              forcedSearch: streamResult.forcedSearch || false,
               searchQuery: streamResult.searchQuery || null,
               sources: streamResult.sources || [],
+              unverifiedClaim: streamResult.unverifiedClaim || false,
+              unverifiedWarning: streamResult.unverifiedWarning || null,
             },
           };
           await db.saveMessage(assistantMessageDoc);
@@ -581,6 +584,8 @@ async function startServer() {
             retrievedMemories: context.relevantMemories,
             attachedDocument: context.attachedDocumentMeta || null,
             sources: streamResult.sources || [],
+            unverifiedClaim: streamResult.unverifiedClaim || false,
+            unverifiedWarning: streamResult.unverifiedWarning || null,
           })}\n\n`);
           return res.end();
         } catch (streamErr) {
@@ -620,8 +625,11 @@ async function startServer() {
           attachedFilename: context.attachedDocumentMeta?.filename || null,
           attachedChunksCount: context.relevantDocumentChunks?.length || 0,
           usedWebSearch: llmResult.usedWebSearch || false,
+          forcedSearch: llmResult.forcedSearch || false,
           searchQuery: llmResult.searchQuery || null,
           sources: llmResult.sources || [],
+          unverifiedClaim: llmResult.unverifiedClaim || false,
+          unverifiedWarning: llmResult.unverifiedWarning || null,
         },
       };
       await db.saveMessage(assistantMessageDoc);
@@ -642,6 +650,8 @@ async function startServer() {
         retrievedMemories: context.relevantMemories,
         attachedDocument: context.attachedDocumentMeta || null,
         sources: llmResult.sources || [],
+        unverifiedClaim: llmResult.unverifiedClaim || false,
+        unverifiedWarning: llmResult.unverifiedWarning || null,
       });
     } catch (err) {
       console.error('Chat processing error:', err);

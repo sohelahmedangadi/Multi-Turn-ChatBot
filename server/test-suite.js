@@ -2,8 +2,11 @@ import { detectAmbiguity } from './services/ambiguityDetector.js';
 import {
   tavilySearch,
   formatTavilyResultsForContext,
+  formatThinResultsWarning,
   extractGeminiGroundingSources,
   extractSearchQueryFromText,
+  isIdentityOrFactualQuery,
+  checkForUnverifiedFactualClaims,
   isTavilyConfigured,
 } from './services/webSearchService.js';
 import {
@@ -398,6 +401,35 @@ File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV da
       q2 === 'React 19 features' &&
       q3 === 'Tavily API documentation',
     'Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls'
+  );
+
+  // Test 6: Identity / Factual Query Pre-Classifier
+  const id1 = isIdentityOrFactualQuery('who is Farak from MTV Hustle 5');
+  const id2 = isIdentityOrFactualQuery('what is the real name of Eminem');
+  const id3 = isIdentityOrFactualQuery('who plays Spider-Man in MCU');
+  const id4 = isIdentityOrFactualQuery('What is 15 multiplied by 37?');
+  assert(
+    id1 === true && id2 === true && id3 === true && id4 === false,
+    'Identity Query Pre-Classifier: Accurately flags biographical/contestant/real-name queries for mandatory search while passing math queries'
+  );
+
+  // Test 7: Thin / Empty Results Warning Formatter
+  const thinWarning = formatThinResultsWarning('Farak MTV Hustle', 'No direct match found');
+  assert(
+    thinWarning.includes('[SEARCH NOTICE - LIMITED/UNVERIFIED SEARCH RESULTS') &&
+      thinWarning.includes('Do NOT guess') &&
+      thinWarning.includes('could not be verified'),
+    'Thin Results Formatter: Injects strict anti-hallucination directive when search yields sparse data'
+  );
+
+  // Test 8: Zero-Source Unverified Factual Claim Guard
+  const claim1 = checkForUnverifiedFactualClaims('His real name is Mayur Chitte and he is an artist.', [], false);
+  const claim2 = checkForUnverifiedFactualClaims('His real name is Marshall Mathers.', [{ title: 'Bio', url: 'https://bio.com' }], true);
+  assert(
+    claim1.hasUnverifiedClaim === true &&
+      claim1.warning.includes('could not be verified') &&
+      claim2.hasUnverifiedClaim === false,
+    'Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations'
   );
 
   // Write results out to error.md

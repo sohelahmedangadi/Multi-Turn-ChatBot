@@ -4,19 +4,19 @@
 **Test Harnesses:** [server/test-suite.js](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)  
 **Target Server:** http://localhost:5000 / http://localhost:3000 (Node.js Express backend + MongoDB Atlas & In-Memory Resilient Store)  
 **Execution Date:** 2026-08-31  
-**Overall Status:** **100% PASS (44 Unit & Integration Tests Passed / 0 Failed)**
+**Overall Status:** **100% PASS (47 Unit & Integration Tests Passed / 0 Failed)**
 
 ---
 
 ## Executive Summary
 
-The Multi-Turn Conversational AI system underwent end-to-end regression, unit, integration, stress, and persistence validation across **44 automated tests**:
-- **44 Automated Unit & Integration Tests (server/test-suite.js)**: Evaluated LangChain entity extraction, 3-tier memory lifecycle, cosine vector similarity search, conflict resolution, explicit forgetting, cross-session full conversation history access, cross-user isolation, token-aware context truncation, JWT/Bcrypt security, semantic coherence scoring, universal file parsing (PDF, Image, CSV, Code, Text), LangChain RAG chunking, strict prompt-level anti-hallucination guardrails, Gemini Native Google Search Grounding extraction, Tavily API integration, and Groq fallback regex search triggering.
+The Multi-Turn Conversational AI system underwent end-to-end regression, unit, integration, stress, and persistence validation across **47 automated tests**:
+- **47 Automated Unit & Integration Tests (server/test-suite.js)**: Evaluated LangChain entity extraction, 3-tier memory lifecycle, cosine vector similarity search, conflict resolution, explicit forgetting, cross-session full conversation history access, cross-user isolation, token-aware context truncation, JWT/Bcrypt security, semantic coherence scoring, universal file parsing (PDF, Image, CSV, Code, Text), LangChain RAG chunking, strict prompt-level anti-hallucination guardrails, Gemini Native Google Search Grounding extraction, Tavily API integration, Groq fallback regex search triggering, identity query pre-classification, thin results warnings, and unverified claim guards.
 
 | Metric | Unit, Integration, RAG & Search Suite | Total Combined |
 | :--- | :--- | :--- |
-| **Total Test Cases** | 44 | **44** |
-| **Passed** | 44 | **44** |
+| **Total Test Cases** | 47 | **47** |
+| **Passed** | 47 | **47** |
 | **Failed** | 0 | **0** |
 | **Pass Rate** | **100.0%** | **100.0%** |
 | **Memory & Context Retention** | 100% (Vector search, LangChain extraction, user isolation, past chat access) | 100% (Immediate, 5+ turns, restart recovery) | **100%** |
@@ -98,6 +98,9 @@ The Multi-Turn Conversational AI system underwent end-to-end regression, unit, i
 | **42** | Tavily Search Fallback | Gracefully handles missing API key or timeouts without unhandled exceptions | **PASS** |
 | **43** | Tavily Search Fallback | Formats direct summary answers, snippets, and source URLs for context injection | **PASS** |
 | **44** | Groq Search Regex Trigger | Accurately extracts search queries from bracket tags, markdown blocks, and function calls | **PASS** |
+| **45** | Identity Query Pre-Classifier | Accurately flags biographical/contestant/real-name queries for mandatory search | **PASS** |
+| **46** | Thin Results Warning Guard | Injects strict anti-hallucination directive when search yields sparse or unconfirmed data | **PASS** |
+| **47** | Zero-Source Unverified Claim Guard | Flags ungrounded factual/identity assertions made without source citations | **PASS** |
 
 ---
 

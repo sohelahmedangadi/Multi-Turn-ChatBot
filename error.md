@@ -1,6 +1,6 @@
-# Test Run Report (2026-08-31T07:02:30.604Z)
+# Test Run Report (2026-08-31T07:22:43.809Z)
 
-Total: 44 | Passed: 44 | Failed: 0
+Total: 47 | Passed: 47 | Failed: 0
 
 - PASS: Detects empty string as ambiguous
 - PASS: Flags "What about that?" as ambiguous when context is empty
@@ -46,3 +46,6 @@ Total: 44 | Passed: 44 | Failed: 0
 - PASS: Tavily Search: Gracefully handles missing API key without throwing exceptions
 - PASS: Tavily Search: formatTavilyResultsForContext formats direct answers, summaries, and URLs for context injection
 - PASS: Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls
+- PASS: Identity Query Pre-Classifier: Accurately flags biographical/contestant/real-name queries for mandatory search while passing math queries
+- PASS: Thin Results Formatter: Injects strict anti-hallucination directive when search yields sparse data
+- PASS: Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations

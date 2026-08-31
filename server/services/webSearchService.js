@@ -1,9 +1,11 @@
 /**
- * Web Search Service — Google Search Grounding & Tavily API Integration
+ * Web Search Service — Google Search Grounding, Tavily API Integration & Fact Verification Guardrails
  * 
  * Provides:
- * 1. Gemini Path: Native Google Search Grounding metadata extraction (queries, citations, sources).
- * 2. Groq Path: Tavily Search API with summarized answer extraction, timeout protection, and clean prompt formatting.
+ * 1. Pre-classifier for mandatory search on identity/biographical/factual queries.
+ * 2. Gemini Path: Native Google Search Grounding metadata extraction (queries, citations, sources).
+ * 3. Groq Path: Tavily Search API with summarized answer extraction, timeout protection, and clean prompt formatting.
+ * 4. Thin-results & unverified factual claims detection guards.
  */
 
 const TAVILY_API_URL = 'https://api.tavily.com/search';
@@ -14,6 +16,93 @@ const DEFAULT_SEARCH_TIMEOUT_MS = 7000; // 7s timeout for Tavily search requests
  */
 export function isTavilyConfigured() {
   return Boolean((process.env.TAVILY_API_KEY || '').trim());
+}
+
+/**
+ * Pre-classifier: Detects queries asking for identity, real names, biographical facts,
+ * current events, or specific real-world entity properties where search MUST be forced.
+ * 
+ * @param {string} query - The incoming user message
+ * @returns {boolean}
+ */
+export function isIdentityOrFactualQuery(query) {
+  if (!query || typeof query !== 'string') return false;
+  const q = query.trim().toLowerCase();
+
+  // Pattern checks for identity / real name / biographical / event questions
+  const patterns = [
+    /\bwho\s+(is|was|are|were)\b/i,
+    /\bwhat\s+is\s+.+\b(real\s+name|full\s+name|actual\s+name|birth\s+name|age|birthday|birth\s+date|net\s+worth|origin|wife|husband|spouse|salary|height)\b/i,
+    /\b(real\s+name|full\s+name|birth\s+name|actual\s+name)\s+of\b/i,
+    /\bwho\s+(plays|played|voiced|portrayed|acts\s+as)\b/i,
+    /\b(contestant|participant|winner|runner[\s-]up|host|judge|cast)\s+(on|in|from|of)\b/i,
+    /\b(when|where)\s+was\s+.+\s+born\b/i,
+    /\b(release\s+date|launch\s+date|air\s+date)\s+of\b/i,
+    /\bwhen\s+did\s+.+\s+(release|launch|air|happen|occur|die)\b/i,
+    /\b(current\s+)?(president|prime\s+minister|ceo|founder|director|governor|mayor)\s+of\b/i,
+    /\bwho\s+won\s+(the\s+)?/i,
+    /\bwhat\s+happened\s+to\b/i,
+    /\bwhere\s+is\s+.+\s+now\b/i,
+    /\b(latest|recent|newest)\s+(version|update|news|score|episode|season)\s+of\b/i,
+  ];
+
+  return patterns.some((p) => p.test(q));
+}
+
+/**
+ * Format thin / empty search results warning for prompt injection.
+ * 
+ * @param {string} query - Search query
+ * @param {string} errorOrDetails - Error reason or details
+ * @returns {string}
+ */
+export function formatThinResultsWarning(query, errorOrDetails = 'Limited results found') {
+  let warning = `\n[SEARCH NOTICE - LIMITED/UNVERIFIED SEARCH RESULTS FOR "${query}"]:\n`;
+  warning += `Web search returned thin or unverified results (${errorOrDetails}).\n`;
+  warning += `MANDATORY ANTI-HALLUCINATION DIRECTIVES:\n`;
+  warning += `1. Do NOT guess, extrapolate, or invent missing details (such as real names, aliases, birthplaces, or dates).\n`;
+  warning += `2. If the search results do not explicitly confirm a specific fact, state clearly: "This information (e.g. real name/specific detail) could not be verified in available public search sources."\n`;
+  warning += `3. Never invent names or aliases not present in verified source material.\n`;
+  return warning;
+}
+
+/**
+ * Post-processing guard: Checks if the generated response makes specific unverified factual claims
+ * (such as asserting a person's real name or birth date) when no web sources were confirmed.
+ * 
+ * @param {string} responseText - Generated LLM response text
+ * @param {Array} sources - Array of confirmed citation sources
+ * @param {boolean} usedWebSearch - Whether web search was successfully utilized
+ * @returns {{hasUnverifiedClaim: boolean, warning: string | null}}
+ */
+export function checkForUnverifiedFactualClaims(responseText, sources = [], usedWebSearch = false) {
+  if (!responseText || typeof responseText !== 'string') {
+    return { hasUnverifiedClaim: false, warning: null };
+  }
+
+  // If search was used and we have confirmed sources, claim is supported
+  if (usedWebSearch && Array.isArray(sources) && sources.length > 0) {
+    return { hasUnverifiedClaim: false, warning: null };
+  }
+
+  // Patterns that indicate specific factual assertions that might be ungrounded hallucinations
+  const ungroundedAssertionPatterns = [
+    /\b(real\s+name|legal\s+name|birth\s+name|actual\s+name)\s+(is|was)\s+["']?[A-Z][a-z]+/i,
+    /\b(known\s+as|alias\s+is|goes\s+by)\s+["']?[A-Z][a-z]+/i,
+    /\bwas\s+born\s+on\s+[A-Z][a-z]+\s+\d{1,2}/i,
+    /\b(lives\s+in|resides\s+in|hails\s+from)\s+[A-Z][a-z]+/i,
+  ];
+
+  const hasAssertion = ungroundedAssertionPatterns.some((p) => p.test(responseText));
+
+  if (hasAssertion && (!sources || sources.length === 0)) {
+    return {
+      hasUnverifiedClaim: true,
+      warning: '⚠️ Specific biographical claims in this response could not be verified by web search sources.',
+    };
+  }
+
+  return { hasUnverifiedClaim: false, warning: null };
 }
 
 /**
@@ -121,7 +210,7 @@ export async function tavilySearch(query, options = {}) {
 }
 
 /**
- * Format Tavily search results into a clean, context-injected block for the Groq fallback path.
+ * Format Tavily search results into a clean, context-injected block for the LLM prompt.
  * 
  * @param {Object} searchResult - The output from tavilySearch()
  * @returns {string} Formatted markdown block
@@ -149,10 +238,11 @@ export function formatTavilyResultsForContext(searchResult) {
     }
   }
 
-  formatted += 'INSTRUCTIONS FOR ANSWER SYNTHESIS:\n';
-  formatted += '- Ground your response in the verified search data above.\n';
-  formatted += '- Provide a comprehensive, direct natural-language response.\n';
-  formatted += '- Cite the source URLs clearly (e.g. "[Source Name](url)" or markdown footnotes).\n';
+  formatted += 'STRICT INSTRUCTIONS FOR ANSWER SYNTHESIS:\n';
+  formatted += '- Ground your response strictly in the verified search data above.\n';
+  formatted += '- When answering about a person\'s real name, origin, or facts, ONLY use details explicitly stated in the sources.\n';
+  formatted += '- If the search results do not confirm a specific detail, state that it could not be verified. Do NOT invent plausible names or aliases.\n';
+  formatted += '- Cite the source URLs clearly (e.g. "[Source Name](url)").\n';
 
   return formatted;
 }
