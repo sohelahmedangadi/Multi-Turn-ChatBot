@@ -100,10 +100,10 @@ export function tripGeminiCircuitBreaker() {
 
 /**
  * Check whether web search tools should be enabled for this request.
- * Only enabled when SERPER_API_KEY is configured.
+ * DuckDuckGo Search Python library is used (100% free, no API key required).
  */
 function isWebSearchEnabled() {
-  return Boolean((process.env.SERPER_API_KEY || '').trim());
+  return process.env.DISABLE_WEB_SEARCH !== 'true';
 }
 
 /**

@@ -1,17 +1,18 @@
 # Multi-Turn Conversational AI Capstone (CosmoAI)
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![LangChain.js](https://img.shields.io/badge/LangChain.js-Core_%26_OpenAI-1C3C3C?logo=langchain&logoColor=white)](https://js.langchain.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Groq](https://img.shields.io/badge/Groq-Fast_Inference-F55036?logo=groq&logoColor=white)](https://groq.com/)
-[![Serper](https://img.shields.io/badge/Web_Search-Serper.dev-4285F4?logo=google&logoColor=white)](https://serper.dev/)
-[![Tests](https://img.shields.io/badge/Tests-42%2F42_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
+[![DuckDuckGo](https://img.shields.io/badge/Web_Search-DuckDuckGo_Python-DE5833?logo=duckduckgo&logoColor=white)](https://duckduckgo.com/)
+[![Tests](https://img.shields.io/badge/Tests-43%2F43_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
 [![Architecture Docs](https://img.shields.io/badge/Architecture-Docs-purple)](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A production-grade, modular full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Autonomous Web Search Function Calling (Serper.dev)**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
+A production-grade, modular full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Autonomous Web Search Function Calling (DuckDuckGo Python Library — 100% Free & No API Key Required)**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
 
 > 📖 **Deep Technical Architecture Guide**: See [ARCHITECTURE.md](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md) for full sequence diagrams, component schemas, memory algorithms, and tool calling flowcharts.
 
@@ -23,7 +24,7 @@ A production-grade, modular full-stack multi-turn conversational AI system featu
 - [Project Structure (Frontend & Backend Separation)](#project-structure)
 - [Core Capabilities](#core-capabilities)
   - [1. 3-Tier Memory Context Engine](#1-3-tier-memory-context-engine)
-  - [2. Autonomous Web Search Tool (Serper.dev & Gemini Function Calling)](#2-autonomous-web-search-tool-serperdev--gemini-function-calling)
+  - [2. Autonomous Web Search Tool (DuckDuckGo Python Library)](#2-autonomous-web-search-tool-duckduckgo-python-library)
   - [3. LangChain RAG & Multimodal Document Analysis Engine](#3-langchain-rag--multimodal-document-analysis-engine)
   - [4. Zero-Cost Ambiguity Detection](#4-zero-cost-ambiguity-detection)
   - [5. Dual-Engine LLM Resilience](#5-dual-engine-llm-resilience)
@@ -66,8 +67,9 @@ A production-grade, modular full-stack multi-turn conversational AI system featu
 +-----------------------------+                     |    Past Conversation Catalog   |
 | Autonomous Web Search Tool  |                     |  * Tier 3: RAG Knowledge Base  |
 | - Gemini Function Calling   +-------------------->|  * RAG Document Excerpts       |
-| - Serper.dev Google API     |                     |  * Strict Grounding Guardrails |
-+-----------------------------+                     +----------------+---------------+
+| - DuckDuckGo Python Library |                     |  * Strict Grounding Guardrails |
+|   (No API Key Required)     |                     +----------------+---------------+
++-----------------------------+                                      |
                                                                      |
 +-----------------------------+                                      |
 | LangChain RAG & Multimodal  |                                      |
@@ -127,22 +129,23 @@ multi-turn-conversational-ai-capstone/
 │   ├── services/
 │   │   ├── ambiguityDetector.js          # Zero-latency clarification heuristic
 │   │   ├── contextManager.js             # 3-tier context & anti-hallucination assembler
+│   │   ├── ddgSearch.py                  # DuckDuckGo Search Python bridge
 │   │   ├── evaluationSuite.js            # Coherence scoring & 5 benchmark suites
 │   │   ├── fileParser.js                 # Multi-format parser & Gemini Vision OCR
 │   │   ├── langchainMemory.js            # LangChain durable fact extractor
 │   │   ├── llmProvider.js                # Gemini 2.5 Flash + Groq failover engine & tool loop
 │   │   ├── memoryManager.js              # Vector search, forget & conflict resolution
 │   │   ├── ragService.js                 # LangChain RecursiveTextSplitter chunking & RAG
-│   │   └── webSearchService.js           # Serper.dev API client & Gemini tool declaration
+│   │   └── webSearchService.js           # DuckDuckGo Search bridge & Gemini tool declaration
 │   ├── index.js                          # Express REST API & SSE streaming server
-│   ├── test-suite.js                     # 42/42 Automated Unit & Integration Tests
+│   ├── test-suite.js                     # 43/43 Automated Unit & Integration Tests
 │   └── package.json                      # Backend dependencies & test runner
 │
-├── .env / .env.example                    # Environment secrets
+├── .env / .env.example                    # Environment secrets (No search API key needed)
 ├── package.json                           # Root workspace runner
 ├── README.md                              # Main project documentation
 ├── ARCHITECTURE.md                        # Technical Design Document
-├── QA_TEST_RESULTS.md                     # 42-test QA verification matrix
+├── QA_TEST_RESULTS.md                     # 43-test QA verification matrix
 └── features.md                            # Comprehensive architectural specifications
 ```
 
@@ -167,11 +170,14 @@ multi-turn-conversational-ai-capstone/
 
 ---
 
-### 2. Autonomous Web Search Tool (Serper.dev & Gemini Function Calling)
-- **Gemini Native Function Calling (`server/services/webSearchService.js` & `server/services/llmProvider.js`)**:
+### 2. Autonomous Web Search Tool (DuckDuckGo Python Library)
+- **100% Free & Keyless Web Search (`server/services/ddgSearch.py` & `server/services/webSearchService.js`)**:
+  - Powered by the DuckDuckGo Search Python library (`duckduckgo_search` / `ddgs`).
+  - **Zero API keys required** — runs locally via Python bridge with UTF-8 JSON stream output.
+- **Gemini Native Function Calling (`server/services/llmProvider.js`)**:
   - Exposes `web_search(query: string)` to Gemini via standard function declaration schemas.
   - The LLM autonomously triggers search when asked about current events, breaking software releases, or unfamiliar entities.
-  - Automatic tool execution loop intercepts `functionCall`, queries Serper.dev, feeds `functionResponse`, and synthesizes a natural-language answer with source citations.
+  - Automatic tool execution loop intercepts `functionCall`, queries DuckDuckGo, feeds `functionResponse`, and synthesizes a natural-language answer with source citations.
 - **Groq Regex Fallback**:
   - Employs regex pattern extraction (`[SEARCH: query]`, ````web_search````) to bring live web search to open-source models on Groq.
 - **Strict Grounding Guardrails**:
@@ -227,8 +233,11 @@ multi-turn-conversational-ai-capstone/
 git clone https://github.com/sohelahmedangadi/Multi-Turn-ChatBot.git
 cd Multi-Turn-ChatBot
 
-# Install dependencies
+# Install Node dependencies
 npm install
+
+# Install Python DuckDuckGo search library
+pip install ddgs duckduckgo_search
 ```
 
 ### Environment Configuration
@@ -243,15 +252,14 @@ NODE_ENV=development
 GEMINI_API_KEY=your_gemini_api_key_here
 GROQ_API_KEY=your_groq_api_key_here
 
-# Live Web Search (Serper.dev)
-SERPER_API_KEY=your_serper_api_key_here
-
 # JWT Security
 JWT_SECRET=your_super_secret_jwt_key_here
 
 # Optional: MongoDB Atlas (falls back to in-memory store if omitted)
 MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/chatbot?retryWrites=true&w=majority
 ```
+
+*(Notice: No search API key is required — DuckDuckGo Search runs directly via Python).*
 
 ### Running the Application
 
@@ -270,13 +278,13 @@ npm run build
 
 ## Automated Verification & Testing
 
-Execute the complete **42-point test suite**:
+Execute the complete **43-point test suite**:
 
 ```bash
 npm test
 ```
 
-### Test Output (42/42 Tests Passing):
+### Test Output (43/43 Tests Passing):
 
 ```text
 ======================================================
@@ -334,13 +342,14 @@ npm test
   ✅ PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
   ✅ PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty
 
-🌐 Testing Web Search Service (server/services/webSearchService.js):
+🌐 Testing Web Search Service (DuckDuckGo Search Python Library):
   ✅ PASS: Gemini Function Declaration: web_search schema has correct name, parameters, and required fields
-  ✅ PASS: Web Search: Returns graceful error message when SERPER_API_KEY is missing
-  ✅ PASS: Web Search: formatSearchResultsForContext produces structured, citation-ready output from results
+  ✅ PASS: DuckDuckGo Search: Returns graceful error message on empty query
+  ✅ PASS: DuckDuckGo Search: formatSearchResultsForContext produces structured, citation-ready output from results
+  ✅ PASS: DuckDuckGo Search: Successfully executes query via Python DDGS bridge and extracts live web results
 
 ======================================================
-📊 TEST RESULTS: 42 Passed, 0 Failed
+📊 TEST RESULTS: 43 Passed, 0 Failed
 ======================================================
 ```
 
@@ -358,7 +367,7 @@ npm test
 | `GET` | `/api/sessions` | List all sessions for user |
 | `DELETE` | `/api/session/:sessionId` | Delete a specific chat session |
 | `GET` | `/api/history/:sessionId` | Retrieve message history for a session |
-| `POST` | `/api/chat` | Send message (supports SSE streaming, `fileId`, and autonomous `web_search`) |
+| `POST` | `/api/chat` | Send message (supports SSE streaming, `fileId`, and autonomous DuckDuckGo `web_search`) |
 | `POST` | `/api/files/upload` | Upload & index PDF, Image, CSV, JSON, Markdown, or Code file |
 | `GET` | `/api/files/:fileId` | Retrieve indexed document metadata |
 | `DELETE` | `/api/files/:fileId` | Remove indexed document from memory |

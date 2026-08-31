@@ -4,19 +4,19 @@
 **Test Harnesses:** [server/test-suite.js](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)  
 **Target Server:** http://localhost:5000 / http://localhost:3000 (Node.js Express backend + MongoDB Atlas & In-Memory Resilient Store)  
 **Execution Date:** 2026-08-31  
-**Overall Status:** **100% PASS (39 Unit & Integration Tests Passed / 0 Failed)**
+**Overall Status:** **100% PASS (43 Unit & Integration Tests Passed / 0 Failed)**
 
 ---
 
 ## Executive Summary
 
-The Multi-Turn Conversational AI system underwent end-to-end regression, unit, integration, stress, and persistence validation across **39 automated tests**:
-- **39 Automated Unit & Integration Tests (server/test-suite.js)**: Evaluated LangChain entity extraction, 3-tier memory lifecycle, cosine vector similarity search, conflict resolution, explicit forgetting, cross-session full conversation history access, cross-user isolation, token-aware context truncation, JWT/Bcrypt security, semantic coherence scoring, universal file parsing (PDF, Image, CSV, Code, Text), LangChain RAG chunking, and strict prompt-level anti-hallucination guardrails.
+The Multi-Turn Conversational AI system underwent end-to-end regression, unit, integration, stress, and persistence validation across **43 automated tests**:
+- **43 Automated Unit & Integration Tests (server/test-suite.js)**: Evaluated LangChain entity extraction, 3-tier memory lifecycle, cosine vector similarity search, conflict resolution, explicit forgetting, cross-session full conversation history access, cross-user isolation, token-aware context truncation, JWT/Bcrypt security, semantic coherence scoring, universal file parsing (PDF, Image, CSV, Code, Text), LangChain RAG chunking, strict prompt-level anti-hallucination guardrails, and autonomous DuckDuckGo Search Python bridge execution.
 
-| Metric | Unit, Integration & RAG Suite | Total Combined |
+| Metric | Unit, Integration, RAG & Web Search Suite | Total Combined |
 | :--- | :--- | :--- |
-| **Total Test Cases** | 39 | **39** |
-| **Passed** | 39 | **39** |
+| **Total Test Cases** | 43 | **43** |
+| **Passed** | 43 | **43** |
 | **Failed** | 0 | **0** |
 | **Pass Rate** | **100.0%** | **100.0%** |
 | **Memory & Context Retention** | 100% (Vector search, LangChain extraction, user isolation, past chat access) | 100% (Immediate, 5+ turns, restart recovery) | **100%** |
@@ -93,6 +93,10 @@ The Multi-Turn Conversational AI system underwent end-to-end regression, unit, i
 | **37** | Context Assembler | Successfully retrieves RAG document chunks for attached file | **PASS** |
 | **38** | Context Assembler | Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt | **PASS** |
 | **39** | Anti-Hallucination Guardrail | Injects strict extraction failure directive when document text is empty or missing | **PASS** |
+| **40** | Function Calling Schema | Gemini `web_search` function declaration is correctly formatted with required properties | **PASS** |
+| **41** | DuckDuckGo Error Guard | Returns graceful error message on empty query without throwing unhandled exceptions | **PASS** |
+| **42** | Result Formatter | `formatSearchResultsForContext` produces structured, citation-ready text with URLs | **PASS** |
+| **43** | DuckDuckGo Python Bridge | Executes live web search query via Python DDGS bridge and parses real-time search results | **PASS** |
 
 ---
 

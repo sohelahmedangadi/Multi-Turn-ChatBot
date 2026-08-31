@@ -1,6 +1,6 @@
-# Test Run Report (2026-08-31T04:41:00.931Z)
+# Test Run Report (2026-08-31T06:34:15.460Z)
 
-Total: 42 | Passed: 42 | Failed: 0
+Total: 43 | Passed: 43 | Failed: 0
 
 - PASS: Detects empty string as ambiguous
 - PASS: Flags "What about that?" as ambiguous when context is empty
@@ -42,5 +42,6 @@ Total: 42 | Passed: 42 | Failed: 0
 - PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
 - PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty
 - PASS: Gemini Function Declaration: web_search schema has correct name, parameters, and required fields
-- PASS: Web Search: Returns graceful error message when SERPER_API_KEY is missing
-- PASS: Web Search: formatSearchResultsForContext produces structured, citation-ready output from results
+- PASS: DuckDuckGo Search: Returns graceful error message on empty query
+- PASS: DuckDuckGo Search: formatSearchResultsForContext produces structured, citation-ready output from results
+- PASS: DuckDuckGo Search: Successfully executes query via Python DDGS bridge and extracts live web results

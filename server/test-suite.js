@@ -307,9 +307,9 @@ File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV da
   );
 
   // ----------------------------------------------------
-  // 7. Web Search Service Unit Tests
+  // 7. Web Search Service Unit Tests (DuckDuckGo Search Python Library)
   // ----------------------------------------------------
-  console.log('\n🌐 Testing Web Search Service (server/services/webSearchService.js):');
+  console.log('\n🌐 Testing Web Search Service (server/services/webSearchService.js - DuckDuckGo Search):');
 
   // Test 1: Function declaration schema is correctly structured
   assert(
@@ -322,33 +322,35 @@ File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV da
     'Gemini Function Declaration: web_search schema has correct name, parameters, and required fields'
   );
 
-  // Test 2: webSearch returns graceful error when API key is missing
-  const originalKey = process.env.SERPER_API_KEY;
-  process.env.SERPER_API_KEY = '';
-  const noKeyResult = await webSearch('test query');
+  // Test 2: webSearch returns graceful error on empty query
+  const emptyQueryResult = await webSearch('');
   assert(
-    noKeyResult.error && noKeyResult.error.includes('not configured') && Array.isArray(noKeyResult.results) && noKeyResult.results.length === 0,
-    'Web Search: Returns graceful error message when SERPER_API_KEY is missing'
+    emptyQueryResult.error && emptyQueryResult.error.includes('Empty') && Array.isArray(emptyQueryResult.results) && emptyQueryResult.results.length === 0,
+    'DuckDuckGo Search: Returns graceful error message on empty query'
   );
-  process.env.SERPER_API_KEY = originalKey || '';
 
-  // Test 3: formatSearchResultsForContext produces readable output from mock results
+  // Test 3: formatSearchResultsForContext produces readable output from results
   const mockSearchResult = {
     results: [
       { title: 'React 19 Released', snippet: 'React 19 is now available with new features.', url: 'https://react.dev/blog/react-19' },
       { title: 'React Docs', snippet: 'Official React documentation.', url: 'https://react.dev' },
     ],
-    answerBox: { title: 'React Version', answer: 'React 19', source: 'https://react.dev' },
     error: null,
   };
   const formatted = formatSearchResultsForContext(mockSearchResult);
   assert(
-    formatted.includes('[WEB SEARCH RESULTS]') &&
+    formatted.includes('[WEB SEARCH RESULTS') &&
       formatted.includes('React 19 Released') &&
       formatted.includes('https://react.dev/blog/react-19') &&
-      formatted.includes('Direct Answer: React 19') &&
       formatted.includes('Cite specific source'),
-    'Web Search: formatSearchResultsForContext produces structured, citation-ready output from results'
+    'DuckDuckGo Search: formatSearchResultsForContext produces structured, citation-ready output from results'
+  );
+
+  // Test 4: Live Python Bridge search execution
+  const liveDDGResult = await webSearch('Node.js release', 2);
+  assert(
+    Array.isArray(liveDDGResult.results) && liveDDGResult.results.length > 0 && liveDDGResult.results[0].title && liveDDGResult.results[0].url,
+    'DuckDuckGo Search: Successfully executes query via Python DDGS bridge and extracts live web results'
   );
 
   // Write results out to error.md

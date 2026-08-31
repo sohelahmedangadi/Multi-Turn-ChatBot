@@ -238,16 +238,17 @@ flowchart TD
 ### Gemini Native Function Calling Pipeline
 1. The [`WEB_SEARCH_FUNCTION_DECLARATION`](file:///d:/multi-turn-conversational-ai-capstone/server/services/webSearchService.js) schema is passed to Gemini via `ai.models.generateContent({ config: { tools: [...] } })`.
 2. When Gemini encounters a query requiring live data, it emits a `functionCall: { name: 'web_search', args: { query: '...' } }`.
-3. [`llmProvider.js`](file:///d:/multi-turn-conversational-ai-capstone/server/services/llmProvider.js) intercepts the tool call, executes `webSearch(query)` against Serper.dev, appends the `functionResponse`, and executes the second synthesis call.
+3. [`llmProvider.js`](file:///d:/multi-turn-conversational-ai-capstone/server/services/llmProvider.js) intercepts the tool call, executes `webSearch(query)` via the DuckDuckGo Python bridge [`ddgSearch.py`](file:///d:/multi-turn-conversational-ai-capstone/server/services/ddgSearch.py), appends the `functionResponse`, and executes the second synthesis call.
 
-### Serper.dev Search Provider Integration
-- Single lightweight REST endpoint (`https://google.serper.dev/search`).
-- Extracts clean organic titles, text snippets, target URLs, and structured Knowledge Graph answer boxes.
+### DuckDuckGo Search Python Library Integration
+- Powered by `duckduckgo_search` / `ddgs` Python package.
+- **100% Free & No API Key Required**: The Node.js service spawns a lightweight Python bridge with UTF-8 JSON stream output.
+- Extracts clean organic titles, text snippets, and target URLs.
 
 ### Groq Prompt-Based Regex Fallback Engine
 - Since Groq open-source models do not share Gemini's unified tool calling schema, the system provides a dual-mode fallback:
   - System prompt instructs Groq models to emit `[SEARCH: query]` when live data is needed.
-  - Robust regex parsing in [`extractSearchQueryFromText`](file:///d:/multi-turn-conversational-ai-capstone/server/services/llmProvider.js) intercepts `[SEARCH: ...]`, ````web_search```` markdown blocks, or functional syntax, executes Serper.dev, and re-prompts the model with formatted search results.
+  - Robust regex parsing in [`extractSearchQueryFromText`](file:///d:/multi-turn-conversational-ai-capstone/server/services/llmProvider.js) intercepts `[SEARCH: ...]`, ````web_search```` markdown blocks, or functional syntax, executes DuckDuckGo search, and re-prompts the model with formatted search results.
 
 ### Strict Anti-Hallucination & Factual Grounding Rules
 - **Rule 1**: Only facts, names, or dates explicitly present in search snippets may be stated.

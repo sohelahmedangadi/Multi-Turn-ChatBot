@@ -1,31 +1,30 @@
 /**
- * Web Search Service — Serper.dev Integration
+ * Web Search Service — DuckDuckGo Search Integration (Python Library)
  * 
  * Provides a web_search(query) tool for real-time web search capabilities.
+ * Powered by the DuckDuckGo Search Python library (100% free, no API key required).
  * Returns top 5 results with title, snippet, and URL.
- * Handles API errors gracefully — returns an error description instead of throwing.
+ * Handles errors gracefully — returns an error description instead of throwing.
  */
 
-const SERPER_API_URL = 'https://google.serper.dev/search';
+import { execFile } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { promisify } from 'util';
+
+const execFileAsync = promisify(execFile);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const SCRIPT_PATH = path.join(__dirname, 'ddgSearch.py');
 
 /**
- * Execute a web search query using the Serper.dev API.
+ * Execute a web search query using the DuckDuckGo Search Python library.
  * 
  * @param {string} query - The search query string
  * @param {number} numResults - Number of results to return (default: 5)
  * @returns {Promise<{results?: Array<{title: string, snippet: string, url: string}>, error?: string}>}
  */
 export async function webSearch(query, numResults = 5) {
-  const apiKey = (process.env.SERPER_API_KEY || '').trim();
-
-  if (!apiKey) {
-    console.warn('[WebSearch] SERPER_API_KEY is not configured. Web search is unavailable.');
-    return {
-      error: 'Web search is not configured. The SERPER_API_KEY environment variable is missing.',
-      results: [],
-    };
-  }
-
   if (!query || typeof query !== 'string' || query.trim().length === 0) {
     return {
       error: 'Empty or invalid search query provided.',
@@ -34,65 +33,49 @@ export async function webSearch(query, numResults = 5) {
   }
 
   try {
-    const response = await fetch(SERPER_API_URL, {
-      method: 'POST',
-      headers: {
-        'X-API-KEY': apiKey,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        q: query.trim(),
-        num: numResults,
-      }),
-    });
+    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
+    const { stdout, stderr } = await execFileAsync(
+      pythonCmd,
+      [SCRIPT_PATH, query.trim(), String(numResults)],
+      {
+        timeout: 15000, // 15s timeout
+        maxBuffer: 1024 * 1024 * 5, // 5MB buffer
+        encoding: 'utf-8',
+      }
+    );
 
-    if (!response.ok) {
-      const errorBody = await response.text().catch(() => '');
-      console.error(`[WebSearch] Serper API returned HTTP ${response.status}: ${errorBody}`);
+    if (stderr && stderr.trim()) {
+      console.warn(`[WebSearch DuckDuckGo notice]:`, stderr.trim());
+    }
+
+    const trimmed = stdout.trim();
+    if (!trimmed) {
       return {
-        error: `Web search failed with HTTP ${response.status}. The search service may be temporarily unavailable.`,
+        error: `No search results returned for query: "${query}"`,
         results: [],
       };
     }
 
-    const data = await response.json();
+    const parsed = JSON.parse(trimmed);
+    const results = parsed.results || [];
 
-    // Extract organic search results
-    const organicResults = data.organic || [];
-    const formattedResults = organicResults.slice(0, numResults).map((result) => ({
-      title: result.title || 'Untitled',
-      snippet: result.snippet || '',
-      url: result.link || '',
-    }));
-
-    // Also check for knowledge graph / answer box for quick factual answers
-    let answerBox = null;
-    if (data.answerBox) {
-      answerBox = {
-        title: data.answerBox.title || '',
-        answer: data.answerBox.answer || data.answerBox.snippet || '',
-        source: data.answerBox.link || '',
-      };
-    }
-
-    if (formattedResults.length === 0 && !answerBox) {
+    if (results.length === 0) {
       return {
-        error: `No search results found for query: "${query}"`,
+        error: parsed.error || `No search results found for query: "${query}"`,
         results: [],
       };
     }
 
-    console.log(`[WebSearch] Query: "${query}" → ${formattedResults.length} results returned.`);
+    console.log(`[WebSearch DuckDuckGo] Query: "${query}" → ${results.length} results returned.`);
 
     return {
-      results: formattedResults,
-      answerBox,
+      results: results.slice(0, numResults),
       error: null,
     };
   } catch (err) {
-    console.error(`[WebSearch] Network or parsing error:`, err.message || err);
+    console.error(`[WebSearch DuckDuckGo] Execution error:`, err.message || err);
     return {
-      error: `Web search failed due to a network error: ${err.message || 'Unknown error'}. Please try again.`,
+      error: `Web search execution failed: ${err.message || 'Unknown error'}`,
       results: [],
     };
   }
@@ -110,15 +93,7 @@ export function formatSearchResultsForContext(searchResult) {
     return `[WEB SEARCH FAILED]: ${searchResult.error}`;
   }
 
-  let formatted = '[WEB SEARCH RESULTS]:\n';
-
-  if (searchResult.answerBox) {
-    formatted += `\nDirect Answer: ${searchResult.answerBox.answer}`;
-    if (searchResult.answerBox.source) {
-      formatted += ` (Source: ${searchResult.answerBox.source})`;
-    }
-    formatted += '\n';
-  }
+  let formatted = '[WEB SEARCH RESULTS (DuckDuckGo)]:\n';
 
   for (let i = 0; i < searchResult.results.length; i++) {
     const r = searchResult.results[i];
