@@ -1,4 +1,5 @@
 import { detectAmbiguity } from './services/ambiguityDetector.js';
+import { webSearch, formatSearchResultsForContext, WEB_SEARCH_FUNCTION_DECLARATION } from './services/webSearchService.js';
 import {
   getSessionContext,
   estimateTokenCount,
@@ -303,6 +304,51 @@ File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV da
     emptyGuardContext.contextualMemorySection.includes('[ATTACHED DOCUMENT NOTICE - EXTRACTION FAILED / EMPTY]') &&
       emptyGuardContext.contextualMemorySection.includes('DO NOT GUESS'),
     'Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty'
+  );
+
+  // ----------------------------------------------------
+  // 7. Web Search Service Unit Tests
+  // ----------------------------------------------------
+  console.log('\n🌐 Testing Web Search Service (server/services/webSearchService.js):');
+
+  // Test 1: Function declaration schema is correctly structured
+  assert(
+    WEB_SEARCH_FUNCTION_DECLARATION.name === 'web_search' &&
+      WEB_SEARCH_FUNCTION_DECLARATION.parameters &&
+      WEB_SEARCH_FUNCTION_DECLARATION.parameters.properties &&
+      WEB_SEARCH_FUNCTION_DECLARATION.parameters.properties.query &&
+      WEB_SEARCH_FUNCTION_DECLARATION.parameters.properties.query.type === 'STRING' &&
+      WEB_SEARCH_FUNCTION_DECLARATION.parameters.required.includes('query'),
+    'Gemini Function Declaration: web_search schema has correct name, parameters, and required fields'
+  );
+
+  // Test 2: webSearch returns graceful error when API key is missing
+  const originalKey = process.env.SERPER_API_KEY;
+  process.env.SERPER_API_KEY = '';
+  const noKeyResult = await webSearch('test query');
+  assert(
+    noKeyResult.error && noKeyResult.error.includes('not configured') && Array.isArray(noKeyResult.results) && noKeyResult.results.length === 0,
+    'Web Search: Returns graceful error message when SERPER_API_KEY is missing'
+  );
+  process.env.SERPER_API_KEY = originalKey || '';
+
+  // Test 3: formatSearchResultsForContext produces readable output from mock results
+  const mockSearchResult = {
+    results: [
+      { title: 'React 19 Released', snippet: 'React 19 is now available with new features.', url: 'https://react.dev/blog/react-19' },
+      { title: 'React Docs', snippet: 'Official React documentation.', url: 'https://react.dev' },
+    ],
+    answerBox: { title: 'React Version', answer: 'React 19', source: 'https://react.dev' },
+    error: null,
+  };
+  const formatted = formatSearchResultsForContext(mockSearchResult);
+  assert(
+    formatted.includes('[WEB SEARCH RESULTS]') &&
+      formatted.includes('React 19 Released') &&
+      formatted.includes('https://react.dev/blog/react-19') &&
+      formatted.includes('Direct Answer: React 19') &&
+      formatted.includes('Cite specific source'),
+    'Web Search: formatSearchResultsForContext produces structured, citation-ready output from results'
   );
 
   // Write results out to error.md

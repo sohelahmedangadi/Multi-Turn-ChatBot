@@ -559,6 +559,8 @@ async function startServer() {
               attachedFileId: fileId || null,
               attachedFilename: context.attachedDocumentMeta?.filename || null,
               attachedChunksCount: context.relevantDocumentChunks?.length || 0,
+              usedWebSearch: streamResult.usedWebSearch || false,
+              searchQuery: streamResult.searchQuery || null,
             },
           };
           await db.saveMessage(assistantMessageDoc);
@@ -615,6 +617,8 @@ async function startServer() {
           attachedFileId: fileId || null,
           attachedFilename: context.attachedDocumentMeta?.filename || null,
           attachedChunksCount: context.relevantDocumentChunks?.length || 0,
+          usedWebSearch: llmResult.usedWebSearch || false,
+          searchQuery: llmResult.searchQuery || null,
         },
       };
       await db.saveMessage(assistantMessageDoc);

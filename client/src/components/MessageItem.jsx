@@ -9,6 +9,7 @@ import {
   Brain,
   Terminal,
   Paperclip,
+  Search,
 } from 'lucide-react';
 import { CopyButton, stripMarkdown } from './CopyButton';
 
@@ -115,6 +116,14 @@ export const MessageItem = ({ message }) => {
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
                 <HelpCircle className="w-3 h-3 text-amber-700" />
                 <span>Clarification Triggered</span>
+              </span>
+            )}
+
+            {/* Web Search Indicator Badge */}
+            {isAssistant && metadata?.usedWebSearch && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-sky-100 text-sky-950 border border-sky-400 font-bold uppercase">
+                <Search className="w-3 h-3 text-sky-700" />
+                <span>Web Search</span>
               </span>
             )}
           </div>

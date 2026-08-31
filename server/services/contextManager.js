@@ -190,6 +190,22 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
     }
   }
 
+  // Web Search Tool Instructions
+  contextualMemorySection += '\n\n[WEB SEARCH TOOL INSTRUCTIONS]:\n';
+  contextualMemorySection += 'You have access to a `web_search` tool that can search the internet for current information.\n';
+  contextualMemorySection += 'USE web_search when the user asks about:\n';
+  contextualMemorySection += '- Current events, recent news, or live data\n';
+  contextualMemorySection += '- Recent software releases, version numbers, or changelogs\n';
+  contextualMemorySection += '- People, organizations, or entities you don\'t recognize or are unsure about\n';
+  contextualMemorySection += '- Anything time-sensitive that your training data may not cover\n';
+  contextualMemorySection += '- Facts you are not confident about and want to verify\n';
+  contextualMemorySection += 'DO NOT use web_search for:\n';
+  contextualMemorySection += '- General knowledge questions you can answer confidently\n';
+  contextualMemorySection += '- Math, logic, or reasoning tasks\n';
+  contextualMemorySection += '- Questions about the user\'s own project, memories, or uploaded documents\n';
+  contextualMemorySection += 'After receiving search results, synthesize a helpful natural-language answer and CITE the source URL(s). Do NOT dump raw search results.\n';
+  contextualMemorySection += 'If the search returns no results or fails, say so honestly instead of guessing.\n';
+
   return {
     history: truncatedHistory,
     totalTokensEstimated: tokensUsed,

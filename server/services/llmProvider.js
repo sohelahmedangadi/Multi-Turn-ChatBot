@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import Groq from 'groq-sdk';
+import { webSearch, formatSearchResultsForContext, WEB_SEARCH_FUNCTION_DECLARATION } from './webSearchService.js';
 
 // Global cached client instances with lazy init
 let geminiClient = null;
@@ -98,8 +99,74 @@ export function tripGeminiCircuitBreaker() {
 }
 
 /**
+ * Check whether web search tools should be enabled for this request.
+ * Only enabled when SERPER_API_KEY is configured.
+ */
+function isWebSearchEnabled() {
+  return Boolean((process.env.SERPER_API_KEY || '').trim());
+}
+
+/**
+ * Build Gemini tools config with web_search function declaration.
+ */
+function getGeminiToolsConfig() {
+  if (!isWebSearchEnabled()) return {};
+  return {
+    tools: [
+      {
+        functionDeclarations: [WEB_SEARCH_FUNCTION_DECLARATION],
+      },
+    ],
+  };
+}
+
+/**
+ * Extract a function call from a Gemini response, if present.
+ * Returns { name, args } or null.
+ */
+function extractFunctionCall(response) {
+  try {
+    const candidates = response?.candidates;
+    if (!candidates || candidates.length === 0) return null;
+    const parts = candidates[0]?.content?.parts;
+    if (!parts || parts.length === 0) return null;
+    for (const part of parts) {
+      if (part.functionCall) {
+        return {
+          name: part.functionCall.name,
+          args: part.functionCall.args || {},
+        };
+      }
+    }
+  } catch (_) {
+    // Fallback: no function call found
+  }
+  return null;
+}
+
+/**
+ * Execute a tool call and return the result.
+ * Currently only supports 'web_search'.
+ */
+async function executeToolCall(functionCall) {
+  if (functionCall.name === 'web_search') {
+    const query = functionCall.args?.query || '';
+    console.log(`[Function Calling] Executing web_search("${query}")`);
+    const searchResult = await webSearch(query);
+    return {
+      name: 'web_search',
+      response: searchResult,
+    };
+  }
+  return {
+    name: functionCall.name,
+    response: { error: `Unknown tool: ${functionCall.name}` },
+  };
+}
+
+/**
  * Universal Non-Streaming Response Generator
- * Attempts Gemini first, automatically fails over to Groq with fallback tagging if quota/rate limited.
+ * Attempts Gemini first (with function calling support), automatically fails over to Groq.
  */
 export async function generateResponse(
   history,
@@ -132,6 +199,8 @@ export async function generateResponse(
           },
         ];
 
+        const toolsConfig = getGeminiToolsConfig();
+
         for (const model of candidateModels) {
           try {
             const response = await withTimeout(
@@ -141,12 +210,66 @@ export async function generateResponse(
                 config: {
                   systemInstruction: systemPrompt,
                   temperature: 0.7,
+                  ...toolsConfig,
                 },
               }),
               PER_CALL_TIMEOUT_MS,
               `Gemini (${model})`
             );
 
+            // Check for function call in response
+            const functionCall = extractFunctionCall(response);
+            let usedWebSearch = false;
+
+            if (functionCall) {
+              // Execute the tool call
+              const toolResult = await executeToolCall(functionCall);
+              usedWebSearch = functionCall.name === 'web_search';
+
+              // Append function call and response to conversation, then re-generate
+              const updatedContents = [
+                ...contents,
+                {
+                  role: 'model',
+                  parts: [{ functionCall: { name: functionCall.name, args: functionCall.args } }],
+                },
+                {
+                  role: 'user',
+                  parts: [{ functionResponse: { name: toolResult.name, response: toolResult.response } }],
+                },
+              ];
+
+              // Second call: Gemini synthesizes a final answer using the tool results
+              const synthesisResponse = await withTimeout(
+                ai.models.generateContent({
+                  model,
+                  contents: updatedContents,
+                  config: {
+                    systemInstruction: systemPrompt,
+                    temperature: 0.7,
+                  },
+                }),
+                PER_CALL_TIMEOUT_MS * 2, // Allow extra time for synthesis
+                `Gemini Synthesis (${model})`
+              );
+
+              const text = synthesisResponse.text || '';
+              const latencyMs = Date.now() - startTime;
+              const tokensEstimated = Math.ceil((text.length + message.length) / 4);
+
+              return {
+                text,
+                provider: 'gemini',
+                model,
+                latencyMs,
+                tokensEstimated,
+                isFallback: false,
+                usedWebSearch,
+                searchQuery: functionCall.args?.query || null,
+              };
+            }
+
+            // No function call — standard text response
             const text = response.text || '';
             const latencyMs = Date.now() - startTime;
             const tokensEstimated = Math.ceil((text.length + message.length) / 4);
@@ -158,6 +281,7 @@ export async function generateResponse(
               latencyMs,
               tokensEstimated,
               isFallback: false,
+              usedWebSearch: false,
             };
           } catch (err) {
             const errMsg = err?.message || String(err);
@@ -179,7 +303,7 @@ export async function generateResponse(
     }
   }
 
-  // 2. Automatic Failover to Groq
+  // 2. Automatic Failover to Groq (with prompt-based web search fallback)
   if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
     try {
       const groq = getGroqClient();
@@ -212,8 +336,41 @@ export async function generateResponse(
             `Groq (${model})`
           );
 
-          const text = completion.choices[0]?.message?.content || '';
+          let text = completion.choices[0]?.message?.content || '';
           const latencyMs = Date.now() - startTime;
+          let usedWebSearch = false;
+          let searchQuery = null;
+
+          // Groq fallback: Check if model requested a web search via [SEARCH: query]
+          const searchMatch = text.match(/\[SEARCH:\s*(.+?)\]/i);
+          if (searchMatch && isWebSearchEnabled()) {
+            searchQuery = searchMatch[1].trim();
+            console.log(`[Groq Fallback] Detected search request: "${searchQuery}"`);
+            const searchResult = await webSearch(searchQuery);
+            const searchContext = formatSearchResultsForContext(searchResult);
+            usedWebSearch = true;
+
+            // Re-prompt Groq with search results injected
+            const retryMessages = [
+              ...messages,
+              { role: 'assistant', content: text },
+              { role: 'user', content: `Here are the web search results for "${searchQuery}":\n\n${searchContext}\n\nNow please answer the original question using these search results. Cite sources with URLs.` },
+            ];
+
+            const retryCompletion = await withTimeout(
+              groq.chat.completions.create({
+                model,
+                messages: retryMessages,
+                temperature: 0.7,
+                max_tokens: 1024,
+              }),
+              PER_CALL_TIMEOUT_MS,
+              `Groq Search Synthesis (${model})`
+            );
+
+            text = retryCompletion.choices[0]?.message?.content || text;
+          }
+
           const tokensEstimated =
             completion.usage?.total_tokens || Math.ceil((text.length + message.length) / 4);
 
@@ -221,9 +378,11 @@ export async function generateResponse(
             text,
             provider: 'groq',
             model,
-            latencyMs,
+            latencyMs: Date.now() - startTime,
             tokensEstimated,
             isFallback: true,
+            usedWebSearch,
+            searchQuery,
           };
         } catch (groqModelErr) {
           console.warn(`[Groq Fallback] Model ${model} failed (${groqModelErr?.message}), trying next candidate...`);
@@ -239,7 +398,7 @@ export async function generateResponse(
 
 /**
  * Universal Streaming Response Generator
- * Streams from Gemini, and automatically falls back to Groq if Gemini is quota limited.
+ * Streams from Gemini (with function calling), and automatically falls back to Groq.
  */
 export async function generateStreamResponse(
   history,
@@ -273,40 +432,106 @@ export async function generateStreamResponse(
           },
         ];
 
+        const toolsConfig = getGeminiToolsConfig();
+
         for (const model of candidateModels) {
           try {
-            const responseStream = await withTimeout(
-              ai.models.generateContentStream({
+            // First call: Non-streaming to check for function calls
+            const initialResponse = await withTimeout(
+              ai.models.generateContent({
                 model,
                 contents,
                 config: {
                   systemInstruction: systemPrompt,
                   temperature: 0.7,
+                  ...toolsConfig,
                 },
               }),
               PER_CALL_TIMEOUT_MS,
-              `Gemini Stream (${model})`
+              `Gemini Stream Init (${model})`
             );
 
-            let fullText = '';
-            for await (const chunk of responseStream) {
-              const chunkText = chunk.text || '';
-              if (chunkText) {
-                fullText += chunkText;
-                onChunk(chunkText);
+            const functionCall = extractFunctionCall(initialResponse);
+
+            if (functionCall) {
+              // Execute the tool call
+              const toolResult = await executeToolCall(functionCall);
+              const usedWebSearch = functionCall.name === 'web_search';
+
+              // Send a search indicator chunk to the client
+              if (usedWebSearch) {
+                onChunk(`🔍 *Searching the web for: "${functionCall.args?.query}"...*\n\n`);
               }
+
+              // Build updated conversation with tool results
+              const updatedContents = [
+                ...contents,
+                {
+                  role: 'model',
+                  parts: [{ functionCall: { name: functionCall.name, args: functionCall.args } }],
+                },
+                {
+                  role: 'user',
+                  parts: [{ functionResponse: { name: toolResult.name, response: toolResult.response } }],
+                },
+              ];
+
+              // Stream the synthesis response
+              const synthesisStream = await withTimeout(
+                ai.models.generateContentStream({
+                  model,
+                  contents: updatedContents,
+                  config: {
+                    systemInstruction: systemPrompt,
+                    temperature: 0.7,
+                  },
+                }),
+                PER_CALL_TIMEOUT_MS * 2,
+                `Gemini Synthesis Stream (${model})`
+              );
+
+              let fullText = '🔍 *Searching the web for: "' + (functionCall.args?.query || '') + '"...*\n\n';
+              for await (const chunk of synthesisStream) {
+                const chunkText = chunk.text || '';
+                if (chunkText) {
+                  fullText += chunkText;
+                  onChunk(chunkText);
+                }
+              }
+
+              const latencyMs = Date.now() - startTime;
+              const tokensEstimated = Math.ceil((fullText.length + message.length) / 4);
+
+              return {
+                text: fullText,
+                provider: 'gemini',
+                model,
+                latencyMs,
+                tokensEstimated,
+                isFallback: false,
+                usedWebSearch,
+                searchQuery: functionCall.args?.query || null,
+              };
+            }
+
+            // No function call — stream the initial text response
+            // Since we already got the non-streaming response, stream it manually
+            const initialText = initialResponse.text || '';
+            if (initialText) {
+              onChunk(initialText);
             }
 
             const latencyMs = Date.now() - startTime;
-            const tokensEstimated = Math.ceil((fullText.length + message.length) / 4);
+            const tokensEstimated = Math.ceil((initialText.length + message.length) / 4);
 
             return {
-              text: fullText,
+              text: initialText,
               provider: 'gemini',
               model,
               latencyMs,
               tokensEstimated,
               isFallback: false,
+              usedWebSearch: false,
             };
           } catch (err) {
             const errMsg = err?.message || String(err);
@@ -371,6 +596,49 @@ export async function generateStreamResponse(
             }
           }
 
+          // Groq fallback: Check if model requested a web search via [SEARCH: query]
+          const searchMatch = fullText.match(/\[SEARCH:\s*(.+?)\]/i);
+          let usedWebSearch = false;
+          let searchQuery = null;
+
+          if (searchMatch && isWebSearchEnabled()) {
+            searchQuery = searchMatch[1].trim();
+            console.log(`[Groq Stream Fallback] Detected search request: "${searchQuery}"`);
+            const searchResult = await webSearch(searchQuery);
+            const searchContext = formatSearchResultsForContext(searchResult);
+            usedWebSearch = true;
+
+            onChunk('\n\n🔍 *Searching the web...*\n\n');
+
+            // Re-prompt Groq with search results (non-streaming then stream synthesis)
+            const retryMessages = [
+              ...messages,
+              { role: 'assistant', content: fullText },
+              { role: 'user', content: `Here are the web search results for "${searchQuery}":\n\n${searchContext}\n\nNow please answer the original question using these search results. Cite sources with URLs.` },
+            ];
+
+            const retryStream = await withTimeout(
+              groq.chat.completions.create({
+                model,
+                messages: retryMessages,
+                temperature: 0.7,
+                max_tokens: 1024,
+                stream: true,
+              }),
+              PER_CALL_TIMEOUT_MS,
+              `Groq Search Synthesis Stream (${model})`
+            );
+
+            fullText = '';
+            for await (const chunk of retryStream) {
+              const delta = chunk.choices[0]?.delta?.content || '';
+              if (delta) {
+                fullText += delta;
+                onChunk(delta);
+              }
+            }
+          }
+
           const latencyMs = Date.now() - startTime;
           const tokensEstimated = Math.ceil((fullText.length + message.length) / 4);
 
@@ -381,6 +649,8 @@ export async function generateStreamResponse(
             latencyMs,
             tokensEstimated,
             isFallback: true,
+            usedWebSearch,
+            searchQuery,
           };
         } catch (groqModelErr) {
           console.warn(`[Groq Stream Fallback] Model ${model} failed (${groqModelErr?.message}), trying next candidate...`);
