@@ -6,7 +6,7 @@
 [![LangChain.js](https://img.shields.io/badge/LangChain.js-Core_%26_OpenAI-1C3C3C?logo=langchain&logoColor=white)](https://js.langchain.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Groq](https://img.shields.io/badge/Groq-Fast_Inference-F55036?logo=groq&logoColor=white)](https://groq.com/)
-[![Tests](https://img.shields.io/badge/Tests-47%2F47_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
+[![Tests](https://img.shields.io/badge/Tests-52%2F52_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A production-grade, modular full-stack multi-turn conversational AI system featuring **Native Google Search Grounding & Tavily API Fallback**, **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**. Detailed design is documented in [ARCHITECTURE.md](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md).
@@ -331,8 +331,15 @@ npm test
   ✅ PASS: Thin Results Formatter: Injects strict anti-hallucination directive when search yields sparse data
   ✅ PASS: Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations
 
+🧠 Testing Upstream Input Classifier:
+  ✅ PASS: Input Classifier: Correctly classifies identity/biographical query as needsWebSearch = true
+  ✅ PASS: Input Classifier: Correctly classifies casual greeting as needsWebSearch = false
+  ✅ PASS: Input Classifier: Correctly classifies coding help request as needsWebSearch = false
+  ✅ PASS: Input Classifier: Correctly classifies current events keyword query as needsWebSearch = true
+  ✅ PASS: Input Classifier: Ambiguous queries safely default to needsWebSearch = true with confidence = low
+
 ======================================================
-📊 TEST RESULTS: 47 Passed, 0 Failed
+📊 TEST RESULTS: 52 Passed, 0 Failed
 ======================================================
 ```
 

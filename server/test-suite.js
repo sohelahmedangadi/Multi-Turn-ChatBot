@@ -9,6 +9,7 @@ import {
   checkForUnverifiedFactualClaims,
   isTavilyConfigured,
 } from './services/webSearchService.js';
+import { classifyInput } from './services/inputClassifier.js';
 import {
   getSessionContext,
   estimateTokenCount,
@@ -430,6 +431,46 @@ File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV da
       claim1.warning.includes('could not be verified') &&
       claim2.hasUnverifiedClaim === false,
     'Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations'
+  );
+
+  // ----------------------------------------------------
+  // 8. Input Classifier Unit Tests (server/services/inputClassifier.js)
+  // ----------------------------------------------------
+  console.log('\n🧠 Testing Upstream Input Classifier (server/services/inputClassifier.js):');
+
+  // Test 1: Identity query -> needsWebSearch = true
+  const c1 = classifyInput('who is Farak from MTV Hustle 5');
+  assert(
+    c1.needsWebSearch === true && c1.reason === 'identity_biographical_lookup' && c1.confidence === 'high',
+    'Input Classifier: Correctly classifies identity/biographical query as needsWebSearch = true'
+  );
+
+  // Test 2: Casual greeting -> needsWebSearch = false
+  const c2 = classifyInput('hello there, good morning!');
+  assert(
+    c2.needsWebSearch === false && c2.reason === 'casual_greeting' && c2.confidence === 'high',
+    'Input Classifier: Correctly classifies casual greeting as needsWebSearch = false'
+  );
+
+  // Test 3: Coding help -> needsWebSearch = false
+  const c3 = classifyInput('how to fix a React useEffect infinite loop bug in javascript');
+  assert(
+    c3.needsWebSearch === false && c3.reason === 'code_help' && c3.confidence === 'high',
+    'Input Classifier: Correctly classifies coding help request as needsWebSearch = false'
+  );
+
+  // Test 4: Current events keyword -> needsWebSearch = true
+  const c4 = classifyInput('what is the latest release version of Next.js in 2026?');
+  assert(
+    c4.needsWebSearch === true && c4.reason === 'current_events_time_sensitive' && c4.confidence === 'high',
+    'Input Classifier: Correctly classifies current events keyword query as needsWebSearch = true'
+  );
+
+  // Test 5: Ambiguous query -> defaults needsWebSearch = true with confidence = 'low'
+  const c5 = classifyInput('what about the secret project AlphaZ?');
+  assert(
+    c5.needsWebSearch === true && c5.confidence === 'low',
+    'Input Classifier: Ambiguous queries safely default to needsWebSearch = true with confidence = low'
   );
 
   // Write results out to error.md

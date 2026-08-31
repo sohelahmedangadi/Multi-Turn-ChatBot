@@ -565,6 +565,7 @@ async function startServer() {
               sources: streamResult.sources || [],
               unverifiedClaim: streamResult.unverifiedClaim || false,
               unverifiedWarning: streamResult.unverifiedWarning || null,
+              classification: streamResult.classification || null,
             },
           };
           await db.saveMessage(assistantMessageDoc);
@@ -586,6 +587,7 @@ async function startServer() {
             sources: streamResult.sources || [],
             unverifiedClaim: streamResult.unverifiedClaim || false,
             unverifiedWarning: streamResult.unverifiedWarning || null,
+            classification: streamResult.classification || null,
           })}\n\n`);
           return res.end();
         } catch (streamErr) {
@@ -630,6 +632,7 @@ async function startServer() {
           sources: llmResult.sources || [],
           unverifiedClaim: llmResult.unverifiedClaim || false,
           unverifiedWarning: llmResult.unverifiedWarning || null,
+          classification: llmResult.classification || null,
         },
       };
       await db.saveMessage(assistantMessageDoc);
@@ -652,6 +655,7 @@ async function startServer() {
         sources: llmResult.sources || [],
         unverifiedClaim: llmResult.unverifiedClaim || false,
         unverifiedWarning: llmResult.unverifiedWarning || null,
+        classification: llmResult.classification || null,
       });
     } catch (err) {
       console.error('Chat processing error:', err);

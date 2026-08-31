@@ -6,10 +6,10 @@ import {
   formatThinResultsWarning,
   extractGeminiGroundingSources,
   extractSearchQueryFromText,
-  isIdentityOrFactualQuery,
   checkForUnverifiedFactualClaims,
   isTavilyConfigured,
 } from './webSearchService.js';
+import { classifyInput } from './inputClassifier.js';
 
 // Global cached client instances with lazy init
 let geminiClient = null;
@@ -109,8 +109,8 @@ export function tripGeminiCircuitBreaker() {
 
 /**
  * Universal Non-Streaming Response Generator
- * Primary: Google Gemini with Native Google Search Grounding & Mandatory Identity Search Injection.
- * Fallback: Groq with Tavily Search API.
+ * Evaluates input classifier upstream, runs proactive search if needed,
+ * then executes Gemini (with Native Search Grounding) or Groq fallback.
  */
 export async function generateResponse(
   history,
@@ -120,17 +120,17 @@ export async function generateResponse(
 ) {
   const startTime = Date.now();
 
-  // Check if query asks for identity / real name / biographical facts
-  const isFactualOrIdentity = isIdentityOrFactualQuery(message);
+  // 1. Upstream Input Classifier Step
+  const classification = classifyInput(message, history);
   let proactiveSearchContext = '';
   let proactiveSources = [];
   let forcedSearch = false;
   let searchQuery = null;
 
-  if (isFactualOrIdentity && isTavilyConfigured()) {
+  if (classification.needsWebSearch && isTavilyConfigured()) {
     forcedSearch = true;
     searchQuery = message.trim();
-    console.log(`[Mandatory Search] Identified factual/identity query: "${searchQuery}". Proactively querying Tavily...`);
+    console.log(`[InputClassifier] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}). Querying Tavily...`);
     try {
       const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
       if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
@@ -144,14 +144,16 @@ export async function generateResponse(
         proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
       }
     } catch (err) {
-      console.warn('[Mandatory Search] Proactive search error:', err.message);
+      console.warn('[InputClassifier] Proactive search error:', err.message);
       proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
     }
+  } else {
+    console.log(`[InputClassifier] Search classified as unnecessary (${classification.reason}, conf: ${classification.confidence}, suggestedProvider: ${classification.suggestedProvider})`);
   }
 
   const effectiveSystemPromptWithSearch = systemPrompt + proactiveSearchContext;
 
-  // 1. Primary Engine: Gemini with Native Google Search Grounding
+  // 2. Primary Engine: Gemini with Native Google Search Grounding
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
     if (isGeminiCircuitOpen()) {
       const remainingSec = Math.ceil((geminiCircuitOpenUntil - Date.now()) / 1000);
@@ -212,7 +214,7 @@ export async function generateResponse(
             // Zero-Source / Unverified claim post-processing guard
             const claimCheck = checkForUnverifiedFactualClaims(text, sources, usedWebSearch);
 
-            console.log(`[LLM Response] Provider: gemini, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
+            console.log(`[LLM Response] Provider: gemini, Model: ${model}, Latency: ${latencyMs}ms, ClassifierPredictedSearch: ${classification.needsWebSearch} (${classification.reason}, conf: ${classification.confidence}), UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
 
             return {
               text,
@@ -221,6 +223,12 @@ export async function generateResponse(
               latencyMs,
               tokensEstimated,
               isFallback: false,
+              classification: {
+                needsWebSearch: classification.needsWebSearch,
+                reason: classification.reason,
+                suggestedProvider: classification.suggestedProvider,
+                confidence: classification.confidence,
+              },
               usedWebSearch,
               forcedSearch,
               searchQuery: activeSearchQuery,
@@ -248,7 +256,7 @@ export async function generateResponse(
     }
   }
 
-  // 2. Secondary Engine: Automatic Failover to Groq + Tavily Search
+  // 3. Secondary Engine: Automatic Failover to Groq + Tavily Search
   if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
     try {
       const groq = getGroqClient();
@@ -342,7 +350,7 @@ export async function generateResponse(
           // Zero-Source / Unverified claim post-processing guard
           const claimCheck = checkForUnverifiedFactualClaims(text, sources, usedWebSearch);
 
-          console.log(`[LLM Response] Provider: groq, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
+          console.log(`[LLM Response] Provider: groq, Model: ${model}, Latency: ${latencyMs}ms, ClassifierPredictedSearch: ${classification.needsWebSearch} (${classification.reason}, conf: ${classification.confidence}), UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
 
           return {
             text,
@@ -351,6 +359,12 @@ export async function generateResponse(
             latencyMs,
             tokensEstimated,
             isFallback: true,
+            classification: {
+              needsWebSearch: classification.needsWebSearch,
+              reason: classification.reason,
+              suggestedProvider: classification.suggestedProvider,
+              confidence: classification.confidence,
+            },
             usedWebSearch,
             forcedSearch,
             searchQuery: activeSearchQuery,
@@ -372,8 +386,8 @@ export async function generateResponse(
 
 /**
  * Universal Streaming Response Generator
- * Primary: Google Gemini with Native Google Search Grounding & Mandatory Identity Search Injection.
- * Fallback: Groq with Tavily Search API.
+ * Evaluates input classifier upstream, runs proactive search if needed,
+ * then streams Gemini (with Native Search Grounding) or Groq fallback.
  */
 export async function generateStreamResponse(
   history,
@@ -384,17 +398,17 @@ export async function generateStreamResponse(
 ) {
   const startTime = Date.now();
 
-  // Check if query asks for identity / real name / biographical facts
-  const isFactualOrIdentity = isIdentityOrFactualQuery(message);
+  // 1. Upstream Input Classifier Step
+  const classification = classifyInput(message, history);
   let proactiveSearchContext = '';
   let proactiveSources = [];
   let forcedSearch = false;
   let searchQuery = null;
 
-  if (isFactualOrIdentity && isTavilyConfigured()) {
+  if (classification.needsWebSearch && isTavilyConfigured()) {
     forcedSearch = true;
     searchQuery = message.trim();
-    console.log(`[Mandatory Stream Search] Identified factual/identity query: "${searchQuery}". Proactively querying Tavily...`);
+    console.log(`[InputClassifier Stream] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}). Querying Tavily...`);
     try {
       const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
       if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
@@ -408,14 +422,16 @@ export async function generateStreamResponse(
         proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
       }
     } catch (err) {
-      console.warn('[Mandatory Stream Search] Proactive search error:', err.message);
+      console.warn('[InputClassifier Stream] Proactive search error:', err.message);
       proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
     }
+  } else {
+    console.log(`[InputClassifier Stream] Search classified as unnecessary (${classification.reason}, conf: ${classification.confidence}, suggestedProvider: ${classification.suggestedProvider})`);
   }
 
   const effectiveSystemPromptWithSearch = systemPrompt + proactiveSearchContext;
 
-  // 1. Primary Engine: Gemini Streaming with Native Google Search Grounding
+  // 2. Primary Engine: Gemini Streaming with Native Google Search Grounding
   if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim()) {
     if (isGeminiCircuitOpen()) {
       const remainingSec = Math.ceil((geminiCircuitOpenUntil - Date.now()) / 1000);
@@ -486,7 +502,7 @@ export async function generateStreamResponse(
             // Zero-Source / Unverified claim post-processing guard
             const claimCheck = checkForUnverifiedFactualClaims(fullText, sources, usedWebSearch);
 
-            console.log(`[LLM Stream Response] Provider: gemini, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
+            console.log(`[LLM Stream Response] Provider: gemini, Model: ${model}, Latency: ${latencyMs}ms, ClassifierPredictedSearch: ${classification.needsWebSearch} (${classification.reason}, conf: ${classification.confidence}), UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
 
             return {
               text: fullText,
@@ -495,6 +511,12 @@ export async function generateStreamResponse(
               latencyMs,
               tokensEstimated,
               isFallback: false,
+              classification: {
+                needsWebSearch: classification.needsWebSearch,
+                reason: classification.reason,
+                suggestedProvider: classification.suggestedProvider,
+                confidence: classification.confidence,
+              },
               usedWebSearch,
               forcedSearch,
               searchQuery: activeSearchQuery,
@@ -522,7 +544,7 @@ export async function generateStreamResponse(
     }
   }
 
-  // 2. Secondary Engine: Automatic Stream Failover to Groq + Tavily
+  // 3. Secondary Engine: Automatic Stream Failover to Groq + Tavily
   if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY.trim()) {
     try {
       const groq = getGroqClient();
@@ -632,7 +654,7 @@ export async function generateStreamResponse(
           // Zero-Source / Unverified claim post-processing guard
           const claimCheck = checkForUnverifiedFactualClaims(fullText, sources, usedWebSearch);
 
-          console.log(`[LLM Stream Response] Provider: groq, Model: ${model}, Latency: ${latencyMs}ms, UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
+          console.log(`[LLM Stream Response] Provider: groq, Model: ${model}, Latency: ${latencyMs}ms, ClassifierPredictedSearch: ${classification.needsWebSearch} (${classification.reason}, conf: ${classification.confidence}), UsedWebSearch: ${usedWebSearch}, ForcedSearch: ${forcedSearch}, SourcesCount: ${sources.length}, UnverifiedClaim: ${claimCheck.hasUnverifiedClaim}`);
 
           return {
             text: fullText,
@@ -641,6 +663,12 @@ export async function generateStreamResponse(
             latencyMs,
             tokensEstimated,
             isFallback: true,
+            classification: {
+              needsWebSearch: classification.needsWebSearch,
+              reason: classification.reason,
+              suggestedProvider: classification.suggestedProvider,
+              confidence: classification.confidence,
+            },
             usedWebSearch,
             forcedSearch,
             searchQuery: activeSearchQuery,

@@ -1,6 +1,6 @@
-# Test Run Report (2026-08-31T07:22:43.809Z)
+# Test Run Report (2026-08-31T11:27:28.676Z)
 
-Total: 47 | Passed: 47 | Failed: 0
+Total: 52 | Passed: 52 | Failed: 0
 
 - PASS: Detects empty string as ambiguous
 - PASS: Flags "What about that?" as ambiguous when context is empty
@@ -49,3 +49,8 @@ Total: 47 | Passed: 47 | Failed: 0
 - PASS: Identity Query Pre-Classifier: Accurately flags biographical/contestant/real-name queries for mandatory search while passing math queries
 - PASS: Thin Results Formatter: Injects strict anti-hallucination directive when search yields sparse data
 - PASS: Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations
+- PASS: Input Classifier: Correctly classifies identity/biographical query as needsWebSearch = true
+- PASS: Input Classifier: Correctly classifies casual greeting as needsWebSearch = false
+- PASS: Input Classifier: Correctly classifies coding help request as needsWebSearch = false
+- PASS: Input Classifier: Correctly classifies current events keyword query as needsWebSearch = true
+- PASS: Input Classifier: Ambiguous queries safely default to needsWebSearch = true with confidence = low
