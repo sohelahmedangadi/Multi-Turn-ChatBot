@@ -6,10 +6,14 @@
 [![LangChain.js](https://img.shields.io/badge/LangChain.js-Core_%26_OpenAI-1C3C3C?logo=langchain&logoColor=white)](https://js.langchain.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Groq](https://img.shields.io/badge/Groq-Fast_Inference-F55036?logo=groq&logoColor=white)](https://groq.com/)
-[![Tests](https://img.shields.io/badge/Tests-39%2F39_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
+[![Serper](https://img.shields.io/badge/Web_Search-Serper.dev-4285F4?logo=google&logoColor=white)](https://serper.dev/)
+[![Tests](https://img.shields.io/badge/Tests-42%2F42_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
+[![Architecture Docs](https://img.shields.io/badge/Architecture-Docs-purple)](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A production-grade, modular full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
+A production-grade, modular full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Autonomous Web Search Function Calling (Serper.dev)**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
+
+> 📖 **Deep Technical Architecture Guide**: See [ARCHITECTURE.md](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md) for full sequence diagrams, component schemas, memory algorithms, and tool calling flowcharts.
 
 ---
 
@@ -19,11 +23,12 @@ A production-grade, modular full-stack multi-turn conversational AI system featu
 - [Project Structure (Frontend & Backend Separation)](#project-structure)
 - [Core Capabilities](#core-capabilities)
   - [1. 3-Tier Memory Context Engine](#1-3-tier-memory-context-engine)
-  - [2. LangChain RAG & Multimodal Document Analysis Engine](#2-langchain-rag--multimodal-document-analysis-engine)
-  - [3. Zero-Cost Ambiguity Detection](#3-zero-cost-ambiguity-detection)
-  - [4. Dual-Engine LLM Resilience](#4-dual-engine-llm-resilience)
-  - [5. Evaluation Suite & Benchmark Analytics](#5-evaluation-suite--benchmark-analytics)
-  - [6. Security & Defensive Engineering](#6-security--defensive-engineering)
+  - [2. Autonomous Web Search Tool (Serper.dev & Gemini Function Calling)](#2-autonomous-web-search-tool-serperdev--gemini-function-calling)
+  - [3. LangChain RAG & Multimodal Document Analysis Engine](#3-langchain-rag--multimodal-document-analysis-engine)
+  - [4. Zero-Cost Ambiguity Detection](#4-zero-cost-ambiguity-detection)
+  - [5. Dual-Engine LLM Resilience](#5-dual-engine-llm-resilience)
+  - [6. Evaluation Suite & Benchmark Analytics](#6-evaluation-suite--benchmark-analytics)
+  - [7. Security & Defensive Engineering](#7-security--defensive-engineering)
 - [Quick Start Guide](#quick-start-guide)
   - [Installation & Setup](#installation--setup)
   - [Environment Configuration](#environment-configuration)
@@ -59,16 +64,22 @@ A production-grade, modular full-stack multi-turn conversational AI system featu
 +-----------------------------+                     |    Memory (Vector Search)      |
                                                     |  * Tier 2.5: Cross-Session     |
 +-----------------------------+                     |    Past Conversation Catalog   |
-| LangChain RAG & Multimodal  |                     |  * Tier 3: RAG Knowledge Base  |
-| - RecursiveTextSplitter     +-------------------->|  * RAG Document Excerpts       |
-| - Gemini 2.5 Multimodal OCR |                     |  * Anti-Hallucination Directives
+| Autonomous Web Search Tool  |                     |  * Tier 3: RAG Knowledge Base  |
+| - Gemini Function Calling   +-------------------->|  * RAG Document Excerpts       |
+| - Serper.dev Google API     |                     |  * Strict Grounding Guardrails |
 +-----------------------------+                     +----------------+---------------+
+                                                                     |
++-----------------------------+                                      |
+| LangChain RAG & Multimodal  |                                      |
+| - RecursiveTextSplitter     +--------------------------------------+
+| - Gemini 2.5 Multimodal OCR |
++-----------------------------+
                                                                      |
                                                                      v
 +------------------------------------------------------------------------------------+
 |                        Resilient LLM Inference Engine & Failover                   |
-|  - Primary: Google Gemini 2.5 Flash (`@google/genai`)                              |
-|  - Secondary: Groq Qwen / Compound / GPT-OSS (`groq-sdk`)                          |
+|  - Primary: Google Gemini 2.5 Flash (`@google/genai` with Function Calling)        |
+|  - Secondary: Groq Qwen / Compound / GPT-OSS (`groq-sdk` with Regex Fallback)      |
 |  - Real-time Server-Sent Events (SSE) Streaming                                    |
 +------------------------------------------+-----------------------------------------+
                                            |
@@ -96,7 +107,7 @@ multi-turn-conversational-ai-capstone/
 │   │   │   ├── EvaluationModal.jsx       # 5 benchmark automated evaluation modal
 │   │   │   ├── FileAttachmentBadge.jsx   # Document & image attachment badge
 │   │   │   ├── MemoryModal.jsx           # 3-tier memory inspector & editor
-│   │   │   ├── MessageItem.jsx           # Message bubbles with markdown & attachment tags
+│   │   │   ├── MessageItem.jsx           # Message bubbles with Web Search & RAG badges
 │   │   │   ├── RubricFeedbackModal.jsx   # 1-5 scale quality evaluation modal
 │   │   │   ├── Sidebar.jsx               # Dialogue history & session manager
 │   │   │   └── SystemPromptModal.jsx     # Persona and system instruction editor
@@ -119,17 +130,19 @@ multi-turn-conversational-ai-capstone/
 │   │   ├── evaluationSuite.js            # Coherence scoring & 5 benchmark suites
 │   │   ├── fileParser.js                 # Multi-format parser & Gemini Vision OCR
 │   │   ├── langchainMemory.js            # LangChain durable fact extractor
-│   │   ├── llmProvider.js                # Gemini 2.5 Flash + Groq failover engine
+│   │   ├── llmProvider.js                # Gemini 2.5 Flash + Groq failover engine & tool loop
 │   │   ├── memoryManager.js              # Vector search, forget & conflict resolution
-│   │   └── ragService.js                 # LangChain RecursiveTextSplitter chunking & RAG
+│   │   ├── ragService.js                 # LangChain RecursiveTextSplitter chunking & RAG
+│   │   └── webSearchService.js           # Serper.dev API client & Gemini tool declaration
 │   ├── index.js                          # Express REST API & SSE streaming server
-│   ├── test-suite.js                     # 39/39 Automated Unit & Integration Tests
+│   ├── test-suite.js                     # 42/42 Automated Unit & Integration Tests
 │   └── package.json                      # Backend dependencies & test runner
 │
 ├── .env / .env.example                    # Environment secrets
 ├── package.json                           # Root workspace runner
 ├── README.md                              # Main project documentation
-├── QA_TEST_RESULTS.md                     # 39-test QA verification matrix
+├── ARCHITECTURE.md                        # Technical Design Document
+├── QA_TEST_RESULTS.md                     # 42-test QA verification matrix
 └── features.md                            # Comprehensive architectural specifications
 ```
 
@@ -154,7 +167,19 @@ multi-turn-conversational-ai-capstone/
 
 ---
 
-### 2. LangChain RAG & Multimodal Document Analysis Engine
+### 2. Autonomous Web Search Tool (Serper.dev & Gemini Function Calling)
+- **Gemini Native Function Calling (`server/services/webSearchService.js` & `server/services/llmProvider.js`)**:
+  - Exposes `web_search(query: string)` to Gemini via standard function declaration schemas.
+  - The LLM autonomously triggers search when asked about current events, breaking software releases, or unfamiliar entities.
+  - Automatic tool execution loop intercepts `functionCall`, queries Serper.dev, feeds `functionResponse`, and synthesizes a natural-language answer with source citations.
+- **Groq Regex Fallback**:
+  - Employs regex pattern extraction (`[SEARCH: query]`, ````web_search````) to bring live web search to open-source models on Groq.
+- **Strict Grounding Guardrails**:
+  - If search snippets do not contain an entity's legal or private name, the model is strictly forbidden from guessing and will report that the information is not publicly documented.
+
+---
+
+### 3. LangChain RAG & Multimodal Document Analysis Engine
 - **Universal Multi-Format Ingestion (`server/services/fileParser.js`)**:
   - Ingests **PDFs**, **Images** (`.png`, `.jpg`, `.jpeg`, `.webp`), **Plaintext/Markdown** (`.txt`, `.md`), **Structured Data** (`.csv`, `.json`), and **Source Code** (`.js`, `.ts`, `.py`, `.java`, `.cpp`, `.c`, `.rs`, `.go`, `.html`, `.css`, `.sql`).
 - **Gemini Multimodal OCR Fallback**:
@@ -163,30 +188,30 @@ multi-turn-conversational-ai-capstone/
   - Leverages `@langchain/textsplitters` (`RecursiveCharacterTextSplitter`) with 800-character chunk sizing and 150-character overlap.
 - **Strict Anti-Hallucination Guardrail (`server/services/contextManager.js`)**:
   - If a file has empty or unreadable content, the system strictly forbids the LLM from guessing based on the filename alone.
-  - Enforces strict factual grounding on actual extracted excerpts.
 
 ---
 
-### 3. Zero-Cost Ambiguity Detection (`server/services/ambiguityDetector.js`)
+### 4. Zero-Cost Ambiguity Detection (`server/services/ambiguityDetector.js`)
 - Intercepts vague, pronoun-heavy queries (e.g., *"What about that?"*, *"Explain it"*) when conversational context is empty.
 - Returns an immediate clarifying question in 0ms with **0 tokens consumed** from LLM APIs.
 
 ---
 
-### 4. Dual-Engine LLM Resilience (`server/services/llmProvider.js`)
+### 5. Dual-Engine LLM Resilience (`server/services/llmProvider.js`)
 - **Primary Engine**: Google Gemini API via official `@google/genai` SDK (`gemini-2.5-flash`).
 - **Secondary / Fallback Engine**: Groq SDK (`groq-sdk`) with fast inference (`qwen/qwen3.8-27b`).
+- **Circuit Breakers**: Fast-routes to Groq on 429 quota exhaustion with automated 60-second cooldown.
 - **Real-Time SSE Streaming**: Incremental Server-Sent Events (SSE) token delivery with client abort support.
 
 ---
 
-### 5. Evaluation Suite & Benchmark Analytics (`server/services/evaluationSuite.js`)
+### 6. Evaluation Suite & Benchmark Analytics (`server/services/evaluationSuite.js`)
 - **Semantic Coherence Metric (`calculateCoherenceScore`)**: Measures keyword and entity overlap across dialogue turns.
 - **5 Standard Benchmark Scenarios**: Context Memory, Ambiguity Interception, Multi-Step Math, Negative Constraint Adherence, and Prompt Injection Defense.
 
 ---
 
-### 6. Security & Defensive Engineering
+### 7. Security & Defensive Engineering
 - **Prompt Injection Defense (`server/middleware/sanitizer.js`)**: Neutralizes adversarial instruction overrides.
 - **Rate Limiting (`express-rate-limit`)**: 30 requests/minute ceiling per IP.
 - **Authentication**: Salted Bcrypt password hashing + signed JSON Web Tokens (JWT).
@@ -218,11 +243,14 @@ NODE_ENV=development
 GEMINI_API_KEY=your_gemini_api_key_here
 GROQ_API_KEY=your_groq_api_key_here
 
+# Live Web Search (Serper.dev)
+SERPER_API_KEY=your_serper_api_key_here
+
 # JWT Security
 JWT_SECRET=your_super_secret_jwt_key_here
 
 # Optional: MongoDB Atlas (falls back to in-memory store if omitted)
-MONGO_URI=
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/chatbot?retryWrites=true&w=majority
 ```
 
 ### Running the Application
@@ -242,13 +270,13 @@ npm run build
 
 ## Automated Verification & Testing
 
-Execute the complete **39-point test suite**:
+Execute the complete **42-point test suite**:
 
 ```bash
 npm test
 ```
 
-### Test Output (39/39 Tests Passing):
+### Test Output (42/42 Tests Passing):
 
 ```text
 ======================================================
@@ -306,8 +334,13 @@ npm test
   ✅ PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
   ✅ PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty
 
+🌐 Testing Web Search Service (server/services/webSearchService.js):
+  ✅ PASS: Gemini Function Declaration: web_search schema has correct name, parameters, and required fields
+  ✅ PASS: Web Search: Returns graceful error message when SERPER_API_KEY is missing
+  ✅ PASS: Web Search: formatSearchResultsForContext produces structured, citation-ready output from results
+
 ======================================================
-📊 TEST RESULTS: 39 Passed, 0 Failed
+📊 TEST RESULTS: 42 Passed, 0 Failed
 ======================================================
 ```
 
@@ -318,14 +351,14 @@ npm test
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/system/status` | System health, active LLM provider, and DB state |
-| `POST` | `/api/auth/register` | Register a new account |
-| `POST` | `/api/auth/login` | Log in and receive JWT token |
-| `GET` | `/api/auth/me` | Fetch authenticated profile |
+| `POST` | `/api/auth/register` | Register a new user account |
+| `POST` | `/api/auth/login` | Log in and receive signed JWT token |
+| `GET` | `/api/auth/me` | Fetch authenticated user profile |
 | `POST` | `/api/session` | Create a new chat session |
 | `GET` | `/api/sessions` | List all sessions for user |
 | `DELETE` | `/api/session/:sessionId` | Delete a specific chat session |
 | `GET` | `/api/history/:sessionId` | Retrieve message history for a session |
-| `POST` | `/api/chat` | Send message (supports SSE streaming with `stream: true` & document `fileId`) |
+| `POST` | `/api/chat` | Send message (supports SSE streaming, `fileId`, and autonomous `web_search`) |
 | `POST` | `/api/files/upload` | Upload & index PDF, Image, CSV, JSON, Markdown, or Code file |
 | `GET` | `/api/files/:fileId` | Retrieve indexed document metadata |
 | `DELETE` | `/api/files/:fileId` | Remove indexed document from memory |
