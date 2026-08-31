@@ -1,20 +1,15 @@
 # Multi-Turn Conversational AI Capstone (CosmoAI)
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org/)
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![LangChain.js](https://img.shields.io/badge/LangChain.js-Core_%26_OpenAI-1C3C3C?logo=langchain&logoColor=white)](https://js.langchain.com/)
 [![Google Gemini](https://img.shields.io/badge/Google_Gemini-2.5_Flash-4285F4?logo=google&logoColor=white)](https://ai.google.dev/)
 [![Groq](https://img.shields.io/badge/Groq-Fast_Inference-F55036?logo=groq&logoColor=white)](https://groq.com/)
-[![DuckDuckGo](https://img.shields.io/badge/Web_Search-DuckDuckGo_Python-DE5833?logo=duckduckgo&logoColor=white)](https://duckduckgo.com/)
-[![Tests](https://img.shields.io/badge/Tests-43%2F43_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
-[![Architecture Docs](https://img.shields.io/badge/Architecture-Docs-purple)](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md)
+[![Tests](https://img.shields.io/badge/Tests-44%2F44_Passing-brightgreen)](file:///d:/multi-turn-conversational-ai-capstone/server/test-suite.js)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A production-grade, modular full-stack multi-turn conversational AI system featuring **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Autonomous Web Search Function Calling (DuckDuckGo Python Library — 100% Free & No API Key Required)**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**.
-
-> 📖 **Deep Technical Architecture Guide**: See [ARCHITECTURE.md](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md) for full sequence diagrams, component schemas, memory algorithms, and tool calling flowcharts.
+A production-grade, modular full-stack multi-turn conversational AI system featuring **Native Google Search Grounding & Tavily API Fallback**, **LangChain & LLM-Powered 3-Tier Conversational Memory**, **Multimodal & LangChain RAG Document Analysis (PDF, Images, CSV, Code, Text)**, **Strict Prompt-Level Anti-Hallucination Guardrails**, **Cross-Session Full Conversation History Access**, **zero-cost heuristic ambiguity detection**, **dual-engine LLM resilience (Google Gemini + Groq)** with real-time Server-Sent Events (SSE) streaming, and an integrated **evaluation & benchmark analytics suite**. Detailed design is documented in [ARCHITECTURE.md](file:///d:/multi-turn-conversational-ai-capstone/ARCHITECTURE.md).
 
 ---
 
@@ -24,7 +19,7 @@ A production-grade, modular full-stack multi-turn conversational AI system featu
 - [Project Structure (Frontend & Backend Separation)](#project-structure)
 - [Core Capabilities](#core-capabilities)
   - [1. 3-Tier Memory Context Engine](#1-3-tier-memory-context-engine)
-  - [2. Autonomous Web Search Tool (DuckDuckGo Python Library)](#2-autonomous-web-search-tool-duckduckgo-python-library)
+  - [2. Real-Time Web Search Grounding (Gemini Native + Tavily Groq Fallback)](#2-real-time-web-search-grounding)
   - [3. LangChain RAG & Multimodal Document Analysis Engine](#3-langchain-rag--multimodal-document-analysis-engine)
   - [4. Zero-Cost Ambiguity Detection](#4-zero-cost-ambiguity-detection)
   - [5. Dual-Engine LLM Resilience](#5-dual-engine-llm-resilience)
@@ -65,23 +60,16 @@ A production-grade, modular full-stack multi-turn conversational AI system featu
 +-----------------------------+                     |    Memory (Vector Search)      |
                                                     |  * Tier 2.5: Cross-Session     |
 +-----------------------------+                     |    Past Conversation Catalog   |
-| Autonomous Web Search Tool  |                     |  * Tier 3: RAG Knowledge Base  |
-| - Gemini Function Calling   +-------------------->|  * RAG Document Excerpts       |
-| - DuckDuckGo Python Library |                     |  * Strict Grounding Guardrails |
-|   (No API Key Required)     |                     +----------------+---------------+
-+-----------------------------+                                      |
-                                                                     |
-+-----------------------------+                                      |
-| LangChain RAG & Multimodal  |                                      |
-| - RecursiveTextSplitter     +--------------------------------------+
-| - Gemini 2.5 Multimodal OCR |
-+-----------------------------+
+| LangChain RAG & Multimodal  |                     |  * Tier 3: RAG Knowledge Base  |
+| - RecursiveTextSplitter     +-------------------->|  * RAG Document Excerpts       |
+| - Gemini 2.5 Multimodal OCR |                     |  * Anti-Hallucination Directives
++-----------------------------+                     +----------------+---------------+
                                                                      |
                                                                      v
 +------------------------------------------------------------------------------------+
 |                        Resilient LLM Inference Engine & Failover                   |
-|  - Primary: Google Gemini 2.5 Flash (`@google/genai` with Function Calling)        |
-|  - Secondary: Groq Qwen / Compound / GPT-OSS (`groq-sdk` with Regex Fallback)      |
+|  - Primary: Google Gemini 2.5 Flash (`@google/genai`)                              |
+|  - Secondary: Groq Qwen / Compound / GPT-OSS (`groq-sdk`)                          |
 |  - Real-time Server-Sent Events (SSE) Streaming                                    |
 +------------------------------------------+-----------------------------------------+
                                            |
@@ -109,7 +97,7 @@ multi-turn-conversational-ai-capstone/
 │   │   │   ├── EvaluationModal.jsx       # 5 benchmark automated evaluation modal
 │   │   │   ├── FileAttachmentBadge.jsx   # Document & image attachment badge
 │   │   │   ├── MemoryModal.jsx           # 3-tier memory inspector & editor
-│   │   │   ├── MessageItem.jsx           # Message bubbles with Web Search & RAG badges
+│   │   │   ├── MessageItem.jsx           # Message bubbles with markdown & attachment tags
 │   │   │   ├── RubricFeedbackModal.jsx   # 1-5 scale quality evaluation modal
 │   │   │   ├── Sidebar.jsx               # Dialogue history & session manager
 │   │   │   └── SystemPromptModal.jsx     # Persona and system instruction editor
@@ -129,23 +117,20 @@ multi-turn-conversational-ai-capstone/
 │   ├── services/
 │   │   ├── ambiguityDetector.js          # Zero-latency clarification heuristic
 │   │   ├── contextManager.js             # 3-tier context & anti-hallucination assembler
-│   │   ├── ddgSearch.py                  # DuckDuckGo Search Python bridge
 │   │   ├── evaluationSuite.js            # Coherence scoring & 5 benchmark suites
 │   │   ├── fileParser.js                 # Multi-format parser & Gemini Vision OCR
 │   │   ├── langchainMemory.js            # LangChain durable fact extractor
-│   │   ├── llmProvider.js                # Gemini 2.5 Flash + Groq failover engine & tool loop
+│   │   ├── llmProvider.js                # Gemini 2.5 Flash + Groq failover engine
 │   │   ├── memoryManager.js              # Vector search, forget & conflict resolution
-│   │   ├── ragService.js                 # LangChain RecursiveTextSplitter chunking & RAG
-│   │   └── webSearchService.js           # DuckDuckGo Search bridge & Gemini tool declaration
+│   │   └── ragService.js                 # LangChain RecursiveTextSplitter chunking & RAG
 │   ├── index.js                          # Express REST API & SSE streaming server
-│   ├── test-suite.js                     # 43/43 Automated Unit & Integration Tests
+│   ├── test-suite.js                     # 39/39 Automated Unit & Integration Tests
 │   └── package.json                      # Backend dependencies & test runner
 │
-├── .env / .env.example                    # Environment secrets (No search API key needed)
+├── .env / .env.example                    # Environment secrets
 ├── package.json                           # Root workspace runner
 ├── README.md                              # Main project documentation
-├── ARCHITECTURE.md                        # Technical Design Document
-├── QA_TEST_RESULTS.md                     # 43-test QA verification matrix
+├── QA_TEST_RESULTS.md                     # 39-test QA verification matrix
 └── features.md                            # Comprehensive architectural specifications
 ```
 
@@ -170,18 +155,14 @@ multi-turn-conversational-ai-capstone/
 
 ---
 
-### 2. Autonomous Web Search Tool (DuckDuckGo Python Library)
-- **100% Free & Keyless Web Search (`server/services/ddgSearch.py` & `server/services/webSearchService.js`)**:
-  - Powered by the DuckDuckGo Search Python library (`duckduckgo_search` / `ddgs`).
-  - **Zero API keys required** — runs locally via Python bridge with UTF-8 JSON stream output.
-- **Gemini Native Function Calling (`server/services/llmProvider.js`)**:
-  - Exposes `web_search(query: string)` to Gemini via standard function declaration schemas.
-  - The LLM autonomously triggers search when asked about current events, breaking software releases, or unfamiliar entities.
-  - Automatic tool execution loop intercepts `functionCall`, queries DuckDuckGo, feeds `functionResponse`, and synthesizes a natural-language answer with source citations.
-- **Groq Regex Fallback**:
-  - Employs regex pattern extraction (`[SEARCH: query]`, ````web_search````) to bring live web search to open-source models on Groq.
-- **Strict Grounding Guardrails**:
-  - If search snippets do not contain an entity's legal or private name, the model is strictly forbidden from guessing and will report that the information is not publicly documented.
+### 2. Real-Time Web Search Grounding (Gemini Native + Tavily Groq Fallback)
+- **Primary: Gemini Native Google Search Grounding (`@google/genai`)**:
+  - Leverages Google's native `googleSearch` grounding tool configured server-side.
+  - Automatically decides when real-time data is needed, queries Google Search, and extracts source citations from `groundingMetadata`.
+- **Fallback: Groq + Tavily Search API (`server/services/webSearchService.js`)**:
+  - Catches regex triggers like `[SEARCH: <query>]` from open-source models during Gemini quota limits.
+  - Queries **Tavily Search API** with a 7-second timeout, extracting summarized answers and top verified sources.
+  - Injects clean context and re-prompts the model for natural-language synthesis with citation links.
 
 ---
 
@@ -194,30 +175,30 @@ multi-turn-conversational-ai-capstone/
   - Leverages `@langchain/textsplitters` (`RecursiveCharacterTextSplitter`) with 800-character chunk sizing and 150-character overlap.
 - **Strict Anti-Hallucination Guardrail (`server/services/contextManager.js`)**:
   - If a file has empty or unreadable content, the system strictly forbids the LLM from guessing based on the filename alone.
+  - Enforces strict factual grounding on actual extracted excerpts.
 
 ---
 
-### 4. Zero-Cost Ambiguity Detection (`server/services/ambiguityDetector.js`)
+### 3. Zero-Cost Ambiguity Detection (`server/services/ambiguityDetector.js`)
 - Intercepts vague, pronoun-heavy queries (e.g., *"What about that?"*, *"Explain it"*) when conversational context is empty.
 - Returns an immediate clarifying question in 0ms with **0 tokens consumed** from LLM APIs.
 
 ---
 
-### 5. Dual-Engine LLM Resilience (`server/services/llmProvider.js`)
+### 4. Dual-Engine LLM Resilience (`server/services/llmProvider.js`)
 - **Primary Engine**: Google Gemini API via official `@google/genai` SDK (`gemini-2.5-flash`).
 - **Secondary / Fallback Engine**: Groq SDK (`groq-sdk`) with fast inference (`qwen/qwen3.8-27b`).
-- **Circuit Breakers**: Fast-routes to Groq on 429 quota exhaustion with automated 60-second cooldown.
 - **Real-Time SSE Streaming**: Incremental Server-Sent Events (SSE) token delivery with client abort support.
 
 ---
 
-### 6. Evaluation Suite & Benchmark Analytics (`server/services/evaluationSuite.js`)
+### 5. Evaluation Suite & Benchmark Analytics (`server/services/evaluationSuite.js`)
 - **Semantic Coherence Metric (`calculateCoherenceScore`)**: Measures keyword and entity overlap across dialogue turns.
 - **5 Standard Benchmark Scenarios**: Context Memory, Ambiguity Interception, Multi-Step Math, Negative Constraint Adherence, and Prompt Injection Defense.
 
 ---
 
-### 7. Security & Defensive Engineering
+### 6. Security & Defensive Engineering
 - **Prompt Injection Defense (`server/middleware/sanitizer.js`)**: Neutralizes adversarial instruction overrides.
 - **Rate Limiting (`express-rate-limit`)**: 30 requests/minute ceiling per IP.
 - **Authentication**: Salted Bcrypt password hashing + signed JSON Web Tokens (JWT).
@@ -233,11 +214,8 @@ multi-turn-conversational-ai-capstone/
 git clone https://github.com/sohelahmedangadi/Multi-Turn-ChatBot.git
 cd Multi-Turn-ChatBot
 
-# Install Node dependencies
+# Install dependencies
 npm install
-
-# Install Python DuckDuckGo search library
-pip install ddgs duckduckgo_search
 ```
 
 ### Environment Configuration
@@ -252,14 +230,15 @@ NODE_ENV=development
 GEMINI_API_KEY=your_gemini_api_key_here
 GROQ_API_KEY=your_groq_api_key_here
 
+# Web Search (Tavily API fallback for Groq)
+TAVILY_API_KEY=your_tavily_api_key_here
+
 # JWT Security
 JWT_SECRET=your_super_secret_jwt_key_here
 
 # Optional: MongoDB Atlas (falls back to in-memory store if omitted)
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/chatbot?retryWrites=true&w=majority
+MONGO_URI=
 ```
-
-*(Notice: No search API key is required — DuckDuckGo Search runs directly via Python).*
 
 ### Running the Application
 
@@ -278,13 +257,13 @@ npm run build
 
 ## Automated Verification & Testing
 
-Execute the complete **43-point test suite**:
+Execute the complete **44-point test suite**:
 
 ```bash
 npm test
 ```
 
-### Test Output (43/43 Tests Passing):
+### Test Output (44/44 Tests Passing):
 
 ```text
 ======================================================
@@ -342,14 +321,15 @@ npm test
   ✅ PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
   ✅ PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty
 
-🌐 Testing Web Search Service (DuckDuckGo Search Python Library):
-  ✅ PASS: Gemini Function Declaration: web_search schema has correct name, parameters, and required fields
-  ✅ PASS: DuckDuckGo Search: Returns graceful error message on empty query
-  ✅ PASS: DuckDuckGo Search: formatSearchResultsForContext produces structured, citation-ready output from results
-  ✅ PASS: DuckDuckGo Search: Successfully executes query via Python DDGS bridge and extracts live web results
+🌐 Testing Web Search Grounding & Tavily Fallback:
+  ✅ PASS: Gemini Grounding: Extracts webSearchQueries and citation sources from groundingMetadata
+  ✅ PASS: Gemini Grounding: Correctly flags ungrounded responses as usedWebSearch = false
+  ✅ PASS: Tavily Search: Gracefully handles missing API key without throwing exceptions
+  ✅ PASS: Tavily Search: formatTavilyResultsForContext formats direct answers, summaries, and URLs for context injection
+  ✅ PASS: Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls
 
 ======================================================
-📊 TEST RESULTS: 43 Passed, 0 Failed
+📊 TEST RESULTS: 44 Passed, 0 Failed
 ======================================================
 ```
 
@@ -360,14 +340,14 @@ npm test
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/system/status` | System health, active LLM provider, and DB state |
-| `POST` | `/api/auth/register` | Register a new user account |
-| `POST` | `/api/auth/login` | Log in and receive signed JWT token |
-| `GET` | `/api/auth/me` | Fetch authenticated user profile |
+| `POST` | `/api/auth/register` | Register a new account |
+| `POST` | `/api/auth/login` | Log in and receive JWT token |
+| `GET` | `/api/auth/me` | Fetch authenticated profile |
 | `POST` | `/api/session` | Create a new chat session |
 | `GET` | `/api/sessions` | List all sessions for user |
 | `DELETE` | `/api/session/:sessionId` | Delete a specific chat session |
 | `GET` | `/api/history/:sessionId` | Retrieve message history for a session |
-| `POST` | `/api/chat` | Send message (supports SSE streaming, `fileId`, and autonomous DuckDuckGo `web_search`) |
+| `POST` | `/api/chat` | Send message (supports SSE streaming with `stream: true` & document `fileId`) |
 | `POST` | `/api/files/upload` | Upload & index PDF, Image, CSV, JSON, Markdown, or Code file |
 | `GET` | `/api/files/:fileId` | Retrieve indexed document metadata |
 | `DELETE` | `/api/files/:fileId` | Remove indexed document from memory |

@@ -190,25 +190,17 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
     }
   }
 
-  // Web Search Tool Instructions
-  contextualMemorySection += '\n\n[WEB SEARCH TOOL INSTRUCTIONS]:\n';
-  contextualMemorySection += 'You have access to a `web_search` tool that can search the internet for current information.\n';
-  contextualMemorySection += 'USE web_search when the user asks about:\n';
+  // Web Search Grounding Instructions
+  contextualMemorySection += '\n\n[WEB SEARCH GROUNDING INSTRUCTIONS]:\n';
+  contextualMemorySection += 'You have access to real-time Web Search Grounding for current information.\n';
+  contextualMemorySection += 'Grounding is used when the user asks about:\n';
   contextualMemorySection += '- Current events, recent news, or live data\n';
   contextualMemorySection += '- Recent software releases, version numbers, or changelogs\n';
   contextualMemorySection += '- People, organizations, or entities you don\'t recognize or are unsure about\n';
   contextualMemorySection += '- Anything time-sensitive that your training data may not cover\n';
-  contextualMemorySection += '- Facts you are not confident about and want to verify\n';
-  contextualMemorySection += 'DO NOT use web_search for:\n';
-  contextualMemorySection += '- General knowledge questions you can answer confidently\n';
-  contextualMemorySection += '- Math, logic, or reasoning tasks\n';
-  contextualMemorySection += '- Questions about the user\'s own project, memories, or uploaded documents\n';
-  contextualMemorySection += 'After receiving search results, synthesize a helpful natural-language answer and CITE the source URL(s). Do NOT dump raw search results.\n';
-  contextualMemorySection += 'If native function calling is unavailable, you may output "[SEARCH: <query>]" on a line by itself to request real-time web search results.\n';
-  contextualMemorySection += 'STRICT FACTUAL GROUNDING RULES FOR SEARCH RESULTS:\n';
-  contextualMemorySection += '1. ONLY state facts, names, numbers, or dates that are EXPLICITLY present in the search snippets.\n';
-  contextualMemorySection += '2. If the user asks for a real/legal name, birthdate, or private info and the search results do NOT explicitly contain it (or show N/A), DO NOT GUESS or invent plausible names. You MUST state plainly: "The real/legal name of [artist/person] has not been publicly disclosed or officially documented."\n';
-  contextualMemorySection += '3. If the search returns no results or fails, say so honestly instead of guessing.\n';
+  contextualMemorySection += 'After receiving search results or grounding data, synthesize a helpful natural-language answer and CITE the source URL(s). Do NOT dump raw search results.\n';
+  contextualMemorySection += 'If running in a fallback environment without native search grounding, you may output "[SEARCH: <query>]" on a single line to request real-time web search verification.\n';
+  contextualMemorySection += 'If the search returns no results or fails, state clearly that information could not be found rather than hallucinating.\n';
 
   return {
     history: truncatedHistory,

@@ -1,127 +1,238 @@
 /**
- * Web Search Service — DuckDuckGo Search Integration (Python Library)
+ * Web Search Service — Google Search Grounding & Tavily API Integration
  * 
- * Provides a web_search(query) tool for real-time web search capabilities.
- * Powered by the DuckDuckGo Search Python library (100% free, no API key required).
- * Returns top 5 results with title, snippet, and URL.
- * Handles errors gracefully — returns an error description instead of throwing.
+ * Provides:
+ * 1. Gemini Path: Native Google Search Grounding metadata extraction (queries, citations, sources).
+ * 2. Groq Path: Tavily Search API with summarized answer extraction, timeout protection, and clean prompt formatting.
  */
 
-import { execFile } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { promisify } from 'util';
-
-const execFileAsync = promisify(execFile);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const SCRIPT_PATH = path.join(__dirname, 'ddgSearch.py');
+const TAVILY_API_URL = 'https://api.tavily.com/search';
+const DEFAULT_SEARCH_TIMEOUT_MS = 7000; // 7s timeout for Tavily search requests
 
 /**
- * Execute a web search query using the DuckDuckGo Search Python library.
- * 
- * @param {string} query - The search query string
- * @param {number} numResults - Number of results to return (default: 5)
- * @returns {Promise<{results?: Array<{title: string, snippet: string, url: string}>, error?: string}>}
+ * Check if Tavily Search is configured via environment variables.
  */
-export async function webSearch(query, numResults = 5) {
-  if (!query || typeof query !== 'string' || query.trim().length === 0) {
+export function isTavilyConfigured() {
+  return Boolean((process.env.TAVILY_API_KEY || '').trim());
+}
+
+/**
+ * Execute a web search query using the Tavily Search API.
+ * Requests summarized/answer-focused results (top 3-5).
+ * 
+ * @param {string} query - Search query string
+ * @param {Object} options - Search configuration options
+ * @returns {Promise<{results: Array<{title: string, content: string, url: string}>, answer?: string, error?: string}>}
+ */
+export async function tavilySearch(query, options = {}) {
+  const apiKey = (process.env.TAVILY_API_KEY || '').trim();
+  const maxResults = options.maxResults || 5;
+  const timeoutMs = options.timeoutMs || DEFAULT_SEARCH_TIMEOUT_MS;
+
+  if (!apiKey) {
+    console.warn('[Tavily] TAVILY_API_KEY is not configured in environment.');
     return {
-      error: 'Empty or invalid search query provided.',
+      error: 'Tavily web search is not configured. Missing TAVILY_API_KEY.',
       results: [],
+      answer: null,
     };
   }
 
+  if (!query || typeof query !== 'string' || query.trim().length === 0) {
+    return {
+      error: 'Invalid or empty search query.',
+      results: [],
+      answer: null,
+    };
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  if (timer.unref) timer.unref();
+
   try {
-    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-    const { stdout, stderr } = await execFileAsync(
-      pythonCmd,
-      [SCRIPT_PATH, query.trim(), String(numResults)],
-      {
-        timeout: 15000, // 15s timeout
-        maxBuffer: 1024 * 1024 * 5, // 5MB buffer
-        encoding: 'utf-8',
-      }
-    );
+    const response = await fetch(TAVILY_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        api_key: apiKey,
+        query: query.trim(),
+        search_depth: 'basic',
+        include_answer: true,
+        max_results: maxResults,
+      }),
+      signal: controller.signal,
+    });
 
-    if (stderr && stderr.trim()) {
-      console.warn(`[WebSearch DuckDuckGo notice]:`, stderr.trim());
-    }
+    clearTimeout(timer);
 
-    const trimmed = stdout.trim();
-    if (!trimmed) {
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      console.warn(`[Tavily] API returned status ${response.status}: ${errorText}`);
       return {
-        error: `No search results returned for query: "${query}"`,
+        error: `Tavily API returned status ${response.status}`,
         results: [],
+        answer: null,
       };
     }
 
-    const parsed = JSON.parse(trimmed);
-    const results = parsed.results || [];
+    const data = await response.json();
+    const rawResults = data.results || [];
+    const formattedResults = rawResults.slice(0, maxResults).map((r) => ({
+      title: r.title || 'Untitled',
+      content: r.content || r.snippet || '',
+      url: r.url || '',
+    }));
 
-    if (results.length === 0) {
+    const answer = data.answer || null;
+
+    if (formattedResults.length === 0 && !answer) {
       return {
-        error: parsed.error || `No search results found for query: "${query}"`,
+        error: `No relevant search results found for: "${query}"`,
         results: [],
+        answer: null,
       };
     }
 
-    console.log(`[WebSearch DuckDuckGo] Query: "${query}" → ${results.length} results returned.`);
+    console.log(`[Tavily] Query: "${query}" → ${formattedResults.length} results returned (Answer: ${Boolean(answer)})`);
 
     return {
-      results: results.slice(0, numResults),
+      results: formattedResults,
+      answer,
       error: null,
     };
   } catch (err) {
-    console.error(`[WebSearch DuckDuckGo] Execution error:`, err.message || err);
+    clearTimeout(timer);
+    const isTimeout = err.name === 'AbortError';
+    const message = isTimeout
+      ? `Search request timed out after ${timeoutMs}ms`
+      : err.message || 'Unknown network error';
+    
+    console.warn(`[Tavily] Search error for query "${query}":`, message);
+
     return {
-      error: `Web search execution failed: ${err.message || 'Unknown error'}`,
+      error: `Web search unavailable (${message})`,
       results: [],
+      answer: null,
     };
   }
 }
 
 /**
- * Format web search results into a readable text block for LLM context injection.
- * Used by the Groq fallback path where native function calling is not available.
+ * Format Tavily search results into a clean, context-injected block for the Groq fallback path.
  * 
- * @param {Object} searchResult - The result from webSearch()
- * @returns {string} Formatted text block
+ * @param {Object} searchResult - The output from tavilySearch()
+ * @returns {string} Formatted markdown block
  */
-export function formatSearchResultsForContext(searchResult) {
-  if (searchResult.error && (!searchResult.results || searchResult.results.length === 0)) {
-    return `[WEB SEARCH FAILED]: ${searchResult.error}`;
+export function formatTavilyResultsForContext(searchResult) {
+  if (!searchResult || (searchResult.error && (!searchResult.results || searchResult.results.length === 0))) {
+    return `[SEARCH STATUS: FAILED/EMPTY - ${searchResult?.error || 'No results available'}]`;
   }
 
-  let formatted = '[WEB SEARCH RESULTS (DuckDuckGo)]:\n';
+  let formatted = '[VERIFIED WEB SEARCH RESULTS (via Tavily)]:\n';
 
-  for (let i = 0; i < searchResult.results.length; i++) {
-    const r = searchResult.results[i];
-    formatted += `\n[${i + 1}] ${r.title}\n    ${r.snippet}\n    URL: ${r.url}\n`;
+  if (searchResult.answer) {
+    formatted += `\nDirect Summary Answer:\n${searchResult.answer}\n`;
   }
 
-  formatted += '\nINSTRUCTION: Synthesize a natural-language answer from these search results. Cite specific source URLs when referencing facts. Do NOT dump raw results.\n';
-  formatted += 'CRITICAL RULE: If the search results do NOT explicitly contain the answer (e.g. real name is unlisted or N/A), DO NOT guess, fabricate, or invent a name. Explicitly state that the information has not been publicly disclosed or documented.\n';
+  if (Array.isArray(searchResult.results) && searchResult.results.length > 0) {
+    formatted += '\nRelevant Web Sources:\n';
+    for (let i = 0; i < searchResult.results.length; i++) {
+      const item = searchResult.results[i];
+      formatted += `[${i + 1}] ${item.title}\n`;
+      if (item.content) {
+        formatted += `    Summary: ${item.content}\n`;
+      }
+      formatted += `    URL: ${item.url}\n\n`;
+    }
+  }
+
+  formatted += 'INSTRUCTIONS FOR ANSWER SYNTHESIS:\n';
+  formatted += '- Ground your response in the verified search data above.\n';
+  formatted += '- Provide a comprehensive, direct natural-language response.\n';
+  formatted += '- Cite the source URLs clearly (e.g. "[Source Name](url)" or markdown footnotes).\n';
 
   return formatted;
 }
 
 /**
- * Gemini Function Declaration schema for the web_search tool.
- * This is passed to the Gemini API's `tools` parameter.
+ * Extract Google Search Grounding metadata and citations from Gemini API responses.
+ * 
+ * @param {Object} response - The raw response from Gemini generateContent / generateContentStream
+ * @returns {{usedWebSearch: boolean, searchQueries: string[], sources: Array<{title: string, url: string}>}}
  */
-export const WEB_SEARCH_FUNCTION_DECLARATION = {
-  name: 'web_search',
-  description:
-    'Search the web for current information. Use this when the user asks about current events, recent news, live data, recent software releases, people or entities you don\'t recognize, or anything time-sensitive that your training data may not cover.',
-  parameters: {
-    type: 'OBJECT',
-    properties: {
-      query: {
-        type: 'STRING',
-        description: 'The search query to look up on the web. Be specific and concise.',
-      },
-    },
-    required: ['query'],
-  },
-};
+export function extractGeminiGroundingSources(response) {
+  const result = {
+    usedWebSearch: false,
+    searchQueries: [],
+    sources: [],
+  };
+
+  try {
+    const candidate = response?.candidates?.[0];
+    const groundingMetadata = candidate?.groundingMetadata;
+
+    if (!groundingMetadata) {
+      return result;
+    }
+
+    // 1. Extract search queries executed by Google Search
+    if (Array.isArray(groundingMetadata.webSearchQueries)) {
+      result.searchQueries = groundingMetadata.webSearchQueries.filter(Boolean);
+    }
+
+    // 2. Extract grounding chunks (web links and titles)
+    if (Array.isArray(groundingMetadata.groundingChunks)) {
+      const seenUrls = new Set();
+      for (const chunk of groundingMetadata.groundingChunks) {
+        const web = chunk.web;
+        if (web && web.uri && !seenUrls.has(web.uri)) {
+          seenUrls.add(web.uri);
+          result.sources.push({
+            title: web.title || 'Web Source',
+            url: web.uri,
+          });
+        }
+      }
+    }
+
+    // Mark as used if search queries or grounding sources exist
+    if (result.searchQueries.length > 0 || result.sources.length > 0) {
+      result.usedWebSearch = true;
+    }
+  } catch (err) {
+    console.warn('[Gemini Grounding] Failed to parse grounding metadata:', err.message);
+  }
+
+  return result;
+}
+
+/**
+ * Extract search query from non-native tool models (Groq fallback).
+ * Supports [SEARCH: query], ```web_search\nquery: "..."```, and web_search("...") patterns.
+ */
+export function extractSearchQueryFromText(text) {
+  if (!text || typeof text !== 'string') return null;
+
+  // 1. [SEARCH: ...] or [web_search: ...]
+  const bracketMatch = text.match(/\[(?:SEARCH|web_search):\s*(.+?)\]/i);
+  if (bracketMatch && bracketMatch[1]?.trim()) {
+    return bracketMatch[1].trim().replace(/^["']|["']$/g, '');
+  }
+
+  // 2. ```web_search ... query: "..." ... ```
+  const codeBlockMatch = text.match(/```(?:web_search|search)[\s\S]*?query:\s*["']?([^"'\r\n]+)["']?[\s\S]*?```/i);
+  if (codeBlockMatch && codeBlockMatch[1]?.trim()) {
+    return codeBlockMatch[1].trim();
+  }
+
+  // 3. web_search("...") or web_search(query="...")
+  const fnCallMatch = text.match(/web_search\s*\(\s*(?:query\s*=\s*)?["']([^"'\r\n]+)["']\s*\)/i);
+  if (fnCallMatch && fnCallMatch[1]?.trim()) {
+    return fnCallMatch[1].trim();
+  }
+
+  return null;
+}

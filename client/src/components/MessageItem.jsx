@@ -10,6 +10,7 @@ import {
   Terminal,
   Paperclip,
   Search,
+  ExternalLink,
 } from 'lucide-react';
 import { CopyButton, stripMarkdown } from './CopyButton';
 
@@ -203,6 +204,31 @@ export const MessageItem = ({ message }) => {
               >
                 {formatMarkdownContent(message.content)}
               </Markdown>
+
+              {/* Web Search Sources / Citations */}
+              {isAssistant && metadata?.sources && metadata.sources.length > 0 && (
+                <div className="mt-3.5 pt-2.5 border-t border-stone-200">
+                  <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-stone-600 uppercase tracking-wider mb-2">
+                    <Search className="w-3 h-3 text-sky-600" />
+                    <span>Verified Web Sources ({metadata.sources.length}):</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {metadata.sources.map((source, idx) => (
+                      <a
+                        key={idx}
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-stone-100 hover:bg-sky-50 text-stone-700 hover:text-sky-900 border border-stone-300 hover:border-sky-400 transition-colors max-w-full truncate shadow-[1px_1px_0px_0px_#e7e5e4]"
+                        title={source.url}
+                      >
+                        <span className="truncate max-w-[220px]">{source.title || source.url}</span>
+                        <ExternalLink className="w-2.5 h-2.5 flex-shrink-0 text-stone-400" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

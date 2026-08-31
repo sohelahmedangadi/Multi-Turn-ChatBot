@@ -83,7 +83,22 @@ The system implements a hierarchical 3-tier memory engine designed to provide ri
 
 ---
 
-## 4. Zero-Cost Heuristic Ambiguity Detection (`server/services/ambiguityDetector.js`)
+## 4. Real-Time Web Search Grounding & Tavily Fallback (`server/services/webSearchService.js` & `server/services/llmProvider.js`)
+
+- **Primary: Gemini Native Google Search Grounding (`@google/genai`)**:
+  - Built directly into the Gemini API request via `tools: [{ googleSearch: {} }]`.
+  - Automatically queries Google Search when real-time or niche information is needed.
+  - Extracts and formats `groundingMetadata` (including search queries and source URLs/titles) so the UI displays verified citation pills.
+- **Fallback: Groq + Tavily Search API**:
+  - Catches regex triggers like `[SEARCH: <query>]` emitted by open-source models during Gemini quota limits.
+  - Queries **Tavily Search API** with a 7-second timeout, extracting summarized answers and top 5 clean source snippets.
+  - Injects formatted search context and re-prompts the model for natural-language synthesis with markdown citation links.
+- **Graceful Error Handling & Fallback**:
+  - All web search calls are wrapped in robust error-handling blocks; if search fails or times out, the chatbot falls back seamlessly to base knowledge without throwing errors or hallucinating ungrounded sources.
+
+---
+
+## 5. Zero-Cost Heuristic Ambiguity Detection (`server/services/ambiguityDetector.js`)
 
 - **Local Rule-Based Pre-check**: Analyzes incoming messages locally before dispatching requests to external LLM APIs.
 - **Pronoun & Vague Reference Detection**: Identifies underspecified queries lacking referents (e.g., *"what about that?"*, *"tell me more"*, *"why?"*, *"explain it"*) when no prior dialogue context exists.
@@ -95,7 +110,7 @@ The system implements a hierarchical 3-tier memory engine designed to provide ri
 
 ---
 
-## 5. Dual-Engine LLM Inference & Resilient Fallback (`server/services/llmProvider.js`)
+## 6. Dual-Engine LLM Inference & Resilient Fallback (`server/services/llmProvider.js`)
 
 - **Primary Engine**: Google Gemini API via official `@google/genai` SDK (`gemini-2.5-flash`).
 - **Secondary / Fallback Engine**: Groq SDK (`groq-sdk`) with ultra-fast inference (`qwen/qwen3.8-27b`).
@@ -105,7 +120,7 @@ The system implements a hierarchical 3-tier memory engine designed to provide ri
 
 ---
 
-## 6. Evaluation Suite & Semantic Coherence Engine (`server/services/evaluationSuite.js`)
+## 7. Evaluation Suite & Semantic Coherence Engine (`server/services/evaluationSuite.js`)
 
 - **Semantic Coherence Metric (`calculateCoherenceScore`)**:
   - Analyzes entity and keyword overlap across the history, user query, and assistant response.
@@ -121,7 +136,7 @@ The system implements a hierarchical 3-tier memory engine designed to provide ri
 
 ---
 
-## 7. Security & Defensive Engineering
+## 8. Security & Defensive Engineering
 
 - **Prompt Injection Neutralization (`server/middleware/sanitizer.js`)**: Detects and sanitizes adversarial prefixes (e.g., *"ignore previous instructions"*, *"system override"*, *"DAN mode"*).
 - **IP Rate Limiting (`express-rate-limit`)**: Enforces a strict 30 requests/minute ceiling per IP to protect against denial-of-service and API quota exhaustion.

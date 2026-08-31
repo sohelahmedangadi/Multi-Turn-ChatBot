@@ -1,6 +1,6 @@
-# Test Run Report (2026-08-31T06:34:15.460Z)
+# Test Run Report (2026-08-31T07:02:30.604Z)
 
-Total: 43 | Passed: 43 | Failed: 0
+Total: 44 | Passed: 44 | Failed: 0
 
 - PASS: Detects empty string as ambiguous
 - PASS: Flags "What about that?" as ambiguous when context is empty
@@ -41,7 +41,8 @@ Total: 43 | Passed: 43 | Failed: 0
 - PASS: Context Assembler: Successfully retrieves RAG document chunks for attached file
 - PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
 - PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty
-- PASS: Gemini Function Declaration: web_search schema has correct name, parameters, and required fields
-- PASS: DuckDuckGo Search: Returns graceful error message on empty query
-- PASS: DuckDuckGo Search: formatSearchResultsForContext produces structured, citation-ready output from results
-- PASS: DuckDuckGo Search: Successfully executes query via Python DDGS bridge and extracts live web results
+- PASS: Gemini Grounding: Extracts webSearchQueries and citation sources from groundingMetadata
+- PASS: Gemini Grounding: Correctly flags ungrounded responses as usedWebSearch = false
+- PASS: Tavily Search: Gracefully handles missing API key without throwing exceptions
+- PASS: Tavily Search: formatTavilyResultsForContext formats direct answers, summaries, and URLs for context injection
+- PASS: Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls

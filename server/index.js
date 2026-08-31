@@ -561,6 +561,7 @@ async function startServer() {
               attachedChunksCount: context.relevantDocumentChunks?.length || 0,
               usedWebSearch: streamResult.usedWebSearch || false,
               searchQuery: streamResult.searchQuery || null,
+              sources: streamResult.sources || [],
             },
           };
           await db.saveMessage(assistantMessageDoc);
@@ -579,6 +580,7 @@ async function startServer() {
             isFallback: streamResult.isFallback,
             retrievedMemories: context.relevantMemories,
             attachedDocument: context.attachedDocumentMeta || null,
+            sources: streamResult.sources || [],
           })}\n\n`);
           return res.end();
         } catch (streamErr) {
@@ -619,6 +621,7 @@ async function startServer() {
           attachedChunksCount: context.relevantDocumentChunks?.length || 0,
           usedWebSearch: llmResult.usedWebSearch || false,
           searchQuery: llmResult.searchQuery || null,
+          sources: llmResult.sources || [],
         },
       };
       await db.saveMessage(assistantMessageDoc);
@@ -638,6 +641,7 @@ async function startServer() {
         isFallback: llmResult.isFallback,
         retrievedMemories: context.relevantMemories,
         attachedDocument: context.attachedDocumentMeta || null,
+        sources: llmResult.sources || [],
       });
     } catch (err) {
       console.error('Chat processing error:', err);

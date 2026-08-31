@@ -1,5 +1,11 @@
 import { detectAmbiguity } from './services/ambiguityDetector.js';
-import { webSearch, formatSearchResultsForContext, WEB_SEARCH_FUNCTION_DECLARATION } from './services/webSearchService.js';
+import {
+  tavilySearch,
+  formatTavilyResultsForContext,
+  extractGeminiGroundingSources,
+  extractSearchQueryFromText,
+  isTavilyConfigured,
+} from './services/webSearchService.js';
 import {
   getSessionContext,
   estimateTokenCount,
@@ -307,50 +313,91 @@ File Upload and RAG Analysis allows users to attach PDFs, code files, and CSV da
   );
 
   // ----------------------------------------------------
-  // 7. Web Search Service Unit Tests (DuckDuckGo Search Python Library)
+  // 7. Web Search Grounding & Tavily Fallback Unit Tests
   // ----------------------------------------------------
-  console.log('\n🌐 Testing Web Search Service (server/services/webSearchService.js - DuckDuckGo Search):');
+  console.log('\n🌐 Testing Web Search Grounding & Tavily Fallback (server/services/webSearchService.js):');
 
-  // Test 1: Function declaration schema is correctly structured
-  assert(
-    WEB_SEARCH_FUNCTION_DECLARATION.name === 'web_search' &&
-      WEB_SEARCH_FUNCTION_DECLARATION.parameters &&
-      WEB_SEARCH_FUNCTION_DECLARATION.parameters.properties &&
-      WEB_SEARCH_FUNCTION_DECLARATION.parameters.properties.query &&
-      WEB_SEARCH_FUNCTION_DECLARATION.parameters.properties.query.type === 'STRING' &&
-      WEB_SEARCH_FUNCTION_DECLARATION.parameters.required.includes('query'),
-    'Gemini Function Declaration: web_search schema has correct name, parameters, and required fields'
-  );
-
-  // Test 2: webSearch returns graceful error on empty query
-  const emptyQueryResult = await webSearch('');
-  assert(
-    emptyQueryResult.error && emptyQueryResult.error.includes('Empty') && Array.isArray(emptyQueryResult.results) && emptyQueryResult.results.length === 0,
-    'DuckDuckGo Search: Returns graceful error message on empty query'
-  );
-
-  // Test 3: formatSearchResultsForContext produces readable output from results
-  const mockSearchResult = {
-    results: [
-      { title: 'React 19 Released', snippet: 'React 19 is now available with new features.', url: 'https://react.dev/blog/react-19' },
-      { title: 'React Docs', snippet: 'Official React documentation.', url: 'https://react.dev' },
+  // Test 1: Gemini Grounding Metadata Extractor
+  const mockGeminiResponse = {
+    candidates: [
+      {
+        content: { parts: [{ text: 'React 19 was released in December 2024.' }] },
+        groundingMetadata: {
+          webSearchQueries: ['React 19 release date', 'React 19 official announcements'],
+          groundingChunks: [
+            { web: { title: 'React 19 Official Blog', uri: 'https://react.dev/blog/2024/12/05/react-19' } },
+            { web: { title: 'React 19 Upgrade Guide', uri: 'https://react.dev/blog/2024/04/25/react-19-upgrade-guide' } },
+          ],
+        },
+      },
     ],
+  };
+
+  const groundingResult = extractGeminiGroundingSources(mockGeminiResponse);
+  assert(
+    groundingResult.usedWebSearch === true &&
+      groundingResult.searchQueries.length === 2 &&
+      groundingResult.sources.length === 2 &&
+      groundingResult.sources[0].url === 'https://react.dev/blog/2024/12/05/react-19',
+    'Gemini Grounding: Extracts webSearchQueries and citation sources from groundingMetadata'
+  );
+
+  // Test 2: Gemini Grounding Unused Detection
+  const mockUngroundedResponse = {
+    candidates: [{ content: { parts: [{ text: '2 + 2 equals 4.' }] } }],
+  };
+  const ungroundedResult = extractGeminiGroundingSources(mockUngroundedResponse);
+  assert(
+    ungroundedResult.usedWebSearch === false &&
+      ungroundedResult.searchQueries.length === 0 &&
+      ungroundedResult.sources.length === 0,
+    'Gemini Grounding: Correctly flags ungrounded responses as usedWebSearch = false'
+  );
+
+  // Test 3: Tavily API Graceful Degradation on Missing Key
+  const originalTavilyKey = process.env.TAVILY_API_KEY;
+  process.env.TAVILY_API_KEY = '';
+  const noKeyResult = await tavilySearch('latest SpaceX launch');
+  assert(
+    noKeyResult.error &&
+      noKeyResult.error.includes('Missing TAVILY_API_KEY') &&
+      Array.isArray(noKeyResult.results) &&
+      noKeyResult.results.length === 0,
+    'Tavily Search: Gracefully handles missing API key without throwing exceptions'
+  );
+  process.env.TAVILY_API_KEY = originalTavilyKey || '';
+
+  // Test 4: Tavily Results Formatter
+  const mockTavilyData = {
+    results: [
+      {
+        title: 'Starship Flight 7 Updates',
+        content: 'SpaceX completed the seventh test flight of Starship with super heavy booster catch.',
+        url: 'https://spacex.com/launches/starship-flight-7',
+      },
+    ],
+    answer: 'SpaceX Starship Flight 7 took place in early 2025.',
     error: null,
   };
-  const formatted = formatSearchResultsForContext(mockSearchResult);
+  const formattedTavily = formatTavilyResultsForContext(mockTavilyData);
   assert(
-    formatted.includes('[WEB SEARCH RESULTS') &&
-      formatted.includes('React 19 Released') &&
-      formatted.includes('https://react.dev/blog/react-19') &&
-      formatted.includes('Cite specific source'),
-    'DuckDuckGo Search: formatSearchResultsForContext produces structured, citation-ready output from results'
+    formattedTavily.includes('[VERIFIED WEB SEARCH RESULTS (via Tavily)]') &&
+      formattedTavily.includes('Starship Flight 7 Updates') &&
+      formattedTavily.includes('https://spacex.com/launches/starship-flight-7') &&
+      formattedTavily.includes('Direct Summary Answer:') &&
+      formattedTavily.includes('Cite the source URLs'),
+    'Tavily Search: formatTavilyResultsForContext formats direct answers, summaries, and URLs for context injection'
   );
 
-  // Test 4: Live Python Bridge search execution
-  const liveDDGResult = await webSearch('Node.js release', 2);
+  // Test 5: Groq Search Query Regex Extractor
+  const q1 = extractSearchQueryFromText('I need to search for this: [SEARCH: "Next.js 16 changelog"]');
+  const q2 = extractSearchQueryFromText('Let me check:\n```web_search\nquery: "React 19 features"\n```');
+  const q3 = extractSearchQueryFromText('web_search(query="Tavily API documentation")');
   assert(
-    Array.isArray(liveDDGResult.results) && liveDDGResult.results.length > 0 && liveDDGResult.results[0].title && liveDDGResult.results[0].url,
-    'DuckDuckGo Search: Successfully executes query via Python DDGS bridge and extracts live web results'
+    q1 === 'Next.js 16 changelog' &&
+      q2 === 'React 19 features' &&
+      q3 === 'Tavily API documentation',
+    'Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls'
   );
 
   // Write results out to error.md
