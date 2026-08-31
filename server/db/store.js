@@ -428,7 +428,7 @@ export const db = {
             createdAt: now,
           },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: 'after' }
       ).lean();
       return updated;
     }

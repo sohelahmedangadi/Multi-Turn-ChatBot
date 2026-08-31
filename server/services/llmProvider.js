@@ -127,25 +127,29 @@ export async function generateResponse(
   let forcedSearch = false;
   let searchQuery = null;
 
-  if (classification.needsWebSearch && isTavilyConfigured()) {
-    forcedSearch = true;
-    searchQuery = message.trim();
-    console.log(`[InputClassifier] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}). Querying Tavily...`);
-    try {
-      const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
-      if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
-        proactiveSources = (searchResult.results || []).map((r) => ({
-          title: r.title || 'Web Source',
-          url: r.url || '',
-        })).filter((s) => s.url);
+  if (classification.needsWebSearch) {
+    if (isTavilyConfigured()) {
+      forcedSearch = true;
+      searchQuery = message.trim();
+      console.log(`[InputClassifier] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}). Querying Tavily...`);
+      try {
+        const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
+        if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
+          proactiveSources = (searchResult.results || []).map((r) => ({
+            title: r.title || 'Web Source',
+            url: r.url || '',
+          })).filter((s) => s.url);
 
-        proactiveSearchContext = '\n\n' + formatTavilyResultsForContext(searchResult);
-      } else {
-        proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
+          proactiveSearchContext = '\n\n' + formatTavilyResultsForContext(searchResult);
+        } else {
+          proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
+        }
+      } catch (err) {
+        console.warn('[InputClassifier] Proactive search error:', err.message);
+        proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
       }
-    } catch (err) {
-      console.warn('[InputClassifier] Proactive search error:', err.message);
-      proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
+    } else {
+      console.log(`[InputClassifier] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}), but TAVILY_API_KEY is not configured. Relying on Gemini native search grounding tool.`);
     }
   } else {
     console.log(`[InputClassifier] Search classified as unnecessary (${classification.reason}, conf: ${classification.confidence}, suggestedProvider: ${classification.suggestedProvider})`);
@@ -405,25 +409,29 @@ export async function generateStreamResponse(
   let forcedSearch = false;
   let searchQuery = null;
 
-  if (classification.needsWebSearch && isTavilyConfigured()) {
-    forcedSearch = true;
-    searchQuery = message.trim();
-    console.log(`[InputClassifier Stream] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}). Querying Tavily...`);
-    try {
-      const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
-      if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
-        proactiveSources = (searchResult.results || []).map((r) => ({
-          title: r.title || 'Web Source',
-          url: r.url || '',
-        })).filter((s) => s.url);
+  if (classification.needsWebSearch) {
+    if (isTavilyConfigured()) {
+      forcedSearch = true;
+      searchQuery = message.trim();
+      console.log(`[InputClassifier Stream] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}). Querying Tavily...`);
+      try {
+        const searchResult = await tavilySearch(searchQuery, { maxResults: 5, timeoutMs: 7000 });
+        if (searchResult && (!searchResult.error || searchResult.results?.length > 0)) {
+          proactiveSources = (searchResult.results || []).map((r) => ({
+            title: r.title || 'Web Source',
+            url: r.url || '',
+          })).filter((s) => s.url);
 
-        proactiveSearchContext = '\n\n' + formatTavilyResultsForContext(searchResult);
-      } else {
-        proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
+          proactiveSearchContext = '\n\n' + formatTavilyResultsForContext(searchResult);
+        } else {
+          proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, searchResult?.error || 'No relevant results found');
+        }
+      } catch (err) {
+        console.warn('[InputClassifier Stream] Proactive search error:', err.message);
+        proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
       }
-    } catch (err) {
-      console.warn('[InputClassifier Stream] Proactive search error:', err.message);
-      proactiveSearchContext = '\n\n' + formatThinResultsWarning(searchQuery, err.message);
+    } else {
+      console.log(`[InputClassifier Stream] Search classified as necessary (${classification.reason}, conf: ${classification.confidence}), but TAVILY_API_KEY is not configured. Relying on Gemini native search grounding tool.`);
     }
   } else {
     console.log(`[InputClassifier Stream] Search classified as unnecessary (${classification.reason}, conf: ${classification.confidence}, suggestedProvider: ${classification.suggestedProvider})`);
