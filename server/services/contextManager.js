@@ -204,6 +204,7 @@ export async function getSessionContext(sessionId, currentQuery = '', userId = '
   contextualMemorySection += '- Math, logic, or reasoning tasks\n';
   contextualMemorySection += '- Questions about the user\'s own project, memories, or uploaded documents\n';
   contextualMemorySection += 'After receiving search results, synthesize a helpful natural-language answer and CITE the source URL(s). Do NOT dump raw search results.\n';
+  contextualMemorySection += 'If native function calling is unavailable, you may output "[SEARCH: <query>]" on a line by itself to request real-time web search results.\n';
   contextualMemorySection += 'If the search returns no results or fails, say so honestly instead of guessing.\n';
 
   return {
