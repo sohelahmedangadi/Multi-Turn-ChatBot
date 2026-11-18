@@ -1,6 +1,6 @@
 # Complete Automated Verification Test Log
 
-**Generated:** 2026-11-18T15:51:39.861Z  
+**Generated:** 2026-11-18T16:44:38.358Z  
 **Source:** `test-results.json` (emitted by `server/test-suite.js`)  
 **Total Assertions:** 558  
 **Total Discrete Test Cases:** 469  
@@ -373,7 +373,7 @@
 | **237** | `PASS` ✅ | Zero Guard: Emoji-only input produces zero vector | Zero Guard: Emoji-only input produces zero vector |
 | **238** | `PASS` ✅ | Zero Guard: Emoji-only zero vector returns 0 cosine similarity without NaN | Zero Guard: Emoji-only zero vector returns 0 cosine similarity without NaN |
 | **239** | `PASS` ✅ | Performance: 1MB text produces valid non-zero vector | Performance: 1MB text produces valid non-zero vector |
-| **240** | `PASS` ✅ | Performance: 1MB text vectorization completes fast without hanging (638ms) | Performance: 1MB text vectorization completes fast without hanging (638ms) |
+| **240** | `PASS` ✅ | Performance: 1MB text vectorization completes fast without hanging (167ms) | Performance: 1MB text vectorization completes fast without hanging (167ms) |
 | **241** | `PASS` ✅ | Hashed Vector: Confirms bag-of-words yields low similarity on non-overlapping paraphrases | Hashed Vector: Confirms bag-of-words yields low similarity on non-overlapping paraphrases |
 | **242** | `PASS` ✅ | Real Embedding: Semantic mock captures paraphrase similarity (1.00) | Real Embedding: Semantic mock captures paraphrase similarity (1.00) |
 | **243** | `PASS` ✅ | Embedding Migration: Successfully re-embeds records and tracks embeddingVersion | Embedding Migration: Successfully re-embeds records and tracks embeddingVersion |
@@ -388,7 +388,7 @@
 | **245** | `PASS` ✅ | SSE Headers: Cache-Control includes no-cache | SSE Headers: Cache-Control includes no-cache |
 | **246** | `PASS` ✅ | SSE Headers: Connection is keep-alive | SSE Headers: Connection is keep-alive |
 | **247** | `PASS` ✅ | Upstream Abort: Gemini abortSignal aborted when client disconnected | Upstream Abort: Gemini abortSignal aborted when client disconnected |
-| **248** | `PASS` ✅ | Upstream Abort: Aborted within 1s of disconnect (2ms) | Upstream Abort: Aborted within 1s of disconnect (2ms) |
+| **248** | `PASS` ✅ | Upstream Abort: Aborted within 1s of disconnect (0ms) | Upstream Abort: Aborted within 1s of disconnect (0ms) |
 | **249** | `PASS` ✅ | Turn Consistency: User message was persisted in session | Turn Consistency: User message was persisted in session |
 | **250** | `PASS` ✅ | Turn Consistency: Partial assistant message was persisted in session | Turn Consistency: Partial assistant message was persisted in session |
 | **251** | `PASS` ✅ | Turn Consistency: Partial assistant turn flagged with incomplete=true | Turn Consistency: Partial assistant turn flagged with incomplete=true |
@@ -719,7 +719,7 @@
 | # | Status | Test Case / Scenario | Exact Assertion Name |
 | :---: | :---: | :--- | :--- |
 | **501** | `PASS` ✅ | Load Test: All 10 concurrent uploads accepted with 202 and enqueued during stream load | Load Test: All 10 concurrent uploads accepted with 202 and enqueued during stream load |
-| **502** | `PASS` ✅ | Load Test: Event loop p95 lag (781.19ms) stays below safety threshold (< 2500ms under load/instrumentation) | Load Test: Event loop p95 lag (781.19ms) stays below safety threshold (< 2500ms under load/instrumentation) |
+| **502** | `PASS` ✅ | Load Test: Event loop p95 lag (514.85ms) stays below safety threshold (< 2500ms under load/instrumentation) | Load Test: Event loop p95 lag (514.85ms) stays below safety threshold (< 2500ms under load/instrumentation) |
 | **503** | `PASS` ✅ | Load Test: All 50 concurrent streams served successfully | Load Test: All 50 concurrent streams served successfully |
 
 ### Property-Based Testing (fast-check) Truncation Invariants
@@ -795,6 +795,6 @@
 
 | # | Status | Test Case / Scenario | Exact Assertion Name |
 | :---: | :---: | :--- | :--- |
-| **557** | `PASS` ✅ | Test Isolation: Production data/local_store.json hash remains completely unchanged after test suite execution | Test Isolation: Production store SHA-256 hash (09267103f3a4bc56726b770c7296fc5055600b1be9ec7c82a8e60bba27790e80) matches initial hash (09267103f3a4bc56726b770c7296fc5055600b1be9ec7c82a8e60bba27790e80) exactly; real store was not touched |
+| **557** | `PASS` ✅ | Test Isolation: Production data/local_store.json hash remains completely unchanged after test suite execution | Test Isolation: Production store SHA-256 hash (b5b3663896164ed369a8cd7b9894c672c634292521548d40a6b52e4234384d05) matches initial hash (b5b3663896164ed369a8cd7b9894c672c634292521548d40a6b52e4234384d05) exactly; real store was not touched |
 | **558** | `PASS` ✅ | Test Isolation: Refuses to run tests if DATA_DIR resolves to real production data directory | Test Isolation: Safety guard successfully throws and halts execution when DATA_DIR points to ./data |
 
