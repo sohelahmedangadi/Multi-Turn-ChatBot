@@ -1,0 +1,3908 @@
+[
+  {
+    "id": 1,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Detects empty string as ambiguous",
+    "status": "PASS",
+    "testCase": "Detects empty string as ambiguous"
+  },
+  {
+    "id": 2,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Flags \"What about that?\" as ambiguous when context is empty",
+    "status": "PASS",
+    "testCase": "Flags \"What about that?\" as ambiguous when context is empty"
+  },
+  {
+    "id": 3,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Returns targeted clarifying question",
+    "status": "PASS",
+    "testCase": "Returns targeted clarifying question"
+  },
+  {
+    "id": 4,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Passes vague question to LLM if prior context has sufficient detail",
+    "status": "PASS",
+    "testCase": "Passes vague question to LLM if prior context has sufficient detail"
+  },
+  {
+    "id": 5,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Recognizes specific non-ambiguous queries without needing clarification",
+    "status": "PASS",
+    "testCase": "Recognizes specific non-ambiguous queries without needing clarification"
+  },
+  {
+    "id": 6,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Is it raining?\" must NOT be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Is it raining?\" must NOT be intercepted as ambiguous"
+  },
+  {
+    "id": 7,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Explain this: <code>\" must NOT be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Explain this: <code>\" must NOT be intercepted as ambiguous"
+  },
+  {
+    "id": 8,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Explain this: <inline code>\" must NOT be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Explain this: <inline code>\" must NOT be intercepted as ambiguous"
+  },
+  {
+    "id": 9,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Fix it\" without context or file must be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Fix it\" without context or file must be intercepted as ambiguous"
+  },
+  {
+    "id": 10,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Summarize this\" without context or file must be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Summarize this\" without context or file must be intercepted as ambiguous"
+  },
+  {
+    "id": 11,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Fix it\" with active file must NOT be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Fix it\" with active file must NOT be intercepted as ambiguous"
+  },
+  {
+    "id": 12,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Summarize this\" with active file must NOT be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Summarize this\" with active file must NOT be intercepted as ambiguous"
+  },
+  {
+    "id": 13,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: \"Explain it\" with active media must NOT be intercepted as ambiguous",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: \"Explain it\" with active media must NOT be intercepted as ambiguous"
+  },
+  {
+    "id": 14,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "First message after upload: Resolves active file before ambiguity check",
+    "status": "PASS",
+    "testCase": "First message after upload: Resolves active file before ambiguity check"
+  },
+  {
+    "id": 15,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "First message after upload: \"Summarize this\" with resolved session file must NOT be intercepted",
+    "status": "PASS",
+    "testCase": "First message after upload: \"Summarize this\" with resolved session file must NOT be intercepted"
+  },
+  {
+    "id": 16,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Ambiguity Detector: Intercepts vague query before any LLM execution",
+    "status": "PASS",
+    "testCase": "Ambiguity Detector: Intercepts vague query before any LLM execution"
+  },
+  {
+    "id": 17,
+    "category": "Ambiguity Detection Heuristics & Fast Interception",
+    "name": "Zero-Cost Guardrail: Intercepted turn skips fact extraction preserving 0 token cost",
+    "status": "PASS",
+    "testCase": "Zero-Cost Guardrail: Intercepted turn skips fact extraction preserving 0 token cost"
+  },
+  {
+    "id": 18,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "LangChain Extractor: Identifies user name \"Sohail\"",
+    "status": "PASS",
+    "testCase": "LangChain Extractor: Identifies user name \"Sohail\""
+  },
+  {
+    "id": 19,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "LangChain Extractor: Identifies project name \"CosmoAI\"",
+    "status": "PASS",
+    "testCase": "LangChain Extractor: Identifies project name \"CosmoAI\""
+  },
+  {
+    "id": 20,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "LangChain Extractor: Identifies tech stack \"React 19\"",
+    "status": "PASS",
+    "testCase": "LangChain Extractor: Identifies tech stack \"React 19\""
+  },
+  {
+    "id": 21,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "User A has exactly 3 structured long-term memories persisted",
+    "status": "PASS",
+    "testCase": "User A has exactly 3 structured long-term memories persisted"
+  },
+  {
+    "id": 22,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Conflict Resolution: Updates project_name in place without creating duplicate memory",
+    "status": "PASS",
+    "testCase": "Conflict Resolution: Updates project_name in place without creating duplicate memory"
+  },
+  {
+    "id": 23,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Project memory value updated to \"ApexBot\"",
+    "status": "PASS",
+    "testCase": "Project memory value updated to \"ApexBot\""
+  },
+  {
+    "id": 24,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Explicit Forget: Successfully deleted tech_stack memory upon user request",
+    "status": "PASS",
+    "testCase": "Explicit Forget: Successfully deleted tech_stack memory upon user request"
+  },
+  {
+    "id": 25,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Cross-User Isolation: User B cannot access User A memories",
+    "status": "PASS",
+    "testCase": "Cross-User Isolation: User B cannot access User A memories"
+  },
+  {
+    "id": 26,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Semantic Search: Retrieves relevant memory for User A",
+    "status": "PASS",
+    "testCase": "Semantic Search: Retrieves relevant memory for User A"
+  },
+  {
+    "id": 27,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Retrieved memory contains correct project \"ApexBot\"",
+    "status": "PASS",
+    "testCase": "Retrieved memory contains correct project \"ApexBot\""
+  },
+  {
+    "id": 28,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Context Assembler embeds retrieved Tier 2 memories into context",
+    "status": "PASS",
+    "testCase": "Context Assembler embeds retrieved Tier 2 memories into context"
+  },
+  {
+    "id": 29,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Context section contains both user name and project name for LLM grounding",
+    "status": "PASS",
+    "testCase": "Context section contains both user name and project name for LLM grounding"
+  },
+  {
+    "id": 30,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Full Past History Access: Retrieves complete past conversation sessions with messages",
+    "status": "PASS",
+    "testCase": "Full Past History Access: Retrieves complete past conversation sessions with messages"
+  },
+  {
+    "id": 31,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Context Assembler embeds full past conversation history catalog into LLM context prompt",
+    "status": "PASS",
+    "testCase": "Context Assembler embeds full past conversation history catalog into LLM context prompt"
+  },
+  {
+    "id": 32,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Tier 3 Knowledge Base: Retrieves domain architecture chunk",
+    "status": "PASS",
+    "testCase": "Tier 3 Knowledge Base: Retrieves domain architecture chunk"
+  },
+  {
+    "id": 33,
+    "category": "LangChain Fact Extraction & 3-Tier Memory Context",
+    "name": "Tier 3 chunk matches Ambiguity Heuristic domain topic",
+    "status": "PASS",
+    "testCase": "Tier 3 chunk matches Ambiguity Heuristic domain topic"
+  },
+  {
+    "id": 34,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Estimates tokens correctly (text.length / 4)",
+    "status": "PASS",
+    "testCase": "Estimates tokens correctly (text.length / 4)"
+  },
+  {
+    "id": 35,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Truncation strictly enforces token budget limit",
+    "status": "PASS",
+    "testCase": "Truncation strictly enforces token budget limit"
+  },
+  {
+    "id": 36,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Drops older turns in paired fashion to stay within budget",
+    "status": "PASS",
+    "testCase": "Drops older turns in paired fashion to stay within budget"
+  },
+  {
+    "id": 37,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Script-Aware Estimator: Indic script density (23 tokens) exceeds Latin (7 tokens) for same char length",
+    "status": "PASS",
+    "testCase": "Script-Aware Estimator: Indic script density (23 tokens) exceeds Latin (7 tokens) for same char length"
+  },
+  {
+    "id": 38,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Script-Aware Estimator: Code snippet density (26 tokens) exceeds naive len/4 (25 tokens)",
+    "status": "PASS",
+    "testCase": "Script-Aware Estimator: Code snippet density (26 tokens) exceeds naive len/4 (25 tokens)"
+  },
+  {
+    "id": 39,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Single Pair: Resulting token count strictly <= budget (1600)",
+    "status": "PASS",
+    "testCase": "Single Pair: Resulting token count strictly <= budget (1600)"
+  },
+  {
+    "id": 40,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Single Pair: Never returns empty history silently",
+    "status": "PASS",
+    "testCase": "Single Pair: Never returns empty history silently"
+  },
+  {
+    "id": 41,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Single Pair: Truncates oversized assistant message with explicit [truncated] marker",
+    "status": "PASS",
+    "testCase": "Single Pair: Truncates oversized assistant message with explicit [truncated] marker"
+  },
+  {
+    "id": 42,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Single Pair: Preserves user message intact when truncating assistant response",
+    "status": "PASS",
+    "testCase": "Single Pair: Preserves user message intact when truncating assistant response"
+  },
+  {
+    "id": 43,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Odd History: Drops orphan without misaligning subsequent (user, assistant) pairs",
+    "status": "PASS",
+    "testCase": "Odd History: Drops orphan without misaligning subsequent (user, assistant) pairs"
+  },
+  {
+    "id": 44,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Odd History: All retained dialogue turns remain in aligned (user, assistant) pairs",
+    "status": "PASS",
+    "testCase": "Odd History: All retained dialogue turns remain in aligned (user, assistant) pairs"
+  },
+  {
+    "id": 45,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Odd History: All retained dialogue turns remain in aligned (user, assistant) pairs",
+    "status": "PASS",
+    "testCase": "Odd History: All retained dialogue turns remain in aligned (user, assistant) pairs"
+  },
+  {
+    "id": 46,
+    "category": "Context Truncation, Token Budgeting & Fast-Check Invariants",
+    "name": "Fast-Check: Property-based invariants verified across 100 random generative conversations",
+    "status": "PASS",
+    "testCase": "Fast-Check: Property-based invariants verified across 100 random generative conversations"
+  },
+  {
+    "id": 47,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Hashes password securely with bcrypt salt",
+    "status": "PASS",
+    "testCase": "Hashes password securely with bcrypt salt"
+  },
+  {
+    "id": 48,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Verifies valid password against bcrypt hash",
+    "status": "PASS",
+    "testCase": "Verifies valid password against bcrypt hash"
+  },
+  {
+    "id": 49,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Rejects invalid password attempt",
+    "status": "PASS",
+    "testCase": "Rejects invalid password attempt"
+  },
+  {
+    "id": 50,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Generates valid 3-part signed JWT token",
+    "status": "PASS",
+    "testCase": "Generates valid 3-part signed JWT token"
+  },
+  {
+    "id": 51,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Password Rules: Rejects passwords shorter than 10 characters",
+    "status": "PASS",
+    "testCase": "Password Rules: Rejects passwords shorter than 10 characters"
+  },
+  {
+    "id": 52,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Password Rules: Rejects known common passwords (password123)",
+    "status": "PASS",
+    "testCase": "Password Rules: Rejects known common passwords (password123)"
+  },
+  {
+    "id": 53,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Password Rules: Rejects repeated single character passwords",
+    "status": "PASS",
+    "testCase": "Password Rules: Rejects repeated single character passwords"
+  },
+  {
+    "id": 54,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Password Rules: Rejects passwords longer than 72 bytes (bcrypt truncation guard)",
+    "status": "PASS",
+    "testCase": "Password Rules: Rejects passwords longer than 72 bytes (bcrypt truncation guard)"
+  },
+  {
+    "id": 55,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Password Rules: Accepts valid passwords up to exactly 72 bytes",
+    "status": "PASS",
+    "testCase": "Password Rules: Accepts valid passwords up to exactly 72 bytes"
+  },
+  {
+    "id": 56,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Password Rules: Accepts strong complex passwords",
+    "status": "PASS",
+    "testCase": "Password Rules: Accepts strong complex passwords"
+  },
+  {
+    "id": 57,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Startup Guard: getJwtSecret fails fast when JWT_SECRET is missing or empty",
+    "status": "PASS",
+    "testCase": "Startup Guard: getJwtSecret fails fast when JWT_SECRET is missing or empty"
+  },
+  {
+    "id": 58,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Startup Guard: getJwtSecret fails fast when JWT_SECRET is shorter than 32 characters",
+    "status": "PASS",
+    "testCase": "Startup Guard: getJwtSecret fails fast when JWT_SECRET is shorter than 32 characters"
+  },
+  {
+    "id": 59,
+    "category": "Authentication, JWT & Password Security",
+    "name": "Startup Guard: Restores and validates secure 32+ character JWT_SECRET",
+    "status": "PASS",
+    "testCase": "Startup Guard: Restores and validates secure 32+ character JWT_SECRET"
+  },
+  {
+    "id": 60,
+    "category": "Evaluation Suite & Coherence Engine",
+    "name": "Contains 5 comprehensive standard benchmark scenarios",
+    "status": "PASS",
+    "testCase": "Contains 5 comprehensive standard benchmark scenarios"
+  },
+  {
+    "id": 61,
+    "category": "Evaluation Suite & Coherence Engine",
+    "name": "Computes high coherence score (0.93) for context-aligned responses",
+    "status": "PASS",
+    "testCase": "Computes high coherence score (0.93) for context-aligned responses"
+  },
+  {
+    "id": 62,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Detects valid PDF %PDF- signature",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Detects valid PDF %PDF- signature"
+  },
+  {
+    "id": 63,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Detects valid PNG signature",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Detects valid PNG signature"
+  },
+  {
+    "id": 64,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Detects valid JPEG signature",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Detects valid JPEG signature"
+  },
+  {
+    "id": 65,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Detects valid MP4 video ftyp signature",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Detects valid MP4 video ftyp signature"
+  },
+  {
+    "id": 66,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Detects valid WebM video EBML signature",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Detects valid WebM video EBML signature"
+  },
+  {
+    "id": 67,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Detects valid WebP image signature",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Detects valid WebP image signature"
+  },
+  {
+    "id": 68,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Recognizes DOCX ZIP container with word/ package entry",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Recognizes DOCX ZIP container with word/ package entry"
+  },
+  {
+    "id": 69,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Magic Bytes: Recognizes CSV tabular structure",
+    "status": "PASS",
+    "testCase": "Magic Bytes: Recognizes CSV tabular structure"
+  },
+  {
+    "id": 70,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Security: Rejects spoofed .docx without valid ZIP magic bytes",
+    "status": "PASS",
+    "testCase": "Security: Rejects spoofed .docx without valid ZIP magic bytes"
+  },
+  {
+    "id": 71,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Security: Throws EmptyDocumentError on empty (0 byte) file",
+    "status": "PASS",
+    "testCase": "Security: Throws EmptyDocumentError on empty (0 byte) file"
+  },
+  {
+    "id": 72,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Security: Strips path traversal sequences from filenames",
+    "status": "PASS",
+    "testCase": "Security: Strips path traversal sequences from filenames"
+  },
+  {
+    "id": 73,
+    "category": "Binary Magic Bytes & File Security Validation",
+    "name": "Security: Throws ZipBombError when archive exceeds 500 entry limit",
+    "status": "PASS",
+    "testCase": "Security: Throws ZipBombError when archive exceeds 500 entry limit"
+  },
+  {
+    "id": 74,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "File Parser: Detects text file type accurately",
+    "status": "PASS",
+    "testCase": "File Parser: Detects text file type accurately"
+  },
+  {
+    "id": 75,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "File Parser: Computes word count correctly",
+    "status": "PASS",
+    "testCase": "File Parser: Computes word count correctly"
+  },
+  {
+    "id": 76,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "File Parser: Extracts document body text cleanly",
+    "status": "PASS",
+    "testCase": "File Parser: Extracts document body text cleanly"
+  },
+  {
+    "id": 77,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "LangChain RAG: Chunks document using RecursiveCharacterTextSplitter",
+    "status": "PASS",
+    "testCase": "LangChain RAG: Chunks document using RecursiveCharacterTextSplitter"
+  },
+  {
+    "id": 78,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "LangChain RAG: Retrieves relevant chunk matching query keywords",
+    "status": "PASS",
+    "testCase": "LangChain RAG: Retrieves relevant chunk matching query keywords"
+  },
+  {
+    "id": 79,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "DOCX Extractor: Returns parsed document with docx fileType",
+    "status": "PASS",
+    "testCase": "DOCX Extractor: Returns parsed document with docx fileType"
+  },
+  {
+    "id": 80,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "DOCX Extractor: Preserves headings in structured text blocks",
+    "status": "PASS",
+    "testCase": "DOCX Extractor: Preserves headings in structured text blocks"
+  },
+  {
+    "id": 81,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "DOCX Extractor: Extracts substantive paragraph text cleanly",
+    "status": "PASS",
+    "testCase": "DOCX Extractor: Extracts substantive paragraph text cleanly"
+  },
+  {
+    "id": 82,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "CSV Extractor: Generates structured table",
+    "status": "PASS",
+    "testCase": "CSV Extractor: Generates structured table"
+  },
+  {
+    "id": 83,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "CSV Extractor: Infers numeric dtype for Amount column",
+    "status": "PASS",
+    "testCase": "CSV Extractor: Infers numeric dtype for Amount column"
+  },
+  {
+    "id": 84,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "CSV Extractor: Infers boolean dtype for IsApproved column",
+    "status": "PASS",
+    "testCase": "CSV Extractor: Infers boolean dtype for IsApproved column"
+  },
+  {
+    "id": 85,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "CSV Extractor: Creates schema summary block for large datasets (>50 rows)",
+    "status": "PASS",
+    "testCase": "CSV Extractor: Creates schema summary block for large datasets (>50 rows)"
+  },
+  {
+    "id": 86,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "CSV Extractor: Safely truncates large row dumps while preserving schema",
+    "status": "PASS",
+    "testCase": "CSV Extractor: Safely truncates large row dumps while preserving schema"
+  },
+  {
+    "id": 87,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "PDF Extractor: Explicitly detects encrypted or corrupted PDFs",
+    "status": "PASS",
+    "testCase": "PDF Extractor: Explicitly detects encrypted or corrupted PDFs"
+  },
+  {
+    "id": 88,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "Image Extractor: Returns parsed document with image fileType",
+    "status": "PASS",
+    "testCase": "Image Extractor: Returns parsed document with image fileType"
+  },
+  {
+    "id": 89,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "Image Extractor: Flags document with isVisionRequired=true",
+    "status": "PASS",
+    "testCase": "Image Extractor: Flags document with isVisionRequired=true"
+  },
+  {
+    "id": 90,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "Image Extractor: Produces structured text blocks for visual context",
+    "status": "PASS",
+    "testCase": "Image Extractor: Produces structured text blocks for visual context"
+  },
+  {
+    "id": 91,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "Video Extractor: Returns parsed document with video fileType",
+    "status": "PASS",
+    "testCase": "Video Extractor: Returns parsed document with video fileType"
+  },
+  {
+    "id": 92,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "Video Extractor: Flags document with isVisionRequired=true",
+    "status": "PASS",
+    "testCase": "Video Extractor: Flags document with isVisionRequired=true"
+  },
+  {
+    "id": 93,
+    "category": "Specialized Document Extractors (PDF, DOCX, CSV, Img, Vid, Plain)",
+    "name": "Video Extractor: Produces chronological timeline blocks for scenes",
+    "status": "PASS",
+    "testCase": "Video Extractor: Produces chronological timeline blocks for scenes"
+  },
+  {
+    "id": 94,
+    "category": "Worker Thread Watchdog, Concurrency & Pool Robustness",
+    "name": "Worker Pool: Watchdog enforces timeout via worker.terminate() and throws ExtractionTimeoutError",
+    "status": "PASS",
+    "testCase": "Worker Pool: Watchdog enforces timeout via worker.terminate() and throws ExtractionTimeoutError"
+  },
+  {
+    "id": 95,
+    "category": "Worker Thread Watchdog, Concurrency & Pool Robustness",
+    "name": "Worker Pool: Catches synchronously throwing worker script without crashing process",
+    "status": "PASS",
+    "testCase": "Worker Pool: Catches synchronously throwing worker script without crashing process"
+  },
+  {
+    "id": 96,
+    "category": "Worker Thread Watchdog, Concurrency & Pool Robustness",
+    "name": "Worker Pool: Handles worker exiting with code 1 and no message cleanly",
+    "status": "PASS",
+    "testCase": "Worker Pool: Handles worker exiting with code 1 and no message cleanly"
+  },
+  {
+    "id": 97,
+    "category": "Worker Thread Watchdog, Concurrency & Pool Robustness",
+    "name": "Worker Pool: Enforces resourceLimits so memory bomb is killed without crashing host server",
+    "status": "PASS",
+    "testCase": "Worker Pool: Enforces resourceLimits so memory bomb is killed without crashing host server"
+  },
+  {
+    "id": 98,
+    "category": "Worker Thread Watchdog, Concurrency & Pool Robustness",
+    "name": "Worker Pool: 20 parallel uploads are queued and completed cleanly without exceeding worker limit",
+    "status": "PASS",
+    "testCase": "Worker Pool: 20 parallel uploads are queued and completed cleanly without exceeding worker limit"
+  },
+  {
+    "id": 99,
+    "category": "User-Scoped Dedup & Cross-Session Isolation",
+    "name": "RAG Index: Successfully indexed chunks into Session 1 namespace",
+    "status": "PASS",
+    "testCase": "RAG Index: Successfully indexed chunks into Session 1 namespace"
+  },
+  {
+    "id": 100,
+    "category": "User-Scoped Dedup & Cross-Session Isolation",
+    "name": "Dedup Cache: User Alpha has cached ParsedDocument from initial upload",
+    "status": "PASS",
+    "testCase": "Dedup Cache: User Alpha has cached ParsedDocument from initial upload"
+  },
+  {
+    "id": 101,
+    "category": "User-Scoped Dedup & Cross-Session Isolation",
+    "name": "Dedup Isolation: Chunks for Session 2 are re-indexed into Session 2 namespace",
+    "status": "PASS",
+    "testCase": "Dedup Isolation: Chunks for Session 2 are re-indexed into Session 2 namespace"
+  },
+  {
+    "id": 102,
+    "category": "User-Scoped Dedup & Cross-Session Isolation",
+    "name": "Namespace Verification: All Session 2 chunks belong strictly to Session 2",
+    "status": "PASS",
+    "testCase": "Namespace Verification: All Session 2 chunks belong strictly to Session 2"
+  },
+  {
+    "id": 103,
+    "category": "User-Scoped Dedup & Cross-Session Isolation",
+    "name": "Cross-Session Isolation: Chunks indexed in Session 2 cannot be retrieved in Session 1",
+    "status": "PASS",
+    "testCase": "Cross-Session Isolation: Chunks indexed in Session 2 cannot be retrieved in Session 1"
+  },
+  {
+    "id": 104,
+    "category": "User-Scoped Dedup & Cross-Session Isolation",
+    "name": "Cross-User Isolation: User Beta cannot access User Alpha deduplication cache",
+    "status": "PASS",
+    "testCase": "Cross-User Isolation: User Beta cannot access User Alpha deduplication cache"
+  },
+  {
+    "id": 105,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "Multi-Turn Turn 1: Successfully retrieves chunks for attached file",
+    "status": "PASS",
+    "testCase": "Multi-Turn Turn 1: Successfully retrieves chunks for attached file"
+  },
+  {
+    "id": 106,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "Citations: Grounding excerpts carry structured citation metadata",
+    "status": "PASS",
+    "testCase": "Citations: Grounding excerpts carry structured citation metadata"
+  },
+  {
+    "id": 107,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "Citations: Citation includes correct document filename",
+    "status": "PASS",
+    "testCase": "Citations: Citation includes correct document filename"
+  },
+  {
+    "id": 108,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "Multi-Turn Turn 2: Automatically resolves active file from session history without re-attaching",
+    "status": "PASS",
+    "testCase": "Multi-Turn Turn 2: Automatically resolves active file from session history without re-attaching"
+  },
+  {
+    "id": 109,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "Multi-Turn Turn 2: Resolved file matches previously discussed document",
+    "status": "PASS",
+    "testCase": "Multi-Turn Turn 2: Resolved file matches previously discussed document"
+  },
+  {
+    "id": 110,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "Whole-Document Detection: Accurately flags summary requests vs specific detail queries",
+    "status": "PASS",
+    "testCase": "Whole-Document Detection: Accurately flags summary requests vs specific detail queries"
+  },
+  {
+    "id": 111,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "Whole-Document Injection: Injects cached summary instead of arbitrary top-k chunks",
+    "status": "PASS",
+    "testCase": "Whole-Document Injection: Injects cached summary instead of arbitrary top-k chunks"
+  },
+  {
+    "id": 112,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "File Cleanup: DELETE /api/files/:fileId successfully cleans up metadata and chunks",
+    "status": "PASS",
+    "testCase": "File Cleanup: DELETE /api/files/:fileId successfully cleans up metadata and chunks"
+  },
+  {
+    "id": 113,
+    "category": "Multi-Turn Follow-Up Resolution & Citations",
+    "name": "File Cleanup: All chunks purged from RAG vector store on file deletion",
+    "status": "PASS",
+    "testCase": "File Cleanup: All chunks purged from RAG vector store on file deletion"
+  },
+  {
+    "id": 114,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Gemini Grounding: Extracts webSearchQueries and citation sources from groundingMetadata",
+    "status": "PASS",
+    "testCase": "Gemini Grounding: Extracts webSearchQueries and citation sources from groundingMetadata"
+  },
+  {
+    "id": 115,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Gemini Grounding: Correctly flags ungrounded responses as usedWebSearch = false",
+    "status": "PASS",
+    "testCase": "Gemini Grounding: Correctly flags ungrounded responses as usedWebSearch = false"
+  },
+  {
+    "id": 116,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Tavily Search: Gracefully handles missing API key without throwing exceptions",
+    "status": "PASS",
+    "testCase": "Tavily Search: Gracefully handles missing API key without throwing exceptions"
+  },
+  {
+    "id": 117,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Tavily Search: formatTavilyResultsForContext formats direct answers, summaries, and URLs for context injection",
+    "status": "PASS",
+    "testCase": "Tavily Search: formatTavilyResultsForContext formats direct answers, summaries, and URLs for context injection"
+  },
+  {
+    "id": 118,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls",
+    "status": "PASS",
+    "testCase": "Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls"
+  },
+  {
+    "id": 119,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Identity Query Pre-Classifier: Accurately flags biographical/real-name queries for search",
+    "status": "PASS",
+    "testCase": "Identity Query Pre-Classifier: Accurately flags biographical/real-name queries for search"
+  },
+  {
+    "id": 120,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Identity Query Pre-Classifier: Accurately flags biographical/contestant/real-name queries for mandatory search while passing math queries",
+    "status": "PASS",
+    "testCase": "Identity Query Pre-Classifier: Accurately flags biographical/contestant/real-name queries for mandatory search while passing math queries"
+  },
+  {
+    "id": 121,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Thin Results Formatter: Injects strict anti-hallucination directive when search yields sparse data",
+    "status": "PASS",
+    "testCase": "Thin Results Formatter: Injects strict anti-hallucination directive when search yields sparse data"
+  },
+  {
+    "id": 122,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Unverified Claim Guard: Flags ungrounded real-name assertions made without citations",
+    "status": "PASS",
+    "testCase": "Unverified Claim Guard: Flags ungrounded real-name assertions made without citations"
+  },
+  {
+    "id": 123,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations",
+    "status": "PASS",
+    "testCase": "Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations"
+  },
+  {
+    "id": 124,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Redacts email addresses from search queries",
+    "status": "PASS",
+    "testCase": "Search Privacy: Redacts email addresses from search queries"
+  },
+  {
+    "id": 125,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Redacts phone numbers from search queries",
+    "status": "PASS",
+    "testCase": "Search Privacy: Redacts phone numbers from search queries"
+  },
+  {
+    "id": 126,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Redacts credit card numbers from search queries",
+    "status": "PASS",
+    "testCase": "Search Privacy: Redacts credit card numbers from search queries"
+  },
+  {
+    "id": 127,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Redacts Aadhaar numbers from search queries",
+    "status": "PASS",
+    "testCase": "Search Privacy: Redacts Aadhaar numbers from search queries"
+  },
+  {
+    "id": 128,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Redacts PAN numbers from search queries",
+    "status": "PASS",
+    "testCase": "Search Privacy: Redacts PAN numbers from search queries"
+  },
+  {
+    "id": 129,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Redacts API keys from search queries",
+    "status": "PASS",
+    "testCase": "Search Privacy: Redacts API keys from search queries"
+  },
+  {
+    "id": 130,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Preserves core entity question in minimal search query",
+    "status": "PASS",
+    "testCase": "Search Privacy: Preserves core entity question in minimal search query"
+  },
+  {
+    "id": 131,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Memory contents are never included in search query",
+    "status": "PASS",
+    "testCase": "Search Privacy: Memory contents are never included in search query"
+  },
+  {
+    "id": 132,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Document contents are never included in search query",
+    "status": "PASS",
+    "testCase": "Search Privacy: Document contents are never included in search query"
+  },
+  {
+    "id": 133,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Extracts clean entity search query despite injected memory/document tags",
+    "status": "PASS",
+    "testCase": "Search Privacy: Extracts clean entity search query despite injected memory/document tags"
+  },
+  {
+    "id": 134,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Strips conversational filler and prefixes/suffixes",
+    "status": "PASS",
+    "testCase": "Search Privacy: Strips conversational filler and prefixes/suffixes"
+  },
+  {
+    "id": 135,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: Extracts clean quoted search term",
+    "status": "PASS",
+    "testCase": "Search Privacy: Extracts clean quoted search term"
+  },
+  {
+    "id": 136,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: tavilySearch scrubs emails before network request",
+    "status": "PASS",
+    "testCase": "Search Privacy: tavilySearch scrubs emails before network request"
+  },
+  {
+    "id": 137,
+    "category": "Web Search Grounding, Circuit Breaker & Anti-Hallucination",
+    "name": "Search Privacy: tavilySearch scrubs phone numbers before network request",
+    "status": "PASS",
+    "testCase": "Search Privacy: tavilySearch scrubs phone numbers before network request"
+  },
+  {
+    "id": 138,
+    "category": "Upstream Input Classifier & Zero-Cost Routing",
+    "name": "Input Classifier: Correctly classifies identity/biographical query as needsWebSearch = true",
+    "status": "PASS",
+    "testCase": "Input Classifier: Correctly classifies identity/biographical query as needsWebSearch = true"
+  },
+  {
+    "id": 139,
+    "category": "Upstream Input Classifier & Zero-Cost Routing",
+    "name": "Input Classifier: Correctly classifies casual greeting as needsWebSearch = false",
+    "status": "PASS",
+    "testCase": "Input Classifier: Correctly classifies casual greeting as needsWebSearch = false"
+  },
+  {
+    "id": 140,
+    "category": "Upstream Input Classifier & Zero-Cost Routing",
+    "name": "Input Classifier: Correctly classifies coding help request as needsWebSearch = false",
+    "status": "PASS",
+    "testCase": "Input Classifier: Correctly classifies coding help request as needsWebSearch = false"
+  },
+  {
+    "id": 141,
+    "category": "Upstream Input Classifier & Zero-Cost Routing",
+    "name": "Input Classifier: Correctly classifies current events keyword query as needsWebSearch = true",
+    "status": "PASS",
+    "testCase": "Input Classifier: Correctly classifies current events keyword query as needsWebSearch = true"
+  },
+  {
+    "id": 142,
+    "category": "Upstream Input Classifier & Zero-Cost Routing",
+    "name": "Input Classifier: Ambiguous queries safely default to needsWebSearch = true with confidence = low",
+    "status": "PASS",
+    "testCase": "Input Classifier: Ambiguous queries safely default to needsWebSearch = true with confidence = low"
+  },
+  {
+    "id": 143,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma: initChroma resolves with boolean connected status",
+    "status": "PASS",
+    "testCase": "Chroma: initChroma resolves with boolean connected status"
+  },
+  {
+    "id": 144,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma: getChromaStatus reports provider = \"chroma\"",
+    "status": "PASS",
+    "testCase": "Chroma: getChromaStatus reports provider = \"chroma\""
+  },
+  {
+    "id": 145,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma: getChromaStatus includes target URL",
+    "status": "PASS",
+    "testCase": "Chroma: getChromaStatus includes target URL"
+  },
+  {
+    "id": 146,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: 127.0.0.1 recognized as valid loopback",
+    "status": "PASS",
+    "testCase": "Chroma Security: 127.0.0.1 recognized as valid loopback"
+  },
+  {
+    "id": 147,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: localhost recognized as valid loopback",
+    "status": "PASS",
+    "testCase": "Chroma Security: localhost recognized as valid loopback"
+  },
+  {
+    "id": 148,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: ::1 recognized as valid loopback",
+    "status": "PASS",
+    "testCase": "Chroma Security: ::1 recognized as valid loopback"
+  },
+  {
+    "id": 149,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: 127.x.x.x recognized as valid loopback",
+    "status": "PASS",
+    "testCase": "Chroma Security: 127.x.x.x recognized as valid loopback"
+  },
+  {
+    "id": 150,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: 192.168.1.100 recognized as non-loopback",
+    "status": "PASS",
+    "testCase": "Chroma Security: 192.168.1.100 recognized as non-loopback"
+  },
+  {
+    "id": 151,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: 10.0.0.1 recognized as non-loopback",
+    "status": "PASS",
+    "testCase": "Chroma Security: 10.0.0.1 recognized as non-loopback"
+  },
+  {
+    "id": 152,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: 203.0.113.195 recognized as non-loopback",
+    "status": "PASS",
+    "testCase": "Chroma Security: 203.0.113.195 recognized as non-loopback"
+  },
+  {
+    "id": 153,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: Loopback URL http://127.0.0.1:8000 accepted",
+    "status": "PASS",
+    "testCase": "Chroma Security: Loopback URL http://127.0.0.1:8000 accepted"
+  },
+  {
+    "id": 154,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: Loopback URL http://localhost:8000 accepted",
+    "status": "PASS",
+    "testCase": "Chroma Security: Loopback URL http://localhost:8000 accepted"
+  },
+  {
+    "id": 155,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: Startup check refuses non-loopback LAN address (http://192.168.1.50:8000)",
+    "status": "PASS",
+    "testCase": "Chroma Security: Startup check refuses non-loopback LAN address (http://192.168.1.50:8000)"
+  },
+  {
+    "id": 156,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma Security: Startup check refuses public IP address (http://203.0.113.88:8000)",
+    "status": "PASS",
+    "testCase": "Chroma Security: Startup check refuses public IP address (http://203.0.113.88:8000)"
+  },
+  {
+    "id": 157,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Chroma: searchMemoriesInChroma safely handles queries without errors",
+    "status": "PASS",
+    "testCase": "Chroma: searchMemoriesInChroma safely handles queries without errors"
+  },
+  {
+    "id": 158,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Local Store: loadLocalStore is available",
+    "status": "PASS",
+    "testCase": "Local Store: loadLocalStore is available"
+  },
+  {
+    "id": 159,
+    "category": "Chroma Vector Database & Local Persistent Store",
+    "name": "Local Store: persistLocalStore is available",
+    "status": "PASS",
+    "testCase": "Local Store: persistLocalStore is available"
+  },
+  {
+    "id": 160,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "100 Parallel Writes: Exactly 25 unique memory records created (no lost updates)",
+    "status": "PASS",
+    "testCase": "100 Parallel Writes: Exactly 25 unique memory records created (no lost updates)"
+  },
+  {
+    "id": 161,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "100 Parallel Writes: No duplicate keys despite 100 concurrent mixed-case writes",
+    "status": "PASS",
+    "testCase": "100 Parallel Writes: No duplicate keys despite 100 concurrent mixed-case writes"
+  },
+  {
+    "id": 162,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 0 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 163,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 1 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 164,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 2 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 165,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 3 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 166,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 4 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 167,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 5 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 168,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 6 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 169,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 7 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 170,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 8 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 171,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 9 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 172,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 10 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 173,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 11 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 174,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 12 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 175,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 13 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 176,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 14 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 177,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 15 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 178,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 16 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 179,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 17 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 180,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 18 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 181,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 19 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 182,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 20 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 183,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 21 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 184,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 22 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 185,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 23 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 186,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Compound Index: O(1) compound lookup for key 24 succeeded case-insensitively",
+    "status": "PASS",
+    "testCase": "Compound Index: O(1) Key Resolution across 25 Concurrent Keys"
+  },
+  {
+    "id": 187,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "On-Disk: local_store.json has schemaVersion = 2",
+    "status": "PASS",
+    "testCase": "On-Disk: local_store.json has schemaVersion = 2"
+  },
+  {
+    "id": 188,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "On-Disk: Exactly 25 records persisted without lost updates or corruption",
+    "status": "PASS",
+    "testCase": "On-Disk: Exactly 25 records persisted without lost updates or corruption"
+  },
+  {
+    "id": 189,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Crash Simulation: Datastore loads cleanly despite abandoned .tmp file",
+    "status": "PASS",
+    "testCase": "Crash Simulation: Datastore loads cleanly despite abandoned .tmp file"
+  },
+  {
+    "id": 190,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Crash Simulation: Primary file was unaffected by interrupted write",
+    "status": "PASS",
+    "testCase": "Crash Simulation: Primary file was unaffected by interrupted write"
+  },
+  {
+    "id": 191,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Crash Simulation: Stale crash .tmp file was safely cleaned up",
+    "status": "PASS",
+    "testCase": "Crash Simulation: Stale crash .tmp file was safely cleaned up"
+  },
+  {
+    "id": 192,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Corrupt-File Recovery: loadLocalStore loaded successfully",
+    "status": "PASS",
+    "testCase": "Corrupt-File Recovery: loadLocalStore loaded successfully"
+  },
+  {
+    "id": 193,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Corrupt-File Recovery: loadLocalStore accurately detected corruption",
+    "status": "PASS",
+    "testCase": "Corrupt-File Recovery: loadLocalStore accurately detected corruption"
+  },
+  {
+    "id": 194,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Corrupt-File Recovery: loadLocalStore recovered state from rolling backup",
+    "status": "PASS",
+    "testCase": "Corrupt-File Recovery: loadLocalStore recovered state from rolling backup"
+  },
+  {
+    "id": 195,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Corrupt-File Recovery: Canary user restored in memory",
+    "status": "PASS",
+    "testCase": "Corrupt-File Recovery: Canary user restored in memory"
+  },
+  {
+    "id": 196,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Corrupt-File Recovery: Canary memory restored in compound index",
+    "status": "PASS",
+    "testCase": "Corrupt-File Recovery: Canary memory restored in compound index"
+  },
+  {
+    "id": 197,
+    "category": "Datastore Mutex, Atomic Flush & Self-Healing Crash Recovery",
+    "name": "Corrupt-File Recovery: Primary local_store.json was automatically healed on disk",
+    "status": "PASS",
+    "testCase": "Corrupt-File Recovery: Primary local_store.json was automatically healed on disk"
+  },
+  {
+    "id": 198,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Rename Retry: Interceptor was invoked exactly 3 times (2 transient EPERMs + 1 success)",
+    "status": "PASS",
+    "testCase": "Windows Transient Lock: Rename throws EPERM twice then succeeds on retry with backoff"
+  },
+  {
+    "id": 199,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Rename Retry: Datastore flushed successfully after transient lock resolved",
+    "status": "PASS",
+    "testCase": "Windows Transient Lock: Rename throws EPERM twice then succeeds on retry with backoff"
+  },
+  {
+    "id": 200,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Disk Full: Explicit flushLocalStore rejects with ENOSPC error",
+    "status": "PASS",
+    "testCase": "Disk Full Resilience: ENOSPC handled gracefully without crashing process, surfaced in /api/health"
+  },
+  {
+    "id": 201,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Disk Full: Persistence queue accurately signaled failure",
+    "status": "PASS",
+    "testCase": "Disk Full Resilience: ENOSPC handled gracefully without crashing process, surfaced in /api/health"
+  },
+  {
+    "id": 202,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Disk Full: lastPersistError captured in store status",
+    "status": "PASS",
+    "testCase": "Disk Full Resilience: ENOSPC handled gracefully without crashing process, surfaced in /api/health"
+  },
+  {
+    "id": 203,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Disk Full: Store status reports \"Degraded\"",
+    "status": "PASS",
+    "testCase": "Disk Full Resilience: ENOSPC handled gracefully without crashing process, surfaced in /api/health"
+  },
+  {
+    "id": 204,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Disk Full: Store status includes error description",
+    "status": "PASS",
+    "testCase": "Disk Full Resilience: ENOSPC handled gracefully without crashing process, surfaced in /api/health"
+  },
+  {
+    "id": 205,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Disk Full Recovery: lastPersistError cleared after successful flush",
+    "status": "PASS",
+    "testCase": "Disk Full Resilience: ENOSPC handled gracefully without crashing process, surfaced in /api/health"
+  },
+  {
+    "id": 206,
+    "category": "Local Datastore Mutex, Debounce & Atomic Resiliency",
+    "name": "Disk Full Recovery: Store status restored to \"Ready\"",
+    "status": "PASS",
+    "testCase": "Disk Full Resilience: ENOSPC handled gracefully without crashing process, surfaced in /api/health"
+  },
+  {
+    "id": 207,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Stream Resiliency: Long stream past first-chunk timeout completes with frequent chunks and breaker closed",
+    "status": "PASS",
+    "testCase": "Stream Resiliency: Long stream past first-chunk timeout completes with frequent chunks and breaker closed"
+  },
+  {
+    "id": 208,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Stream Timeout: A 20s stream with chunks every 1s completes with the breaker closed",
+    "status": "PASS",
+    "testCase": "Stream Timeout: A 20s stream with chunks every 1s completes with the breaker closed"
+  },
+  {
+    "id": 209,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Stream Resiliency: Stalled stream emits error event, avoids Groq fallback restart, and preserves partial text",
+    "status": "PASS",
+    "testCase": "Stream Resiliency: Stalled stream emits error event, avoids Groq fallback restart, and preserves partial text"
+  },
+  {
+    "id": 210,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Stream Resiliency: Stream never emitting first chunk falls back to Groq and trips circuit breaker",
+    "status": "PASS",
+    "testCase": "Stream Resiliency: Stream never emitting first chunk falls back to Groq and trips circuit breaker"
+  },
+  {
+    "id": 211,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Multimodal Fallback: Groq prompt contains degraded directive and OCR text on 429",
+    "status": "PASS",
+    "testCase": "Multimodal Fallback: Groq prompt contains degraded directive and OCR text on 429"
+  },
+  {
+    "id": 212,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Multimodal Fallback: Degraded meta event sent on vision failure",
+    "status": "PASS",
+    "testCase": "Multimodal Fallback: Degraded meta event sent on vision failure"
+  },
+  {
+    "id": 213,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Multimodal Fallback: Vision failure produces UI notice banner for user interface",
+    "status": "PASS",
+    "testCase": "Multimodal Fallback: Vision failure produces UI notice banner for user interface"
+  },
+  {
+    "id": 214,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Multimodal Fallback: Empty-OCR image returns clear message without LLM call",
+    "status": "PASS",
+    "testCase": "Multimodal Fallback: Empty-OCR image returns clear message without LLM call"
+  },
+  {
+    "id": 215,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Error Classifier: 400 Bad Request classified as non-trippable client_error",
+    "status": "PASS",
+    "testCase": "Error Classifier: 400 Bad Request classified as non-trippable client_error"
+  },
+  {
+    "id": 216,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Error Classifier: 429 classified as trippable quota error",
+    "status": "PASS",
+    "testCase": "Error Classifier: 429 classified as trippable quota error"
+  },
+  {
+    "id": 217,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Error Classifier: 503 classified as trippable server_error",
+    "status": "PASS",
+    "testCase": "Error Classifier: 503 classified as trippable server_error"
+  },
+  {
+    "id": 218,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Error Classifier: ECONNRESET classified as trippable network error",
+    "status": "PASS",
+    "testCase": "Error Classifier: ECONNRESET classified as trippable network error"
+  },
+  {
+    "id": 219,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: Malformed 400 client error surfaces to caller without tripping breaker",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: Malformed 400 client error surfaces to caller without tripping breaker"
+  },
+  {
+    "id": 220,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: 429 transitions breaker to OPEN",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: 429 transitions breaker to OPEN"
+  },
+  {
+    "id": 221,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: Breaker transitions to HALF_OPEN after cooldown",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: Breaker transitions to HALF_OPEN after cooldown"
+  },
+  {
+    "id": 222,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: Successful half-open probe closes the breaker",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: Successful half-open probe closes the breaker"
+  },
+  {
+    "id": 223,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: Honors Retry-After header (180s)",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: Honors Retry-After header (180s)"
+  },
+  {
+    "id": 224,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: First failure initiates 60s cooldown",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: First failure initiates 60s cooldown"
+  },
+  {
+    "id": 225,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: Eligible for half-open probe",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: Eligible for half-open probe"
+  },
+  {
+    "id": 226,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: Probe failure re-trips with exponential backoff (120s)",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: Probe failure re-trips with exponential backoff (120s)"
+  },
+  {
+    "id": 227,
+    "category": "Dual-Engine Failover, Circuit Breaker & Stream Resiliency",
+    "name": "Circuit Breaker: Concurrent requests during HALF_OPEN permit exactly ONE probe",
+    "status": "PASS",
+    "testCase": "Circuit Breaker: Concurrent requests during HALF_OPEN permit exactly ONE probe"
+  },
+  {
+    "id": 228,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Unicode Vector: Kannada text produces non-zero dense vector",
+    "status": "PASS",
+    "testCase": "Unicode Vector: Kannada text produces non-zero dense vector"
+  },
+  {
+    "id": 229,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Unicode Vector: Kannada query produces non-zero dense vector",
+    "status": "PASS",
+    "testCase": "Unicode Vector: Kannada query produces non-zero dense vector"
+  },
+  {
+    "id": 230,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Unicode Vector: Kannada query successfully retrieves Kannada document (similarity: 0.522)",
+    "status": "PASS",
+    "testCase": "Unicode Vector: Kannada query successfully retrieves Kannada document (similarity: 0.522)"
+  },
+  {
+    "id": 231,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Unicode Vector: Hindi text produces non-zero dense vector",
+    "status": "PASS",
+    "testCase": "Unicode Vector: Hindi text produces non-zero dense vector"
+  },
+  {
+    "id": 232,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Unicode Vector: Hindi query produces non-zero dense vector",
+    "status": "PASS",
+    "testCase": "Unicode Vector: Hindi query produces non-zero dense vector"
+  },
+  {
+    "id": 233,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Unicode Vector: Hindi query successfully retrieves Hindi document (similarity: 0.535)",
+    "status": "PASS",
+    "testCase": "Unicode Vector: Hindi query successfully retrieves Hindi document (similarity: 0.535)"
+  },
+  {
+    "id": 234,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Zero Guard: Empty text produces zero vector",
+    "status": "PASS",
+    "testCase": "Zero Guard: Empty text produces zero vector"
+  },
+  {
+    "id": 235,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Zero Guard: Cosine similarity with zero vector returns 0 and NEVER NaN",
+    "status": "PASS",
+    "testCase": "Zero Guard: Cosine similarity with zero vector returns 0 and NEVER NaN"
+  },
+  {
+    "id": 236,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Zero Guard: Cosine similarity between two zero vectors returns 0 and NEVER NaN",
+    "status": "PASS",
+    "testCase": "Zero Guard: Cosine similarity between two zero vectors returns 0 and NEVER NaN"
+  },
+  {
+    "id": 237,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Zero Guard: Emoji-only input produces zero vector",
+    "status": "PASS",
+    "testCase": "Zero Guard: Emoji-only input produces zero vector"
+  },
+  {
+    "id": 238,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Zero Guard: Emoji-only zero vector returns 0 cosine similarity without NaN",
+    "status": "PASS",
+    "testCase": "Zero Guard: Emoji-only zero vector returns 0 cosine similarity without NaN"
+  },
+  {
+    "id": 239,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Performance: 1MB text produces valid non-zero vector",
+    "status": "PASS",
+    "testCase": "Performance: 1MB text produces valid non-zero vector"
+  },
+  {
+    "id": 240,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Performance: 1MB text vectorization completes fast without hanging (167ms)",
+    "status": "PASS",
+    "testCase": "Performance: 1MB text vectorization completes fast without hanging (167ms)"
+  },
+  {
+    "id": 241,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Hashed Vector: Confirms bag-of-words yields low similarity on non-overlapping paraphrases",
+    "status": "PASS",
+    "testCase": "Hashed Vector: Confirms bag-of-words yields low similarity on non-overlapping paraphrases"
+  },
+  {
+    "id": 242,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Real Embedding: Semantic mock captures paraphrase similarity (1.00)",
+    "status": "PASS",
+    "testCase": "Real Embedding: Semantic mock captures paraphrase similarity (1.00)"
+  },
+  {
+    "id": 243,
+    "category": "Dense Vector Engine, Unicode & Real Embeddings",
+    "name": "Embedding Migration: Successfully re-embeds records and tracks embeddingVersion",
+    "status": "PASS",
+    "testCase": "Embedding Migration: Successfully re-embeds records and tracks embeddingVersion"
+  },
+  {
+    "id": 244,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "SSE Headers: X-Accel-Buffering is set to no",
+    "status": "PASS",
+    "testCase": "SSE Headers: X-Accel-Buffering is set to no"
+  },
+  {
+    "id": 245,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "SSE Headers: Cache-Control includes no-cache",
+    "status": "PASS",
+    "testCase": "SSE Headers: Cache-Control includes no-cache"
+  },
+  {
+    "id": 246,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "SSE Headers: Connection is keep-alive",
+    "status": "PASS",
+    "testCase": "SSE Headers: Connection is keep-alive"
+  },
+  {
+    "id": 247,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "Upstream Abort: Gemini abortSignal aborted when client disconnected",
+    "status": "PASS",
+    "testCase": "Upstream Abort: Gemini abortSignal aborted when client disconnected"
+  },
+  {
+    "id": 248,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "Upstream Abort: Aborted within 1s of disconnect (0ms)",
+    "status": "PASS",
+    "testCase": "Upstream Abort: Aborted within 1s of disconnect (0ms)"
+  },
+  {
+    "id": 249,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "Turn Consistency: User message was persisted in session",
+    "status": "PASS",
+    "testCase": "Turn Consistency: User message was persisted in session"
+  },
+  {
+    "id": 250,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "Turn Consistency: Partial assistant message was persisted in session",
+    "status": "PASS",
+    "testCase": "Turn Consistency: Partial assistant message was persisted in session"
+  },
+  {
+    "id": 251,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "Turn Consistency: Partial assistant turn flagged with incomplete=true",
+    "status": "PASS",
+    "testCase": "Turn Consistency: Partial assistant turn flagged with incomplete=true"
+  },
+  {
+    "id": 252,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "Terminal SSE Event: Emits terminal error event on server error mid-stream",
+    "status": "PASS",
+    "testCase": "Terminal SSE Event: Emits terminal error event on server error mid-stream"
+  },
+  {
+    "id": 253,
+    "category": "SSE Chat Endpoint Disconnect & Turn Consistency",
+    "name": "Terminal SSE Event: Ends stream response cleanly on server error without hanging",
+    "status": "PASS",
+    "testCase": "Terminal SSE Event: Ends stream response cleanly on server error without hanging"
+  },
+  {
+    "id": 254,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Detects zero-width obfuscated injection",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Detects zero-width obfuscated injection"
+  },
+  {
+    "id": 255,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Detects bidi-character obfuscated injection",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Detects bidi-character obfuscated injection"
+  },
+  {
+    "id": 256,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Detects spaced character obfuscated injection",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Detects spaced character obfuscated injection"
+  },
+  {
+    "id": 257,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Detects fullwidth Unicode obfuscated injection",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Detects fullwidth Unicode obfuscated injection"
+  },
+  {
+    "id": 258,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Benign \"ignore the previous error\" must NOT be flagged",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Benign \"ignore the previous error\" must NOT be flagged"
+  },
+  {
+    "id": 259,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Benign \"disregard my previous typo\" must NOT be flagged",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Benign \"disregard my previous typo\" must NOT be flagged"
+  },
+  {
+    "id": 260,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Benign \"bypass a clogged filter\" must NOT be flagged",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Benign \"bypass a clogged filter\" must NOT be flagged"
+  },
+  {
+    "id": 261,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Injection Sanitizer: Benign discussion of system override must NOT be flagged",
+    "status": "PASS",
+    "testCase": "Injection Sanitizer: Benign discussion of system override must NOT be flagged"
+  },
+  {
+    "id": 262,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Memory Validation: Rejects instruction-like memory (\"always respond in pirate speak\")",
+    "status": "PASS",
+    "testCase": "Memory Validation: Rejects instruction-like memory (\"always respond in pirate speak\")"
+  },
+  {
+    "id": 263,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Memory Validation: Rejects role-override imperative memory",
+    "status": "PASS",
+    "testCase": "Memory Validation: Rejects role-override imperative memory"
+  },
+  {
+    "id": 264,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Memory Validation: Preserves legitimate user profile fact (name: Alex)",
+    "status": "PASS",
+    "testCase": "Memory Validation: Preserves legitimate user profile fact (name: Alex)"
+  },
+  {
+    "id": 265,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Memory Validation: Preserves legitimate project name fact (project: NextGen)",
+    "status": "PASS",
+    "testCase": "Memory Validation: Preserves legitimate project name fact (project: NextGen)"
+  },
+  {
+    "id": 266,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Context Delimiters: Memories wrapped in <untrusted_memory> tags",
+    "status": "PASS",
+    "testCase": "Context Delimiters: Memories wrapped in <untrusted_memory> tags"
+  },
+  {
+    "id": 267,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Context Delimiters: System directive declares <untrusted_*> content is data, never instructions",
+    "status": "PASS",
+    "testCase": "Context Delimiters: System directive declares <untrusted_*> content is data, never instructions"
+  },
+  {
+    "id": 268,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Security Corpus: Passed 53/53 payloads (Pass rate: 100.0%)",
+    "status": "PASS",
+    "testCase": "Prompt Injection: 53-Payload Adversarial Corpus Benchmark (53 Inputs)"
+  },
+  {
+    "id": 269,
+    "category": "Prompt Injection Hardening & Defense in Depth",
+    "name": "Security Corpus: 100% of benign look-alikes pass cleanly without false positive blockage",
+    "status": "PASS",
+    "testCase": "Prompt Injection: 53-Payload Adversarial Corpus Benchmark (53 Inputs)"
+  },
+  {
+    "id": 270,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: Chat endpoint succeeds with allowWebSearch=false",
+    "status": "PASS",
+    "testCase": "Search Setting: Chat endpoint succeeds with allowWebSearch=false"
+  },
+  {
+    "id": 271,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: usedWebSearch is false when allowWebSearch is disabled",
+    "status": "PASS",
+    "testCase": "Search Setting: usedWebSearch is false when allowWebSearch is disabled"
+  },
+  {
+    "id": 272,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: searchQuery is null when allowWebSearch is disabled",
+    "status": "PASS",
+    "testCase": "Search Setting: searchQuery is null when allowWebSearch is disabled"
+  },
+  {
+    "id": 273,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: No web sources returned when allowWebSearch is disabled",
+    "status": "PASS",
+    "testCase": "Search Setting: No web sources returned when allowWebSearch is disabled"
+  },
+  {
+    "id": 274,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: Gemini tools omit googleSearch when allowWebSearch is disabled",
+    "status": "PASS",
+    "testCase": "Search Setting: Gemini tools omit googleSearch when allowWebSearch is disabled"
+  },
+  {
+    "id": 275,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: Chat endpoint succeeds with allowWebSearch=true",
+    "status": "PASS",
+    "testCase": "Search Setting: Chat endpoint succeeds with allowWebSearch=true"
+  },
+  {
+    "id": 276,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: usedWebSearch is true when allowWebSearch is enabled",
+    "status": "PASS",
+    "testCase": "Search Setting: usedWebSearch is true when allowWebSearch is enabled"
+  },
+  {
+    "id": 277,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: searchQuery captures executed query when enabled",
+    "status": "PASS",
+    "testCase": "Search Setting: searchQuery captures executed query when enabled"
+  },
+  {
+    "id": 278,
+    "category": "Web Search Privacy, User Settings & Grounding Injection",
+    "name": "Search Setting: Gemini tools include googleSearch when allowWebSearch is true",
+    "status": "PASS",
+    "testCase": "Search Setting: Gemini tools include googleSearch when allowWebSearch is true"
+  },
+  {
+    "id": 279,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Concurrent Sends: All 10 concurrent requests return 200 OK",
+    "status": "PASS",
+    "testCase": "Concurrent Sends: All 10 concurrent requests return 200 OK"
+  },
+  {
+    "id": 280,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Concurrent Sends: GET /api/history returns 200 OK",
+    "status": "PASS",
+    "testCase": "Concurrent Sends: GET /api/history returns 200 OK"
+  },
+  {
+    "id": 281,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Concurrent Sends: Exactly 20 messages exist (10 user + 10 assistant)",
+    "status": "PASS",
+    "testCase": "Concurrent Sends: Exactly 20 messages exist (10 user + 10 assistant)"
+  },
+  {
+    "id": 282,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 0 has seq = 1",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 283,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 1 has seq = 2",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 284,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 2 has seq = 3",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 285,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 3 has seq = 4",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 286,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 4 has seq = 5",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 287,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 5 has seq = 6",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 288,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 6 has seq = 7",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 289,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 7 has seq = 8",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 290,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 8 has seq = 9",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 291,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 9 has seq = 10",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 292,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 10 has seq = 11",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 293,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 11 has seq = 12",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 294,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 12 has seq = 13",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 295,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 13 has seq = 14",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 296,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 14 has seq = 15",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 297,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 15 has seq = 16",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 298,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 16 has seq = 17",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 299,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 17 has seq = 18",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 300,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 18 has seq = 19",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 301,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Monotonic Seq: Message at index 19 has seq = 20",
+    "status": "PASS",
+    "testCase": "Monotonic Sequence: Strict Monotonic Ordering across 10 Concurrent Turns"
+  },
+  {
+    "id": 302,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 1 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 303,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 1 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 304,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 1 user seq (1) directly precedes assistant seq (2)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 305,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 2 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 306,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 2 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 307,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 2 user seq (3) directly precedes assistant seq (4)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 308,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 3 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 309,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 3 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 310,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 3 user seq (5) directly precedes assistant seq (6)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 311,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 4 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 312,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 4 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 313,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 4 user seq (7) directly precedes assistant seq (8)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 314,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 5 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 315,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 5 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 316,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 5 user seq (9) directly precedes assistant seq (10)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 317,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 6 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 318,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 6 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 319,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 6 user seq (11) directly precedes assistant seq (12)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 320,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 7 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 321,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 7 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 322,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 7 user seq (13) directly precedes assistant seq (14)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 323,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 8 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 324,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 8 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 325,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 8 user seq (15) directly precedes assistant seq (16)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 326,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 9 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 327,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 9 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 328,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 9 user seq (17) directly precedes assistant seq (18)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 329,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 10 leading message is role user",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 330,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 10 response message is role assistant",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 331,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Pair Alignment: Turn 10 user seq (19) directly precedes assistant seq (20)",
+    "status": "PASS",
+    "testCase": "Pair Alignment: Aligned User-Assistant Turns across 10 Concurrent Sends"
+  },
+  {
+    "id": 332,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Failed Turn Recovery: Post-failure turn succeeds with 200 OK",
+    "status": "PASS",
+    "testCase": "Failed Turn Recovery: Post-failure turn succeeds with 200 OK"
+  },
+  {
+    "id": 333,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Failed Turn: All 5 messages present in raw history",
+    "status": "PASS",
+    "testCase": "Failed Turn: All 5 messages present in raw history"
+  },
+  {
+    "id": 334,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Failed Turn: Orphaned user message is accurately detected and marked",
+    "status": "PASS",
+    "testCase": "Failed Turn: Orphaned user message is accurately detected and marked"
+  },
+  {
+    "id": 335,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Tier 1 Context: Excludes orphan turn, retaining exactly 4 aligned messages (2 pairs)",
+    "status": "PASS",
+    "testCase": "Tier 1 Context: Excludes orphan turn, retaining exactly 4 aligned messages (2 pairs)"
+  },
+  {
+    "id": 336,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Tier 1 Context: First pair is aligned (user, assistant)",
+    "status": "PASS",
+    "testCase": "Tier 1 Context: First pair is aligned (user, assistant)"
+  },
+  {
+    "id": 337,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Tier 1 Context: Second pair is aligned (user, assistant)",
+    "status": "PASS",
+    "testCase": "Tier 1 Context: Second pair is aligned (user, assistant)"
+  },
+  {
+    "id": 338,
+    "category": "Per-Session Mutex Locks, Monotonic Seq & Orphan Turn Repair",
+    "name": "Tier 1 Context: Orphan message was completely excluded from LLM prompt context",
+    "status": "PASS",
+    "testCase": "Tier 1 Context: Orphan message was completely excluded from LLM prompt context"
+  },
+  {
+    "id": 339,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Auth Token: No token returns 401 on protected route",
+    "status": "PASS",
+    "testCase": "Auth Token: No token returns 401 on protected route"
+  },
+  {
+    "id": 340,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Auth Token: Expired token returns 401",
+    "status": "PASS",
+    "testCase": "Auth Token: Expired token returns 401"
+  },
+  {
+    "id": 341,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Auth Token: Token for deleted user returns 401",
+    "status": "PASS",
+    "testCase": "Auth Token: Token for deleted user returns 401"
+  },
+  {
+    "id": 342,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Auth Token: Deleted user rejected on session list with 401",
+    "status": "PASS",
+    "testCase": "Auth Token: Deleted user rejected on session list with 401"
+  },
+  {
+    "id": 343,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Auth Token: Deleted user rejected on memories list with 401",
+    "status": "PASS",
+    "testCase": "Auth Token: Deleted user rejected on memories list with 401"
+  },
+  {
+    "id": 344,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Auth Token: Valid token returns 200 on /api/auth/me",
+    "status": "PASS",
+    "testCase": "Auth Token: Valid token returns 200 on /api/auth/me"
+  },
+  {
+    "id": 345,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Auth Token: Returns authenticated user profile strictly for User B",
+    "status": "PASS",
+    "testCase": "Auth Token: Returns authenticated user profile strictly for User B"
+  },
+  {
+    "id": 346,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: DELETE /api/session/:sessionId returns 404 for other user session",
+    "status": "PASS",
+    "testCase": "Ownership Guard: DELETE /api/session/:sessionId returns 404 for other user session"
+  },
+  {
+    "id": 347,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: Session A was NOT deleted by User B",
+    "status": "PASS",
+    "testCase": "Ownership Guard: Session A was NOT deleted by User B"
+  },
+  {
+    "id": 348,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/history/:sessionId returns 404 for other user session",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/history/:sessionId returns 404 for other user session"
+  },
+  {
+    "id": 349,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: History response body contains no messages",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: History response body contains no messages"
+  },
+  {
+    "id": 350,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: No User A secret data in history response body",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: No User A secret data in history response body"
+  },
+  {
+    "id": 351,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /history/:sessionId alias returns 404 for other user session",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /history/:sessionId alias returns 404 for other user session"
+  },
+  {
+    "id": 352,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/sessions returns 200 for User B",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/sessions returns 200 for User B"
+  },
+  {
+    "id": 353,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: User B sessions list does NOT contain User A session",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: User B sessions list does NOT contain User A session"
+  },
+  {
+    "id": 354,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/memories returns 200 for User B",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/memories returns 200 for User B"
+  },
+  {
+    "id": 355,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: User B memories list does NOT contain User A memory",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: User B memories list does NOT contain User A memory"
+  },
+  {
+    "id": 356,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: PUT /api/memories/:id returns 404 for other user memory",
+    "status": "PASS",
+    "testCase": "Ownership Guard: PUT /api/memories/:id returns 404 for other user memory"
+  },
+  {
+    "id": 357,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: Memory A was NOT mutated by User B",
+    "status": "PASS",
+    "testCase": "Ownership Guard: Memory A was NOT mutated by User B"
+  },
+  {
+    "id": 358,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: DELETE /api/memories/:id returns 404 for other user memory",
+    "status": "PASS",
+    "testCase": "Ownership Guard: DELETE /api/memories/:id returns 404 for other user memory"
+  },
+  {
+    "id": 359,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: Memory A was NOT deleted by User B",
+    "status": "PASS",
+    "testCase": "Ownership Guard: Memory A was NOT deleted by User B"
+  },
+  {
+    "id": 360,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/files/session/:sessionId returns 404 for other user session",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/files/session/:sessionId returns 404 for other user session"
+  },
+  {
+    "id": 361,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: No files returned in body for other user session",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: No files returned in body for other user session"
+  },
+  {
+    "id": 362,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/files/:fileId returns 404 for other user file",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/files/:fileId returns 404 for other user file"
+  },
+  {
+    "id": 363,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: No document metadata returned for other user file",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: No document metadata returned for other user file"
+  },
+  {
+    "id": 364,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/files/preview/:fileId returns 404 for other user file",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/files/preview/:fileId returns 404 for other user file"
+  },
+  {
+    "id": 365,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: No raw bytes leaked in preview",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: No raw bytes leaked in preview"
+  },
+  {
+    "id": 366,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/files/:fileId/raw returns 404 for other user file",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/files/:fileId/raw returns 404 for other user file"
+  },
+  {
+    "id": 367,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: DELETE /api/files/:fileId returns 404 for other user file",
+    "status": "PASS",
+    "testCase": "Ownership Guard: DELETE /api/files/:fileId returns 404 for other user file"
+  },
+  {
+    "id": 368,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: File A was NOT deleted by User B",
+    "status": "PASS",
+    "testCase": "Ownership Guard: File A was NOT deleted by User B"
+  },
+  {
+    "id": 369,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: GET /api/files/status/:jobId returns 404 for other user extraction job",
+    "status": "PASS",
+    "testCase": "Ownership Guard: GET /api/files/status/:jobId returns 404 for other user extraction job"
+  },
+  {
+    "id": 370,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: No job details returned for other user job",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: No job details returned for other user job"
+  },
+  {
+    "id": 371,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: POST /api/files/upload returns 404 when uploading into other user session",
+    "status": "PASS",
+    "testCase": "Ownership Guard: POST /api/files/upload returns 404 when uploading into other user session"
+  },
+  {
+    "id": 372,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: POST /api/chat returns 404 when chatting in other user session",
+    "status": "PASS",
+    "testCase": "Ownership Guard: POST /api/chat returns 404 when chatting in other user session"
+  },
+  {
+    "id": 373,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Data Leak Guard: No session A contents in chat error response",
+    "status": "PASS",
+    "testCase": "Data Leak Guard: No session A contents in chat error response"
+  },
+  {
+    "id": 374,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: POST /api/chat returns 404 when attaching other user fileId",
+    "status": "PASS",
+    "testCase": "Ownership Guard: POST /api/chat returns 404 when attaching other user fileId"
+  },
+  {
+    "id": 375,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Ownership Guard: POST /api/evaluate/rubric returns 404 when scoring other user session/message",
+    "status": "PASS",
+    "testCase": "Ownership Guard: POST /api/evaluate/rubric returns 404 when scoring other user session/message"
+  },
+  {
+    "id": 376,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Public Route: GET /api/health accessible without token",
+    "status": "PASS",
+    "testCase": "Public Route: GET /api/health accessible without token"
+  },
+  {
+    "id": 377,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Public Route: GET /api/system/status accessible without token",
+    "status": "PASS",
+    "testCase": "Public Route: GET /api/system/status accessible without token"
+  },
+  {
+    "id": 378,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Public Route: GET /api/knowledge accessible without token",
+    "status": "PASS",
+    "testCase": "Public Route: GET /api/knowledge accessible without token"
+  },
+  {
+    "id": 379,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Public Route: GET /api/evaluate/benchmarks accessible without token",
+    "status": "PASS",
+    "testCase": "Public Route: GET /api/evaluate/benchmarks accessible without token"
+  },
+  {
+    "id": 380,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Public Route: GET /api/evaluate/summary accessible without token",
+    "status": "PASS",
+    "testCase": "Public Route: GET /api/evaluate/summary accessible without token"
+  },
+  {
+    "id": 381,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Cross-User Isolation: User B memory search cannot retrieve User A memory",
+    "status": "PASS",
+    "testCase": "Cross-User Isolation: User B memory search cannot retrieve User A memory"
+  },
+  {
+    "id": 382,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Cross-User Isolation: User B RAG search cannot retrieve User A document chunks",
+    "status": "PASS",
+    "testCase": "Cross-User Isolation: User B RAG search cannot retrieve User A document chunks"
+  },
+  {
+    "id": 383,
+    "category": "Route Authorization Audit & Cross-User RBAC Ownership Guards",
+    "name": "Cross-User Isolation: User B cannot retrieve User A cached parsed document",
+    "status": "PASS",
+    "testCase": "Cross-User Isolation: User B cannot retrieve User A cached parsed document"
+  },
+  {
+    "id": 384,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: createApp() throws and prevents server boot when JWT_SECRET is missing",
+    "status": "PASS",
+    "testCase": "Auth Hardening: createApp() throws and prevents server boot when JWT_SECRET is missing"
+  },
+  {
+    "id": 385,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Register rejects passwords > 72 bytes (bcrypt guard)",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Register rejects passwords > 72 bytes (bcrypt guard)"
+  },
+  {
+    "id": 386,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Register rejects common passwords",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Register rejects common passwords"
+  },
+  {
+    "id": 387,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Register rejects passwords < 10 characters",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Register rejects passwords < 10 characters"
+  },
+  {
+    "id": 388,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Register succeeds with strong password and returns signed token",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Register succeeds with strong password and returns signed token"
+  },
+  {
+    "id": 389,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Register returns uniform non-enumerating message on duplicate registration",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Register returns uniform non-enumerating message on duplicate registration"
+  },
+  {
+    "id": 390,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Login with unknown email returns 401",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Login with unknown email returns 401"
+  },
+  {
+    "id": 391,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Login with wrong password returns 401",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Login with wrong password returns 401"
+  },
+  {
+    "id": 392,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Login returns identical error message for unknown email and wrong password",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Login returns identical error message for unknown email and wrong password"
+  },
+  {
+    "id": 393,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Active token accesses /api/auth/me successfully",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Active token accesses /api/auth/me successfully"
+  },
+  {
+    "id": 394,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: POST /api/auth/logout revokes session tokens",
+    "status": "PASS",
+    "testCase": "Auth Hardening: POST /api/auth/logout revokes session tokens"
+  },
+  {
+    "id": 395,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Revoked token rejected with 401 (tokenVersion invalidation)",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Revoked token rejected with 401 (tokenVersion invalidation)"
+  },
+  {
+    "id": 396,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Fresh login returns valid token with updated tokenVersion",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Fresh login returns valid token with updated tokenVersion"
+  },
+  {
+    "id": 397,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: POST /api/auth/refresh successfully issues refreshed token",
+    "status": "PASS",
+    "testCase": "Auth Hardening: POST /api/auth/refresh successfully issues refreshed token"
+  },
+  {
+    "id": 398,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Refreshed token successfully authenticates user",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Refreshed token successfully authenticates user"
+  },
+  {
+    "id": 399,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Victim user successfully registers from known IP",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Victim user successfully registers from known IP"
+  },
+  {
+    "id": 400,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Brute-force login attempts get blocked with 429 Too Many Requests",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Brute-force login attempts get blocked with 429 Too Many Requests"
+  },
+  {
+    "id": 401,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: 429 Rate limit response includes Retry-After header",
+    "status": "PASS",
+    "testCase": "Auth Hardening: 429 Rate limit response includes Retry-After header"
+  },
+  {
+    "id": 402,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Attacker IP remains throttled by progressive delay",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Attacker IP remains throttled by progressive delay"
+  },
+  {
+    "id": 403,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Attacker IP cannot lock victim; legitimate user logs in successfully during attack (bypasses per-email delay)",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Attacker IP cannot lock victim; legitimate user logs in successfully during attack (bypasses per-email delay)"
+  },
+  {
+    "id": 404,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Legitimate user from fresh IP can also log in (keying lockouts on email + IP isolates attacker)",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Legitimate user from fresh IP can also log in (keying lockouts on email + IP isolates attacker)"
+  },
+  {
+    "id": 405,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Attempt 1 on unknown email returns 401",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Attempt 1 on unknown email returns 401"
+  },
+  {
+    "id": 406,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Hammered unknown email still returns 401 (never reveals lock state or 429)",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Hammered unknown email still returns 401 (never reveals lock state or 429)"
+  },
+  {
+    "id": 407,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Error message for hammered unknown email is identical to initial attempt",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Error message for hammered unknown email is identical to initial attempt"
+  },
+  {
+    "id": 408,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Response body never reveals lock state or rate limiting for unknown emails",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Response body never reveals lock state or rate limiting for unknown emails"
+  },
+  {
+    "id": 409,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Per-IP ceiling message specifically references IP limit without exposing account info",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Per-IP ceiling message specifically references IP limit without exposing account info"
+  },
+  {
+    "id": 410,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Exceeding per-IP ceiling (30 attempts) locks the offending IP",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Exceeding per-IP ceiling (30 attempts) locks the offending IP"
+  },
+  {
+    "id": 411,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Resilience: Per-IP ceiling response includes Retry-After header",
+    "status": "PASS",
+    "testCase": "Auth Resilience: Per-IP ceiling response includes Retry-After header"
+  },
+  {
+    "id": 412,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Helmet sets X-Content-Type-Options: nosniff",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Helmet sets X-Content-Type-Options: nosniff"
+  },
+  {
+    "id": 413,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: Helmet sets X-DNS-Prefetch-Control: off",
+    "status": "PASS",
+    "testCase": "Auth Hardening: Helmet sets X-DNS-Prefetch-Control: off"
+  },
+  {
+    "id": 414,
+    "category": "Auth Hardening, Dual Rate Limiting & Token Revocation",
+    "name": "Auth Hardening: CORS allowlist permits configured origin",
+    "status": "PASS",
+    "testCase": "Auth Hardening: CORS allowlist permits configured origin"
+  },
+  {
+    "id": 415,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Raw <script> tag is completely stripped and never rendered",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Raw <script> tag is completely stripped and never rendered"
+  },
+  {
+    "id": 416,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Script body is not executed or rendered as code block",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Script body is not executed or rendered as code block"
+  },
+  {
+    "id": 417,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Raw <img> tag is stripped by strict schema",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Raw <img> tag is stripped by strict schema"
+  },
+  {
+    "id": 418,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Event handler onerror is completely stripped",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Event handler onerror is completely stripped"
+  },
+  {
+    "id": 419,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: javascript: protocol link is stripped of href",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: javascript: protocol link is stripped of href"
+  },
+  {
+    "id": 420,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: javascript: link is rendered as safe non-anchor span",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: javascript: link is rendered as safe non-anchor span"
+  },
+  {
+    "id": 421,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes Mixed case payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 422,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes Whitespace within scheme payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 423,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes HTML entity encoded payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 424,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes Colon entity encoded payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 425,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes URL percent encoded payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 426,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes Data URI payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 427,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes VBScript URI payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 428,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: Neutralizes Null byte inserted payload from creating executable anchor",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: Obfuscated URL Scheme Neutralization"
+  },
+  {
+    "id": 429,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: https:// links are allowed and automatically enriched with rel=\"noopener noreferrer\" and target=\"_blank\"",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: https:// links are allowed and automatically enriched with rel=\"noopener noreferrer\" and target=\"_blank\""
+  },
+  {
+    "id": 430,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Markdown Sanitizer: mailto: links are allowed and enriched with rel=\"noopener noreferrer\"",
+    "status": "PASS",
+    "testCase": "Markdown Sanitizer: mailto: links are allowed and enriched with rel=\"noopener noreferrer\""
+  },
+  {
+    "id": 431,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Filename Sanitizer: Strips HTML angle brackets from filenames",
+    "status": "PASS",
+    "testCase": "Filename Sanitizer: Strips HTML angle brackets from filenames"
+  },
+  {
+    "id": 432,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Citation Sanitizer: Strips HTML tags and quotes from badge text",
+    "status": "PASS",
+    "testCase": "Citation Sanitizer: Strips HTML tags and quotes from badge text"
+  },
+  {
+    "id": 433,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Helmet CSP: Response includes Content-Security-Policy header",
+    "status": "PASS",
+    "testCase": "Helmet CSP: Response includes Content-Security-Policy header"
+  },
+  {
+    "id": 434,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Helmet CSP: Enforces script-src 'self'",
+    "status": "PASS",
+    "testCase": "Helmet CSP: Enforces script-src 'self'"
+  },
+  {
+    "id": 435,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Helmet CSP: Strictly forbids 'unsafe-inline' scripts",
+    "status": "PASS",
+    "testCase": "Helmet CSP: Strictly forbids 'unsafe-inline' scripts"
+  },
+  {
+    "id": 436,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Helmet CSP: Enforces object-src 'none' to block plugin vectors",
+    "status": "PASS",
+    "testCase": "Helmet CSP: Enforces object-src 'none' to block plugin vectors"
+  },
+  {
+    "id": 437,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Cookie Auth: Register endpoint succeeds",
+    "status": "PASS",
+    "testCase": "Cookie Auth: Register endpoint succeeds"
+  },
+  {
+    "id": 438,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Cookie Auth: Response sets cosmo_auth_token cookie",
+    "status": "PASS",
+    "testCase": "Cookie Auth: Response sets cosmo_auth_token cookie"
+  },
+  {
+    "id": 439,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Cookie Auth: cosmo_auth_token is marked HttpOnly",
+    "status": "PASS",
+    "testCase": "Cookie Auth: cosmo_auth_token is marked HttpOnly"
+  },
+  {
+    "id": 440,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "Cookie Auth: cosmo_auth_token is marked SameSite=Strict",
+    "status": "PASS",
+    "testCase": "Cookie Auth: cosmo_auth_token is marked SameSite=Strict"
+  },
+  {
+    "id": 441,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "CSRF Protection: Response sets cosmo_csrf_token cookie",
+    "status": "PASS",
+    "testCase": "CSRF Protection: Response sets cosmo_csrf_token cookie"
+  },
+  {
+    "id": 442,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "CSRF Protection: Register response body includes csrfToken",
+    "status": "PASS",
+    "testCase": "CSRF Protection: Register response body includes csrfToken"
+  },
+  {
+    "id": 443,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "CSRF Protection: Cookie auth without X-CSRF-Token is blocked with 403",
+    "status": "PASS",
+    "testCase": "CSRF Protection: Cookie auth without X-CSRF-Token is blocked with 403"
+  },
+  {
+    "id": 444,
+    "category": "Client Markdown Sanitization, XSS Neutralization & CSP",
+    "name": "CSRF Protection: Cookie auth with valid matching X-CSRF-Token succeeds with 201 Created",
+    "status": "PASS",
+    "testCase": "CSRF Protection: Cookie auth with valid matching X-CSRF-Token succeeds with 201 Created"
+  },
+  {
+    "id": 445,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects ZIP archive with single uncompressed entry > 30MB (ZipBombError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects ZIP archive with single uncompressed entry > 30MB (ZipBombError)"
+  },
+  {
+    "id": 446,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects ZIP archive with compression ratio exceeding 100:1 (ZipBombError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects ZIP archive with compression ratio exceeding 100:1 (ZipBombError)"
+  },
+  {
+    "id": 447,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects nested archives (.tar.gz) embedded within ZIP archives",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects nested archives (.tar.gz) embedded within ZIP archives"
+  },
+  {
+    "id": 448,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects PNG decompression bomb (50,000x50,000) in 0ms before OCR (DecompressionBombError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects PNG decompression bomb (50,000x50,000) in 0ms before OCR (DecompressionBombError)"
+  },
+  {
+    "id": 449,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects 3-hour video header metadata before transcription starts (MediaLimitExceededError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects 3-hour video header metadata before transcription starts (MediaLimitExceededError)"
+  },
+  {
+    "id": 450,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects polyglot PDF/ZIP dual-signature file (PolyglotFileError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects polyglot PDF/ZIP dual-signature file (PolyglotFileError)"
+  },
+  {
+    "id": 451,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects Windows executable header (MZ/PE) even with .txt extension (PolyglotFileError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects Windows executable header (MZ/PE) even with .txt extension (PolyglotFileError)"
+  },
+  {
+    "id": 452,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Rejects mismatched file (declared .pdf but binary is PNG) (PolyglotFileError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Rejects mismatched file (declared .pdf but binary is PNG) (PolyglotFileError)"
+  },
+  {
+    "id": 453,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Filename traversal ../../etc/passwd is sanitized to \"passwd\"",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Filename traversal ../../etc/passwd is sanitized to \"passwd\""
+  },
+  {
+    "id": 454,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Windows traversal ..\\..\\windows\\system32\\cmd.exe is sanitized to \"cmd.exe\"",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Windows traversal ..\\..\\windows\\system32\\cmd.exe is sanitized to \"cmd.exe\""
+  },
+  {
+    "id": 455,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Strips Unicode Bidi RTL override characters from filenames",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Strips Unicode Bidi RTL override characters from filenames"
+  },
+  {
+    "id": 456,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Strips binary control characters from filenames",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Strips binary control characters from filenames"
+  },
+  {
+    "id": 457,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Hardening: Text files containing NUL bytes (0x00) are rejected (CorruptFileError)",
+    "status": "PASS",
+    "testCase": "Upload Hardening: Text files containing NUL bytes (0x00) are rejected (CorruptFileError)"
+  },
+  {
+    "id": 458,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Quota: Blocks 51st upload when daily count quota (50 files/day) is reached",
+    "status": "PASS",
+    "testCase": "Upload Quota: Blocks 51st upload when daily count quota (50 files/day) is reached"
+  },
+  {
+    "id": 459,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Quota: Blocks upload exceeding daily byte volume quota (100MB/day)",
+    "status": "PASS",
+    "testCase": "Upload Quota: Blocks upload exceeding daily byte volume quota (100MB/day)"
+  },
+  {
+    "id": 460,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Upload Quota: POST /api/files/upload returns 429 Too Many Requests when daily quota is exceeded",
+    "status": "PASS",
+    "testCase": "Upload Quota: POST /api/files/upload returns 429 Too Many Requests when daily quota is exceeded"
+  },
+  {
+    "id": 461,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Process Safety: Python process runner caps concurrency to max 2 concurrent jobs",
+    "status": "PASS",
+    "testCase": "Process Safety: Python process runner caps concurrency to max 2 concurrent jobs"
+  },
+  {
+    "id": 462,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Process Safety: Python runner provides process group kill on timeout",
+    "status": "PASS",
+    "testCase": "Process Safety: Python runner provides process group kill on timeout"
+  },
+  {
+    "id": 463,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Concurrency Hardening: All 30 parallel uploads are accepted with 202 and enqueued",
+    "status": "PASS",
+    "testCase": "Concurrency Hardening: All 30 parallel uploads are accepted with 202 and enqueued"
+  },
+  {
+    "id": 464,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Concurrency Hardening: Server remains responsive (200 OK) during and after 30 parallel uploads",
+    "status": "PASS",
+    "testCase": "Concurrency Hardening: Server remains responsive (200 OK) during and after 30 parallel uploads"
+  },
+  {
+    "id": 465,
+    "category": "Multimodal Upload Quota & Extraction Hardening",
+    "name": "Process Safety: 30 parallel uploads leave no orphan Python processes",
+    "status": "PASS",
+    "testCase": "Process Safety: 30 parallel uploads leave no orphan Python processes"
+  },
+  {
+    "id": 466,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Auth: User successfully registered with token",
+    "status": "PASS",
+    "testCase": "E2E Auth: User successfully registered with token"
+  },
+  {
+    "id": 467,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Auth: User login returns valid access token",
+    "status": "PASS",
+    "testCase": "E2E Auth: User login returns valid access token"
+  },
+  {
+    "id": 468,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Auth: Authenticated profile retrieval matches user email",
+    "status": "PASS",
+    "testCase": "E2E Auth: Authenticated profile retrieval matches user email"
+  },
+  {
+    "id": 469,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Session: POST /api/session creates new session",
+    "status": "PASS",
+    "testCase": "E2E Session: POST /api/session creates new session"
+  },
+  {
+    "id": 470,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Session: GET /api/sessions lists created session",
+    "status": "PASS",
+    "testCase": "E2E Session: GET /api/sessions lists created session"
+  },
+  {
+    "id": 471,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Session: GET /api/history/:id returns empty history initially",
+    "status": "PASS",
+    "testCase": "E2E Session: GET /api/history/:id returns empty history initially"
+  },
+  {
+    "id": 472,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat SSE: POST /api/chat returns HTTP 200 OK",
+    "status": "PASS",
+    "testCase": "E2E Chat SSE: POST /api/chat returns HTTP 200 OK"
+  },
+  {
+    "id": 473,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat SSE: Response header Content-Type is text/event-stream",
+    "status": "PASS",
+    "testCase": "E2E Chat SSE: Response header Content-Type is text/event-stream"
+  },
+  {
+    "id": 474,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat SSE: Response header Cache-Control includes no-cache",
+    "status": "PASS",
+    "testCase": "E2E Chat SSE: Response header Cache-Control includes no-cache"
+  },
+  {
+    "id": 475,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat SSE: Response header X-Accel-Buffering is no",
+    "status": "PASS",
+    "testCase": "E2E Chat SSE: Response header X-Accel-Buffering is no"
+  },
+  {
+    "id": 476,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat SSE: Stream payload contains SSE chunk events",
+    "status": "PASS",
+    "testCase": "E2E Chat SSE: Stream payload contains SSE chunk events"
+  },
+  {
+    "id": 477,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat SSE: Stream payload terminates with done event",
+    "status": "PASS",
+    "testCase": "E2E Chat SSE: Stream payload terminates with done event"
+  },
+  {
+    "id": 478,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat: History persists exactly 2 messages (user + assistant turn)",
+    "status": "PASS",
+    "testCase": "E2E Chat: History persists exactly 2 messages (user + assistant turn)"
+  },
+  {
+    "id": 479,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat: User message persisted with monotonic seq 1",
+    "status": "PASS",
+    "testCase": "E2E Chat: User message persisted with monotonic seq 1"
+  },
+  {
+    "id": 480,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Chat: Assistant message persisted with monotonic seq 2",
+    "status": "PASS",
+    "testCase": "E2E Chat: Assistant message persisted with monotonic seq 2"
+  },
+  {
+    "id": 481,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Upload: POST /api/files/upload accepts file with 202 and returns jobId & fileId",
+    "status": "PASS",
+    "testCase": "E2E Upload: POST /api/files/upload accepts file with 202 and returns jobId & fileId"
+  },
+  {
+    "id": 482,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Upload: Async job queue processes and completes file extraction",
+    "status": "PASS",
+    "testCase": "E2E Upload: Async job queue processes and completes file extraction"
+  },
+  {
+    "id": 483,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Upload: GET /api/files/:fileId returns document metadata and parsed chunks",
+    "status": "PASS",
+    "testCase": "E2E Upload: GET /api/files/:fileId returns document metadata and parsed chunks"
+  },
+  {
+    "id": 484,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Memories: POST /api/memories creates new memory record",
+    "status": "PASS",
+    "testCase": "E2E Memories: POST /api/memories creates new memory record"
+  },
+  {
+    "id": 485,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Memories: GET /api/memories lists created memory",
+    "status": "PASS",
+    "testCase": "E2E Memories: GET /api/memories lists created memory"
+  },
+  {
+    "id": 486,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Memories: PUT /api/memories/:id updates memory fact",
+    "status": "PASS",
+    "testCase": "E2E Memories: PUT /api/memories/:id updates memory fact"
+  },
+  {
+    "id": 487,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Memories: DELETE /api/memories/:id deletes memory",
+    "status": "PASS",
+    "testCase": "E2E Memories: DELETE /api/memories/:id deletes memory"
+  },
+  {
+    "id": 488,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Memories: Memory successfully removed from datastore",
+    "status": "PASS",
+    "testCase": "E2E Memories: Memory successfully removed from datastore"
+  },
+  {
+    "id": 489,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Session: DELETE /api/session/:id deletes session",
+    "status": "PASS",
+    "testCase": "E2E Session: DELETE /api/session/:id deletes session"
+  },
+  {
+    "id": 490,
+    "category": "Extended HTTP-Level E2E Workflows",
+    "name": "E2E Session: Deleted session returns 404 on subsequent queries",
+    "status": "PASS",
+    "testCase": "E2E Session: Deleted session returns 404 on subsequent queries"
+  },
+  {
+    "id": 491,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: 429 Quota Exceeded is tracked as trippable rate limit failure without process crash",
+    "status": "PASS",
+    "testCase": "Fault Injector: 429 Quota Exceeded is tracked as trippable rate limit failure without process crash"
+  },
+  {
+    "id": 492,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: 500 Internal Server Error is intercepted and handled cleanly without unhandled rejection",
+    "status": "PASS",
+    "testCase": "Fault Injector: 500 Internal Server Error is intercepted and handled cleanly without unhandled rejection"
+  },
+  {
+    "id": 493,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: Slow first token triggers STREAM_FIRST_CHUNK_TIMEOUT and aborts stalled stream",
+    "status": "PASS",
+    "testCase": "Fault Injector: Slow first token triggers STREAM_FIRST_CHUNK_TIMEOUT and aborts stalled stream"
+  },
+  {
+    "id": 494,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: Mid-stream drop flags response with incomplete=true",
+    "status": "PASS",
+    "testCase": "Fault Injector: Mid-stream drop flags response with incomplete=true"
+  },
+  {
+    "id": 495,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: Mid-stream drop preserves partial flag",
+    "status": "PASS",
+    "testCase": "Fault Injector: Mid-stream drop preserves partial flag"
+  },
+  {
+    "id": 496,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: Partial chunks emitted prior to disconnect were captured",
+    "status": "PASS",
+    "testCase": "Fault Injector: Partial chunks emitted prior to disconnect were captured"
+  },
+  {
+    "id": 497,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: Malformed chunks (null, missing text) are safely ignored while valid chunk is retained",
+    "status": "PASS",
+    "testCase": "Fault Injector: Malformed chunks (null, missing text) are safely ignored while valid chunk is retained"
+  },
+  {
+    "id": 498,
+    "category": "Fault-Injecting Mock LLM Resiliency",
+    "name": "Fault Injector: Empty response (0 tokens) completes gracefully without hanging or throwing",
+    "status": "PASS",
+    "testCase": "Fault Injector: Empty response (0 tokens) completes gracefully without hanging or throwing"
+  },
+  {
+    "id": 499,
+    "category": "Real Chat Route Adversarial Corpus Verification",
+    "name": "Real-Route Corpus: Passed 53/53 payloads through HTTP route (Pass rate: 100.0%)",
+    "status": "PASS",
+    "testCase": "Real Chat Route: 53-Payload Adversarial Corpus HTTP Verification (53 Inputs)"
+  },
+  {
+    "id": 500,
+    "category": "Real Chat Route Adversarial Corpus Verification",
+    "name": "Real-Route Corpus: 100% of benign look-alikes pass cleanly through HTTP route without false positive blockage",
+    "status": "PASS",
+    "testCase": "Real Chat Route: 53-Payload Adversarial Corpus HTTP Verification (53 Inputs)"
+  },
+  {
+    "id": 501,
+    "category": "Autocannon Load Performance & Event Loop Lag",
+    "name": "Load Test: All 10 concurrent uploads accepted with 202 and enqueued during stream load",
+    "status": "PASS",
+    "testCase": "Load Test: All 10 concurrent uploads accepted with 202 and enqueued during stream load"
+  },
+  {
+    "id": 502,
+    "category": "Autocannon Load Performance & Event Loop Lag",
+    "name": "Load Test: Event loop p95 lag (514.85ms) stays below safety threshold (< 2500ms under load/instrumentation)",
+    "status": "PASS",
+    "testCase": "Load Test: Event loop p95 lag (514.85ms) stays below safety threshold (< 2500ms under load/instrumentation)"
+  },
+  {
+    "id": 503,
+    "category": "Autocannon Load Performance & Event Loop Lag",
+    "name": "Load Test: All 50 concurrent streams served successfully",
+    "status": "PASS",
+    "testCase": "Load Test: All 50 concurrent streams served successfully"
+  },
+  {
+    "id": 504,
+    "category": "Property-Based Testing (fast-check) Truncation Invariants",
+    "name": "Fast-Check Property: Token estimation is strictly positive (>=1) and monotonic with repetition across 100 generative strings",
+    "status": "PASS",
+    "testCase": "Fast-Check Property: Token estimation is strictly positive (>=1) and monotonic with repetition across 100 generative strings"
+  },
+  {
+    "id": 505,
+    "category": "Property-Based Testing (fast-check) Truncation Invariants",
+    "name": "Fast-Check Property: Script-aware token estimator assigns non-Latin scripts density >= naive length/4 across 50 runs",
+    "status": "PASS",
+    "testCase": "Fast-Check Property: Script-aware token estimator assigns non-Latin scripts density >= naive length/4 across 50 runs"
+  },
+  {
+    "id": 506,
+    "category": "Property-Based Testing (fast-check) Truncation Invariants",
+    "name": "Fast-Check Property: Truncated history strictly adheres to token budget across 100 random multi-turn dialogues",
+    "status": "PASS",
+    "testCase": "Fast-Check Property: Truncated history strictly adheres to token budget across 100 random multi-turn dialogues"
+  },
+  {
+    "id": 507,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Primary Gemini model configured as \"gemini-2.5-flash\"",
+    "status": "PASS",
+    "testCase": "Model Config: Primary Gemini model configured as \"gemini-2.5-flash\""
+  },
+  {
+    "id": 508,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Full Gemini model list has 5 models with primary in 0th position",
+    "status": "PASS",
+    "testCase": "Model Config: Full Gemini model list has 5 models with primary in 0th position"
+  },
+  {
+    "id": 509,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Primary Groq model configured as \"qwen/qwen3.8-27b\"",
+    "status": "PASS",
+    "testCase": "Model Config: Primary Groq model configured as \"qwen/qwen3.8-27b\""
+  },
+  {
+    "id": 510,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Groq fallback list excludes deprecated \"groq/compound\"",
+    "status": "PASS",
+    "testCase": "Model Config: Groq fallback list excludes deprecated \"groq/compound\""
+  },
+  {
+    "id": 511,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Embedding model configured as \"gemini-embedding-001\"",
+    "status": "PASS",
+    "testCase": "Model Config: Embedding model configured as \"gemini-embedding-001\""
+  },
+  {
+    "id": 512,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: getModelConfigSummary returns valid structured config snapshot",
+    "status": "PASS",
+    "testCase": "Model Config: getModelConfigSummary returns valid structured config snapshot"
+  },
+  {
+    "id": 513,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Simulating legacy invalid Groq model \"groq/compound\"",
+    "status": "PASS",
+    "testCase": "Model Config: Simulating legacy invalid Groq model \"groq/compound\""
+  },
+  {
+    "id": 514,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: validateAndLogModelConfig handles deprecated model gracefully",
+    "status": "PASS",
+    "testCase": "Model Config: validateAndLogModelConfig handles deprecated model gracefully"
+  },
+  {
+    "id": 515,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Warning logged loudly for deprecated model",
+    "status": "PASS",
+    "testCase": "Model Config: Warning logged loudly for deprecated model"
+  },
+  {
+    "id": 516,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Automatically switched to alternative: \"openai/gpt-oss-120b\"",
+    "status": "PASS",
+    "testCase": "Model Config: Automatically switched to alternative: \"openai/gpt-oss-120b\""
+  },
+  {
+    "id": 517,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Fail fast mode throws loudly: \"[Model Config] Fatal: Primary Groq model \"compound\" is deprecated or invalid, and no valid fallback exists.\"",
+    "status": "PASS",
+    "testCase": "Model Config: Fail fast mode throws loudly: \"[Model Config] Fatal: Primary Groq model \"compound\" is deprecated or invalid, and no valid fallback exists.\""
+  },
+  {
+    "id": 518,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Config: Strict validation fails loudly when configured primary model is deprecated",
+    "status": "PASS",
+    "testCase": "Model Config: Strict validation fails loudly when configured primary model is deprecated"
+  },
+  {
+    "id": 519,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: GET /api/health returns HTTP 200",
+    "status": "PASS",
+    "testCase": "Health Endpoint: GET /api/health returns HTTP 200"
+  },
+  {
+    "id": 520,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports status \"ok\"",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports status \"ok\""
+  },
+  {
+    "id": 521,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports active provider \"gemini\"",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports active provider \"gemini\""
+  },
+  {
+    "id": 522,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports Gemini primary model",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports Gemini primary model"
+  },
+  {
+    "id": 523,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports Groq primary model",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports Groq primary model"
+  },
+  {
+    "id": 524,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports configured embedding model",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports configured embedding model"
+  },
+  {
+    "id": 525,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports circuit breaker state \"CLOSED\"",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports circuit breaker state \"CLOSED\""
+  },
+  {
+    "id": 526,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports breaker failure counter",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports breaker failure counter"
+  },
+  {
+    "id": 527,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports Chroma status",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports Chroma status"
+  },
+  {
+    "id": 528,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports Chroma bound URL",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports Chroma bound URL"
+  },
+  {
+    "id": 529,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports store type",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports store type"
+  },
+  {
+    "id": 530,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports store schemaVersion 2",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports store schemaVersion 2"
+  },
+  {
+    "id": 531,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports sessions count",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports sessions count"
+  },
+  {
+    "id": 532,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports users count",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports users count"
+  },
+  {
+    "id": 533,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports memories count",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports memories count"
+  },
+  {
+    "id": 534,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports store.lastPersistError as null when healthy",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports store.lastPersistError as null when healthy"
+  },
+  {
+    "id": 535,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: returns HTTP 200 even when store is degraded",
+    "status": "PASS",
+    "testCase": "Health Endpoint: returns HTTP 200 even when store is degraded"
+  },
+  {
+    "id": 536,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: reports status \"degraded\" when lastPersistError is present",
+    "status": "PASS",
+    "testCase": "Health Endpoint: reports status \"degraded\" when lastPersistError is present"
+  },
+  {
+    "id": 537,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: surfaces store.lastPersistError with failure details",
+    "status": "PASS",
+    "testCase": "Health Endpoint: surfaces store.lastPersistError with failure details"
+  },
+  {
+    "id": 538,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: status restores to \"ok\" once store persists successfully",
+    "status": "PASS",
+    "testCase": "Health Endpoint: status restores to \"ok\" once store persists successfully"
+  },
+  {
+    "id": 539,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: store.lastPersistError cleared back to null after recovery",
+    "status": "PASS",
+    "testCase": "Health Endpoint: store.lastPersistError cleared back to null after recovery"
+  },
+  {
+    "id": 540,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: backward-compatible top-level state \"CLOSED\" preserved",
+    "status": "PASS",
+    "testCase": "Health Endpoint: backward-compatible top-level state \"CLOSED\" preserved"
+  },
+  {
+    "id": 541,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Health Endpoint: backward-compatible top-level openUntil preserved",
+    "status": "PASS",
+    "testCase": "Health Endpoint: backward-compatible top-level openUntil preserved"
+  },
+  {
+    "id": 542,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: checkModels executed with 17 models audited",
+    "status": "PASS",
+    "testCase": "Model Audit: checkModels executed with 17 models audited"
+  },
+  {
+    "id": 543,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Gemini 2.5 Flash (\"gemini-2.5-flash\") verified to EXIST on Gemini API",
+    "status": "PASS",
+    "testCase": "Model Audit: Gemini 2.5 Flash (\"gemini-2.5-flash\") verified to EXIST on Gemini API"
+  },
+  {
+    "id": 544,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Gemini Fallback #1 (\"gemini-flash-latest\") verified to EXIST on Gemini API",
+    "status": "PASS",
+    "testCase": "Model Audit: Gemini Fallback #1 (\"gemini-flash-latest\") verified to EXIST on Gemini API"
+  },
+  {
+    "id": 545,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Gemini Fallback #2 (\"gemini-3.7-flash\") verified to EXIST on Gemini API",
+    "status": "PASS",
+    "testCase": "Model Audit: Gemini Fallback #2 (\"gemini-3.7-flash\") verified to EXIST on Gemini API"
+  },
+  {
+    "id": 546,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Gemini Fallback #3 (\"gemini-2.5-flash-lite\") verified to EXIST on Gemini API",
+    "status": "PASS",
+    "testCase": "Model Audit: Gemini Fallback #3 (\"gemini-2.5-flash-lite\") verified to EXIST on Gemini API"
+  },
+  {
+    "id": 547,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Gemini Fallback #4 (\"gemini-3.1-pro-preview\") verified to EXIST on Gemini API",
+    "status": "PASS",
+    "testCase": "Model Audit: Gemini Fallback #4 (\"gemini-3.1-pro-preview\") verified to EXIST on Gemini API"
+  },
+  {
+    "id": 548,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Embedding model (\"gemini-embedding-001\") verified to EXIST on Gemini API",
+    "status": "PASS",
+    "testCase": "Model Audit: Embedding model (\"gemini-embedding-001\") verified to EXIST on Gemini API"
+  },
+  {
+    "id": 549,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Groq \"qwen/qwen3.8-27b\" verified to EXIST on Groq Cloud API",
+    "status": "PASS",
+    "testCase": "Model Audit: Groq \"qwen/qwen3.8-27b\" verified to EXIST on Groq Cloud API"
+  },
+  {
+    "id": 550,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Groq Fallback #1 (\"openai/gpt-oss-120b\") verified to EXIST on Groq Cloud API",
+    "status": "PASS",
+    "testCase": "Model Audit: Groq Fallback #1 (\"openai/gpt-oss-120b\") verified to EXIST on Groq Cloud API"
+  },
+  {
+    "id": 551,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Groq Fallback #2 (\"openai/gpt-oss-20b\") verified to EXIST on Groq Cloud API",
+    "status": "PASS",
+    "testCase": "Model Audit: Groq Fallback #2 (\"openai/gpt-oss-20b\") verified to EXIST on Groq Cloud API"
+  },
+  {
+    "id": 552,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Groq Fallback #3 (\"allam-2-7b\") verified to EXIST on Groq Cloud API",
+    "status": "PASS",
+    "testCase": "Model Audit: Groq Fallback #3 (\"allam-2-7b\") verified to EXIST on Groq Cloud API"
+  },
+  {
+    "id": 553,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Zero missing models across all configured active and fallback chains",
+    "status": "PASS",
+    "testCase": "Model Audit: Zero missing models across all configured active and fallback chains"
+  },
+  {
+    "id": 554,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Written audit output file exists in docs/ directory",
+    "status": "PASS",
+    "testCase": "Model Audit: Written audit output file exists in docs/ directory"
+  },
+  {
+    "id": 555,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Groq \"compound\" verified to NOT EXIST on Groq API (correctly flagged)",
+    "status": "PASS",
+    "testCase": "Model Audit: Groq \"compound\" verified to NOT EXIST on Groq API (correctly flagged)"
+  },
+  {
+    "id": 556,
+    "category": "Model Configuration, Live Catalog Audit & Health Endpoint",
+    "name": "Model Audit: Groq \"groq/compound\" verified to NOT EXIST on Groq API (correctly flagged)",
+    "status": "PASS",
+    "testCase": "Model Audit: Groq \"groq/compound\" verified to NOT EXIST on Groq API (correctly flagged)"
+  },
+  {
+    "id": 557,
+    "category": "Test Isolation & Production Store Protection",
+    "name": "Test Isolation: Production store SHA-256 hash (b5b3663896164ed369a8cd7b9894c672c634292521548d40a6b52e4234384d05) matches initial hash (b5b3663896164ed369a8cd7b9894c672c634292521548d40a6b52e4234384d05) exactly; real store was not touched",
+    "status": "PASS",
+    "testCase": "Test Isolation: Production data/local_store.json hash remains completely unchanged after test suite execution"
+  },
+  {
+    "id": 558,
+    "category": "Test Isolation & Production Store Protection",
+    "name": "Test Isolation: Safety guard successfully throws and halts execution when DATA_DIR points to ./data",
+    "status": "PASS",
+    "testCase": "Test Isolation: Refuses to run tests if DATA_DIR resolves to real production data directory"
+  }
+]

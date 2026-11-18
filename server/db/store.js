@@ -1,101 +1,122 @@
-import mongoose, { Schema, model } from 'mongoose';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Check if Mongo URI exists
-const MONGO_URI = process.env.MONGO_URI || '';
-let isMongoConnected = false;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+export function getDataDir() {
+  return process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.resolve(__dirname, '../../data');
+}
 
-// In-memory fallback stores for local development and preview
+export function getLocalStorePath() {
+  return path.join(getDataDir(), 'local_store.json');
+}
+
+export function getLocalStoreBackupPath() {
+  return path.join(getDataDir(), 'local_store.backup.json');
+}
+
+export let LOCAL_STORE_PATH = getLocalStorePath();
+export let LOCAL_STORE_BACKUP_PATH = getLocalStoreBackupPath();
+
+export function updateStorePaths() {
+  LOCAL_STORE_PATH = getLocalStorePath();
+  LOCAL_STORE_BACKUP_PATH = getLocalStoreBackupPath();
+}
+
+// Current schema version
+export const CURRENT_SCHEMA_VERSION = 2;
+
+// In-memory persistent stores
 const inMemoryUsers = new Map();
 const inMemorySessions = new Map();
 const inMemoryMessages = new Map(); // sessionId -> messages
 const inMemoryRubrics = new Map();
-const inMemoryMemories = new Map(); // userId -> Map(key -> Memory)
+const inMemoryMemories = new Map(); // userId -> Map(normalizedKey -> Memory)
+const compoundMemoryIndex = new Map(); // `${userId}:::${normalizedKey}` -> Memory
+const memoryIdIndex = new Map(); // memoryId -> Memory
 const inMemoryKnowledge = new Map(); // id -> KnowledgeChunk
+const inMemoryFileMetadata = new Map(); // fileId -> FileMetadata
+const inMemoryFileJobs = new Map(); // jobId -> FileJob
+const inMemoryDocumentChunks = new Map(); // chunkId -> DocumentChunk
+const inMemoryParses = new Map(); // `${userId}:${sha256}` -> ParsedDocument
 
-// ==========================================
-// SCHEMAS
-// ==========================================
+export function clearInMemoryStore() {
+  inMemoryUsers.clear();
+  inMemorySessions.clear();
+  inMemoryMessages.clear();
+  inMemoryRubrics.clear();
+  inMemoryMemories.clear();
+  compoundMemoryIndex.clear();
+  memoryIdIndex.clear();
+  inMemoryKnowledge.clear();
+  inMemoryFileMetadata.clear();
+  inMemoryFileJobs.clear();
+  inMemoryDocumentChunks.clear();
+  inMemoryParses.clear();
+  isStoreDirty = false;
+  lastPersistError = null;
+  renameInterceptorForTesting = null;
+  writeInterceptorForTesting = null;
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+}
 
-const UserSchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  passwordHash: { type: String, required: true },
-  createdAt: { type: String, default: () => new Date().toISOString() },
-});
+/**
+ * Case-insensitive memory key normalizer.
+ * Preserves strict case-insensitive deduplication and lookup:
+ * "Tech Stack" -> "tech_stack", "PREFERRED_LLM" -> "preferred_llm"
+ */
+export function normalizeMemoryKey(key) {
+  if (!key || typeof key !== 'string') return '';
+  return key.trim().toLowerCase().replace(/\s+/g, '_');
+}
 
-const SessionSchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  userId: { type: String, required: true, index: true },
-  title: { type: String, required: true },
-  createdAt: { type: String, default: () => new Date().toISOString() },
-  updatedAt: { type: String, default: () => new Date().toISOString() },
-  messageCount: { type: Number, default: 0 },
-  providerUsed: { type: String, enum: ['gemini', 'groq'] },
-});
+/**
+ * Compound index key generator for (userId, key)
+ */
+export function makeCompoundMemoryKey(userId, key) {
+  return `${userId || 'unknown'}:::${normalizeMemoryKey(key)}`;
+}
 
-const MessageSchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  sessionId: { type: String, required: true, index: true },
-  role: { type: String, enum: ['user', 'assistant', 'system'], required: true },
-  content: { type: String, required: true },
-  timestamp: { type: String, default: () => new Date().toISOString() },
-  metadata: {
-    provider: String,
-    model: String,
-    latencyMs: Number,
-    tokensEstimated: Number,
-    ambiguityFlag: Boolean,
-    coherenceScore: Number,
-    isFallback: Boolean,
-    retrievedMemoriesCount: Number,
-  },
-});
+/**
+ * Index a memory into compound and ID maps in O(1)
+ */
+function indexMemory(mem) {
+  if (!mem || !mem.userId || !mem.key) return;
+  const cleanKey = normalizeMemoryKey(mem.key);
+  mem.key = cleanKey;
+  let userMap = inMemoryMemories.get(mem.userId);
+  if (!userMap) {
+    userMap = new Map();
+    inMemoryMemories.set(mem.userId, userMap);
+  }
+  userMap.set(cleanKey, mem);
+  compoundMemoryIndex.set(makeCompoundMemoryKey(mem.userId, cleanKey), mem);
+  if (mem.id) {
+    memoryIdIndex.set(mem.id, mem);
+  }
+}
 
-const RubricSchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  sessionId: { type: String, required: true, index: true },
-  messageId: { type: String, required: true },
-  userId: { type: String, required: true },
-  relevance: { type: Number, required: true, min: 1, max: 5 },
-  coherence: { type: Number, required: true, min: 1, max: 5 },
-  helpfulness: { type: Number, required: true, min: 1, max: 5 },
-  feedback: { type: String },
-  timestamp: { type: String, default: () => new Date().toISOString() },
-});
-
-// Tier 2: User-Specific Long-Term Memories
-const UserMemorySchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  userId: { type: String, required: true, index: true },
-  key: { type: String, required: true }, // e.g. "project_name", "preferred_language", "tech_stack"
-  fact: { type: String, required: true }, // e.g. "User is building OmniTurn AI, a multi-turn chatbot"
-  category: { type: String, default: 'general' }, // "project", "preference", "profile", "tech_stack"
-  vector: { type: Schema.Types.Mixed, default: {} }, // dense embedding / term vector
-  sourceSessionId: { type: String },
-  updatedAt: { type: String, default: () => new Date().toISOString() },
-  createdAt: { type: String, default: () => new Date().toISOString() },
-});
-
-UserMemorySchema.index({ userId: 1, key: 1 }, { unique: true });
-
-// Tier 3: General Domain Knowledge Base Chunks
-const KnowledgeChunkSchema = new Schema({
-  id: { type: String, required: true, unique: true },
-  title: { type: String, required: true },
-  content: { type: String, required: true },
-  category: { type: String, default: 'general' },
-  tags: { type: [String], default: [] },
-  vector: { type: Schema.Types.Mixed, default: {} },
-  createdAt: { type: String, default: () => new Date().toISOString() },
-});
-
-export const UserModel = mongoose.models.User || model('User', UserSchema);
-export const SessionModel = mongoose.models.Session || model('Session', SessionSchema);
-export const MessageModel = mongoose.models.Message || model('Message', MessageSchema);
-export const RubricModel = mongoose.models.Rubric || model('Rubric', RubricSchema);
-export const UserMemoryModel = mongoose.models.UserMemory || model('UserMemory', UserMemorySchema, 'memories');
-export const KnowledgeChunkModel = mongoose.models.KnowledgeChunk || model('KnowledgeChunk', KnowledgeChunkSchema, 'knowledge_chunks');
+/**
+ * Unindex a memory from compound and ID maps in O(1)
+ */
+function unindexMemory(mem) {
+  if (!mem) return;
+  const cleanKey = normalizeMemoryKey(mem.key);
+  if (mem.userId) {
+    const userMap = inMemoryMemories.get(mem.userId);
+    if (userMap) {
+      userMap.delete(cleanKey);
+    }
+    compoundMemoryIndex.delete(makeCompoundMemoryKey(mem.userId, cleanKey));
+  }
+  if (mem.id) {
+    memoryIdIndex.delete(mem.id);
+  }
+}
 
 // Default initial domain knowledge chunks (Tier 3)
 const DEFAULT_KNOWLEDGE_CHUNKS = [
@@ -129,39 +150,385 @@ const DEFAULT_KNOWLEDGE_CHUNKS = [
   },
 ];
 
-export async function initDatabase() {
-  const uri = process.env.MONGO_URI?.trim() || MONGO_URI;
-  if (uri && uri.startsWith('mongodb')) {
+// Single-writer mutex queue and write debounce management
+let writeMutexChain = Promise.resolve();
+let pendingWriteResolvers = [];
+let pendingWriteRejecters = [];
+let debounceTimer = null;
+const DEBOUNCE_MS = 35; // Coalesce window (35ms)
+let isStoreDirty = false;
+let lastPersistError = null;
+
+// Fault injection hooks for automated testing
+let renameInterceptorForTesting = null;
+let writeInterceptorForTesting = null;
+
+export function setRenameInterceptorForTesting(fn) {
+  renameInterceptorForTesting = fn;
+}
+
+export function setWriteInterceptorForTesting(fn) {
+  writeInterceptorForTesting = fn;
+}
+
+export function getStoreDirtyState() {
+  return isStoreDirty;
+}
+
+export function getLastPersistError() {
+  return lastPersistError;
+}
+
+export function resetLastPersistError() {
+  lastPersistError = null;
+}
+
+export function markStoreDirty() {
+  isStoreDirty = true;
+}
+
+/**
+ * Robust atomic rename with exponential backoff and retry.
+ * Handles Windows transient locks from antivirus, indexers, or background readers (EPERM / EBUSY / EACCES).
+ */
+async function renameWithRetry(sourcePath, targetPath, maxAttempts = 5) {
+  let attempt = 0;
+  while (true) {
+    attempt++;
     try {
-      await mongoose.connect(uri, {
-        serverSelectionTimeoutMS: 4000,
-      });
-      isMongoConnected = true;
-      console.log('✅ Connected to MongoDB at:', uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
-      await seedKnowledgeBase();
-      return { isMongo: true, message: 'Connected to MongoDB' };
+      if (typeof renameInterceptorForTesting === 'function') {
+        await renameInterceptorForTesting(sourcePath, targetPath, attempt);
+      } else {
+        await fs.promises.rename(sourcePath, targetPath);
+      }
+      return;
     } catch (err) {
-      console.warn('⚠️ MongoDB connection error. Operating with In-Memory store:', err.message);
-      isMongoConnected = false;
-      seedInMemoryKnowledge();
-      return { isMongo: false, message: 'Using In-Memory Datastore (MongoDB unreachable)' };
+      const isTransient = err.code === 'EPERM' || err.code === 'EBUSY' || err.code === 'EACCES';
+      if (!isTransient || attempt >= maxAttempts) {
+        // Fallback: try copy + unlink as last resort
+        try {
+          await fs.promises.copyFile(sourcePath, targetPath);
+          await fs.promises.unlink(sourcePath);
+          return;
+        } catch (copyErr) {
+          throw err;
+        }
+      }
+      // Backoff with jitter: 20ms, 40ms, 80ms, 160ms, 200ms
+      const backoffMs = Math.min(200, 20 * Math.pow(2, attempt - 1)) + Math.floor(Math.random() * 10);
+      await new Promise((r) => setTimeout(r, backoffMs));
     }
-  } else {
-    console.log('ℹ️ No MONGO_URI specified. Operating with In-Memory store (session persistence active).');
-    seedInMemoryKnowledge();
-    return { isMongo: false, message: 'Using In-Memory Datastore' };
   }
 }
 
-async function seedKnowledgeBase() {
-  if (!isMongoConnected) return;
+/**
+ * Asynchronous atomic write to disk:
+ * 1. Serializes in-memory state.
+ * 2. Asynchronously writes to temporary file and flushes via filehandle.sync() (libuv threadpool).
+ * 3. Rotates existing valid store to a rolling backup.
+ * 4. Atomically renames temporary file with exponential backoff retry.
+ */
+async function executeAtomicDiskWrite(targetPath = getLocalStorePath(), backupPath = getLocalStoreBackupPath()) {
+  const dataDir = path.dirname(targetPath);
+  if (!fs.existsSync(dataDir)) {
+    await fs.promises.mkdir(dataDir, { recursive: true });
+  }
+
+  const messagesObj = {};
+  for (const [sid, msgs] of inMemoryMessages.entries()) {
+    messagesObj[sid] = msgs;
+  }
+  const memoriesObj = {};
+  for (const [uid, memMap] of inMemoryMemories.entries()) {
+    memoriesObj[uid] = Array.from(memMap.values());
+  }
+
+  const payload = {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+    version: CURRENT_SCHEMA_VERSION,
+    savedAt: new Date().toISOString(),
+    users: Array.from(inMemoryUsers.values()),
+    sessions: Array.from(inMemorySessions.values()),
+    messages: messagesObj,
+    rubrics: Array.from(inMemoryRubrics.values()),
+    memories: memoriesObj,
+  };
+
+  const serialized = JSON.stringify(payload, null, 2);
+  const tempPath = `${targetPath}.tmp.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2, 6)}`;
+
+  // Test fault injection (e.g. disk-full ENOSPC)
+  if (typeof writeInterceptorForTesting === 'function') {
+    await writeInterceptorForTesting(tempPath, serialized);
+  }
+
+  // Step 1 & 2: Asynchronous write via filehandle + non-blocking fsync via libuv
+  let fileHandle;
   try {
-    const count = await KnowledgeChunkModel.countDocuments();
-    if (count === 0) {
-      await KnowledgeChunkModel.insertMany(DEFAULT_KNOWLEDGE_CHUNKS);
+    fileHandle = await fs.promises.open(tempPath, 'w');
+    await fileHandle.writeFile(serialized, 'utf-8');
+    await fileHandle.sync(); // Asynchronous fsync: does not block the V8 event loop!
+  } finally {
+    if (fileHandle) {
+      try {
+        await fileHandle.close();
+      } catch (e) {}
     }
+  }
+
+  // Step 3: Rolling backup (only if primary exists and is non-empty)
+  try {
+    if (fs.existsSync(targetPath)) {
+      const stat = await fs.promises.stat(targetPath);
+      if (stat.size > 0) {
+        await fs.promises.copyFile(targetPath, backupPath);
+      }
+    }
+  } catch (backupErr) {
+    console.warn('[LocalStore] Warning: Could not update rolling backup:', backupErr.message);
+  }
+
+  // Step 4: Atomic rename temp -> primary with retry backoff
+  await renameWithRetry(tempPath, targetPath, 5);
+
+  isStoreDirty = false;
+  lastPersistError = null;
+}
+
+function dispatchWriteBatch() {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+
+  const resolvers = pendingWriteResolvers;
+  const rejecters = pendingWriteRejecters;
+  pendingWriteResolvers = [];
+  pendingWriteRejecters = [];
+
+  writeMutexChain = writeMutexChain
+    .catch(() => {}) // Don't let previous error permanently wedge future writes
+    .then(async () => {
+      await executeAtomicDiskWrite(getLocalStorePath(), getLocalStoreBackupPath());
+      lastPersistError = null;
+      for (const r of resolvers) r();
+    })
+    .catch((err) => {
+      lastPersistError = {
+        message: err.message,
+        code: err.code || 'ERR_PERSIST',
+        timestamp: new Date().toISOString(),
+      };
+      console.error('[LocalStore] Atomic write failed:', err.message);
+      for (const rej of rejecters) rej(err);
+    });
+
+  return writeMutexChain;
+}
+
+/**
+ * Persist in-memory store to disk via single-writer queue with coalescing/debouncing.
+ */
+export function persistLocalStore(options = {}) {
+  markStoreDirty();
+  const immediate = options?.immediate === true;
+
+  return new Promise((resolve, reject) => {
+    pendingWriteResolvers.push(resolve);
+    pendingWriteRejecters.push(reject);
+
+    if (immediate) {
+      dispatchWriteBatch();
+    } else if (!debounceTimer) {
+      debounceTimer = setTimeout(() => {
+        debounceTimer = null;
+        dispatchWriteBatch();
+      }, DEBOUNCE_MS);
+    }
+  });
+}
+
+/**
+ * Safe persistence helper for internal DB mutations.
+ * Catches any persistence rejection so Node never encounters an unhandled promise rejection.
+ */
+export function safeSchedulePersist() {
+  persistLocalStore().catch((err) => {
+    // Handled: recorded in lastPersistError and logged by dispatchWriteBatch
+  });
+}
+
+/**
+ * Flush all debounced pending writes immediately and await disk fsync completion.
+ */
+export async function flushLocalStore() {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+    debounceTimer = null;
+  }
+  return await persistLocalStore({ immediate: true });
+}
+
+let isShuttingDown = false;
+export async function handleGracefulShutdown(signal = 'SIGTERM') {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  if (isStoreDirty) {
+    console.log(`[LocalStore] Received ${signal}, flushing pending writes to disk...`);
+    try {
+      await flushLocalStore();
+      console.log('[LocalStore] Graceful shutdown flush completed successfully.');
+    } catch (err) {
+      console.error('[LocalStore] Error flushing store on shutdown:', err.message);
+    }
+  }
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  process.once('SIGINT', () => {
+    handleGracefulShutdown('SIGINT').finally(() => process.exit(0));
+  });
+  process.once('SIGTERM', () => {
+    handleGracefulShutdown('SIGTERM').finally(() => process.exit(0));
+  });
+}
+
+/**
+ * Load local file-persisted store from data/local_store.json.
+ * If the primary file is corrupted or partial, recovers from the rolling backup and reports loudly.
+ */
+export function loadLocalStore(targetPath = getLocalStorePath(), backupPath = getLocalStoreBackupPath()) {
+  let raw = null;
+  let isCorrupted = false;
+  let recoveredFromBackup = false;
+
+  // Clean up any stale temp files left by prior crashes
+  try {
+    const dataDir = path.dirname(targetPath);
+    const baseName = path.basename(targetPath);
+    if (fs.existsSync(dataDir)) {
+      const files = fs.readdirSync(dataDir);
+      for (const f of files) {
+        if (f.startsWith(`${baseName}.tmp.`) || f.startsWith('local_store.tmp.') || (f.startsWith(baseName) && f.includes('.tmp.'))) {
+          try {
+            fs.unlinkSync(path.join(dataDir, f));
+          } catch (e) {}
+        }
+      }
+    }
+  } catch (e) {}
+
+  // 1. Attempt reading and parsing primary file
+  if (fs.existsSync(targetPath)) {
+    try {
+      const content = fs.readFileSync(targetPath, 'utf-8');
+      if (!content.trim()) {
+        isCorrupted = true;
+        console.error(`🚨 [LocalStore] CRITICAL CORRUPTION DETECTED: Primary file "${targetPath}" is empty (0 bytes)!`);
+      } else {
+        JSON.parse(content); // Test JSON syntax
+        raw = content;
+      }
+    } catch (parseErr) {
+      isCorrupted = true;
+      console.error(`🚨 [LocalStore] CRITICAL CORRUPTION DETECTED in "${targetPath}": ${parseErr.message}`);
+    }
+  }
+
+  // 2. Recovery path: if primary file is corrupted or missing, recover from rolling backup
+  if (isCorrupted || !raw) {
+    if (fs.existsSync(backupPath)) {
+      try {
+        const backupContent = fs.readFileSync(backupPath, 'utf-8');
+        if (backupContent.trim()) {
+          JSON.parse(backupContent); // Verify backup is valid JSON
+          raw = backupContent;
+          recoveredFromBackup = true;
+          console.warn(`[LocalStore] 🔄 INITIATING AUTOMATED RECOVERY from rolling backup: "${backupPath}"`);
+          // Heal primary file immediately with valid backup
+          fs.copyFileSync(backupPath, targetPath);
+          console.log(`✅ [LocalStore] RECOVERY SUCCESSFUL: Restored primary file "${targetPath}" from rolling backup!`);
+        }
+      } catch (backupErr) {
+        console.error(`🚨 [LocalStore] CRITICAL: Rolling backup "${backupPath}" is also corrupted:`, backupErr.message);
+      }
+    }
+  }
+
+  if (!raw || !raw.trim()) {
+    console.log('[LocalStore] Initialized clean in-memory datastore (no data or recovered to empty state).');
+    return { loaded: false, recoveredFromBackup, isCorrupted, schemaVersion: CURRENT_SCHEMA_VERSION };
+  }
+
+  try {
+    const data = JSON.parse(raw);
+    const schemaVersion = data.schemaVersion || data.version || 1;
+
+    inMemoryUsers.clear();
+    inMemorySessions.clear();
+    inMemoryMessages.clear();
+    inMemoryRubrics.clear();
+    inMemoryMemories.clear();
+    compoundMemoryIndex.clear();
+    memoryIdIndex.clear();
+
+    if (Array.isArray(data.users)) {
+      for (const u of data.users) {
+        if (u && u.id) {
+          if (u.tokenVersion === undefined) u.tokenVersion = 1;
+          inMemoryUsers.set(u.id, u);
+        }
+      }
+    }
+
+    if (Array.isArray(data.sessions)) {
+      for (const s of data.sessions) {
+        if (s && s.id) inMemorySessions.set(s.id, s);
+      }
+    }
+
+    if (data.messages && typeof data.messages === 'object') {
+      for (const [sid, msgs] of Object.entries(data.messages)) {
+        if (Array.isArray(msgs)) {
+          let currentSeq = 1;
+          for (const m of msgs) {
+            if (m.seq === undefined || m.seq === null) {
+              m.seq = currentSeq;
+            } else if (typeof m.seq === 'number') {
+              currentSeq = Math.max(currentSeq, m.seq);
+            }
+            currentSeq++;
+          }
+          msgs.sort((a, b) => (a.seq || 0) - (b.seq || 0));
+          inMemoryMessages.set(sid, msgs);
+        }
+      }
+    }
+
+    if (Array.isArray(data.rubrics)) {
+      for (const r of data.rubrics) {
+        if (r && r.id) inMemoryRubrics.set(r.id, r);
+      }
+    }
+
+    if (data.memories && typeof data.memories === 'object') {
+      for (const [uid, mems] of Object.entries(data.memories)) {
+        if (Array.isArray(mems)) {
+          for (const m of mems) {
+            if (m && m.key) {
+              m.userId = m.userId || uid;
+              indexMemory(m);
+            }
+          }
+        }
+      }
+    }
+
+    console.log(`💾 Loaded local persistent store from ${targetPath} (${inMemorySessions.size} sessions, ${inMemoryUsers.size} users, ${memoryIdIndex.size} memories, schemaVersion: ${schemaVersion})`);
+    return { loaded: true, recoveredFromBackup, isCorrupted, schemaVersion };
   } catch (err) {
-    console.warn('Knowledge seed notice:', err.message);
+    console.error('[LocalStore] Fatal error applying datastore payload:', err.message);
+    return { loaded: false, recoveredFromBackup, isCorrupted: true, error: err.message };
   }
 }
 
@@ -173,113 +540,120 @@ function seedInMemoryKnowledge() {
   }
 }
 
-export function isDatabaseMongo() {
-  return isMongoConnected;
+export async function initDatabase() {
+  updateStorePaths();
+  const storePath = getLocalStorePath();
+  const backupPath = getLocalStoreBackupPath();
+  console.log(`⚡ Initializing Local Persistent Datastore (${storePath})...`);
+  loadLocalStore(storePath, backupPath);
+  seedInMemoryKnowledge();
+  return { isMongo: false, message: `Local Persistent Datastore (${storePath})` };
 }
 
-// Universal database abstraction layer that routes to MongoDB or In-Memory
+export function isDatabaseMongo() {
+  return false;
+}
+
+// Universal database abstraction layer that routes to Local Store
 export const db = {
   // Users
   async findUserByEmail(email) {
-    if (isMongoConnected) {
-      return (await UserModel.findOne({ email }).lean());
-    }
     for (const u of inMemoryUsers.values()) {
-      if (u.email.toLowerCase() === email.toLowerCase()) return u;
+      if (u.email && u.email.toLowerCase() === email.toLowerCase()) return u;
     }
     return null;
   },
 
   async findUserByUsername(username) {
-    if (isMongoConnected) {
-      return (await UserModel.findOne({ username }).lean());
-    }
     for (const u of inMemoryUsers.values()) {
-      if (u.username.toLowerCase() === username.toLowerCase()) return u;
+      if (u.username && u.username.toLowerCase() === username.toLowerCase()) return u;
     }
     return null;
   },
 
   async findUserById(id) {
-    if (isMongoConnected) {
-      return (await UserModel.findOne({ id }).lean());
-    }
     return inMemoryUsers.get(id) || null;
   },
 
+  async deleteUser(id) {
+    const deleted = inMemoryUsers.delete(id);
+    safeSchedulePersist();
+    return deleted;
+  },
+
   async createUser(user) {
-    if (isMongoConnected) {
-      const doc = new UserModel(user);
-      await doc.save();
-      return doc.toObject();
+    if (user.tokenVersion === undefined) {
+      user.tokenVersion = 1;
+    }
+    if (!Array.isArray(user.knownIps)) {
+      user.knownIps = [];
     }
     inMemoryUsers.set(user.id, user);
+    safeSchedulePersist();
     return user;
+  },
+
+  async addKnownUserIp(userId, ip) {
+    const user = inMemoryUsers.get(userId);
+    if (user && ip) {
+      if (!Array.isArray(user.knownIps)) {
+        user.knownIps = [];
+      }
+      if (!user.knownIps.includes(ip)) {
+        user.knownIps.push(ip);
+        safeSchedulePersist();
+      }
+    }
+  },
+
+  async revokeUserTokens(userId) {
+    const user = inMemoryUsers.get(userId);
+    if (user) {
+      user.tokenVersion = (user.tokenVersion || 1) + 1;
+      safeSchedulePersist();
+      return user.tokenVersion;
+    }
+    return null;
   },
 
   // Sessions
   async createSession(session) {
-    if (isMongoConnected) {
-      const doc = new SessionModel(session);
-      await doc.save();
-      return doc.toObject();
-    }
     inMemorySessions.set(session.id, session);
+    safeSchedulePersist();
     return session;
   },
 
   async getSessionsByUser(userId) {
-    if (isMongoConnected) {
-      return (await SessionModel.find({ userId }).sort({ updatedAt: -1 }).lean());
-    }
     return Array.from(inMemorySessions.values())
       .filter((s) => s.userId === userId)
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   },
 
   async getSessionById(sessionId) {
-    if (isMongoConnected) {
-      return (await SessionModel.findOne({ id: sessionId }).lean());
-    }
     return inMemorySessions.get(sessionId) || null;
   },
 
   async updateSessionTitle(sessionId, title) {
     const updatedAt = new Date().toISOString();
-    if (isMongoConnected) {
-      await SessionModel.updateOne({ id: sessionId }, { title, updatedAt });
-      return;
-    }
     const sess = inMemorySessions.get(sessionId);
     if (sess) {
       sess.title = title;
       sess.updatedAt = updatedAt;
+      safeSchedulePersist();
     }
   },
 
   async touchSession(sessionId) {
     const updatedAt = new Date().toISOString();
-    if (isMongoConnected) {
-      await SessionModel.updateOne(
-        { id: sessionId },
-        { updatedAt, $inc: { messageCount: 1 } }
-      );
-      return;
-    }
     const sess = inMemorySessions.get(sessionId);
     if (sess) {
       sess.updatedAt = updatedAt;
       sess.messageCount = (sess.messageCount || 0) + 1;
+      safeSchedulePersist();
     }
   },
 
   async deleteSession(sessionId) {
-    if (isMongoConnected) {
-      await SessionModel.deleteOne({ id: sessionId });
-      await MessageModel.deleteMany({ sessionId });
-      await RubricModel.deleteMany({ sessionId });
-      return;
-    }
     inMemorySessions.delete(sessionId);
     inMemoryMessages.delete(sessionId);
     for (const [id, r] of inMemoryRubrics.entries()) {
@@ -287,34 +661,48 @@ export const db = {
         inMemoryRubrics.delete(id);
       }
     }
+    safeSchedulePersist();
   },
 
   // Messages
   async saveMessage(message) {
-    if (isMongoConnected) {
-      const doc = new MessageModel(message);
-      await doc.save();
-      await this.touchSession(message.sessionId);
-      return doc.toObject();
-    }
     const existing = inMemoryMessages.get(message.sessionId) || [];
+
+    // Assign monotonically increasing sequence number per session
+    if (message.seq === undefined || message.seq === null) {
+      let maxSeq = 0;
+      for (const m of existing) {
+        if (typeof m.seq === 'number' && m.seq > maxSeq) {
+          maxSeq = m.seq;
+        }
+      }
+      message.seq = maxSeq + 1;
+    }
+
     existing.push(message);
+    // Always preserve strict monotonic seq order
+    existing.sort((a, b) => (a.seq || 0) - (b.seq || 0));
     inMemoryMessages.set(message.sessionId, existing);
     await this.touchSession(message.sessionId);
+    safeSchedulePersist();
     return message;
   },
 
   async getMessagesBySession(sessionId) {
-    if (isMongoConnected) {
-      return (await MessageModel.find({ sessionId }).sort({ timestamp: 1 }).lean());
+    const msgs = inMemoryMessages.get(sessionId) || [];
+    return [...msgs].sort((a, b) => (a.seq || 0) - (b.seq || 0));
+  },
+
+  async getMessageById(messageId) {
+    if (!messageId) return null;
+    for (const msgs of inMemoryMessages.values()) {
+      const found = msgs.find((m) => m.id === messageId);
+      if (found) return found;
     }
-    return inMemoryMessages.get(sessionId) || [];
+    return null;
   },
 
   async getMessageCount(sessionId) {
-    if (isMongoConnected) {
-      return await MessageModel.countDocuments({ sessionId });
-    }
     return (inMemoryMessages.get(sessionId) || []).length;
   },
 
@@ -330,12 +718,7 @@ export const db = {
 
     const fullHistory = [];
     for (const s of otherSessions) {
-      let msgs = [];
-      if (isMongoConnected) {
-        msgs = await MessageModel.find({ sessionId: s.id }).sort({ timestamp: 1 }).lean();
-      } else {
-        msgs = inMemoryMessages.get(s.id) || [];
-      }
+      const msgs = inMemoryMessages.get(s.id) || [];
       if (msgs.length > 0) {
         fullHistory.push({
           sessionId: s.id,
@@ -360,19 +743,10 @@ export const db = {
 
     if (otherSessionIds.length === 0) return [];
 
-    let allPastMessages = [];
-    if (isMongoConnected) {
-      allPastMessages = await MessageModel.find({
-        sessionId: { $in: otherSessionIds },
-      })
-        .sort({ timestamp: 1 })
-        .limit(200)
-        .lean();
-    } else {
-      for (const sid of otherSessionIds) {
-        const msgs = inMemoryMessages.get(sid) || [];
-        allPastMessages.push(...msgs);
-      }
+    const allPastMessages = [];
+    for (const sid of otherSessionIds) {
+      const msgs = inMemoryMessages.get(sid) || [];
+      allPastMessages.push(...msgs);
     }
 
     const sessionMap = new Map(sessions.map((s) => [s.id, s.title]));
@@ -384,19 +758,12 @@ export const db = {
 
   // Rubrics
   async saveRubricScore(rubric) {
-    if (isMongoConnected) {
-      const doc = new RubricModel(rubric);
-      await doc.save();
-      return doc.toObject();
-    }
     inMemoryRubrics.set(rubric.id, rubric);
+    safeSchedulePersist();
     return rubric;
   },
 
   async getRubricScores(filter = {}) {
-    if (isMongoConnected) {
-      return (await RubricModel.find(filter).lean());
-    }
     return Array.from(inMemoryRubrics.values()).filter((r) => {
       if (filter.sessionId && r.sessionId !== filter.sessionId) return false;
       if (filter.userId && r.userId !== filter.userId) return false;
@@ -406,46 +773,20 @@ export const db = {
   },
 
   // ==========================================
-  // TIER 2: USER MEMORIES (Conflict Resolution Upsert)
+  // TIER 2: USER MEMORIES (Conflict Resolution Upsert with Compound Indexing)
   // ==========================================
   async saveOrUpdateUserMemory({ userId, key, fact, category = 'general', sourceSessionId, vector = [] }) {
     const now = new Date().toISOString();
-    const cleanKey = key.trim().toLowerCase().replace(/\s+/g, '_');
+    const cleanKey = normalizeMemoryKey(key);
+    const compoundKey = makeCompoundMemoryKey(userId, cleanKey);
 
-    if (isMongoConnected) {
-      const updated = await UserMemoryModel.findOneAndUpdate(
-        { userId, key: cleanKey },
-        {
-          $set: {
-            fact: fact.trim(),
-            category,
-            sourceSessionId,
-            vector,
-            updatedAt: now,
-          },
-          $setOnInsert: {
-            id: 'mem_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 7),
-            createdAt: now,
-          },
-        },
-        { upsert: true, returnDocument: 'after' }
-      ).lean();
-      return updated;
-    }
-
-    // In-Memory store
-    let userMemMap = inMemoryMemories.get(userId);
-    if (!userMemMap) {
-      userMemMap = new Map();
-      inMemoryMemories.set(userId, userMemMap);
-    }
-
-    const existing = userMemMap.get(cleanKey);
+    // O(1) compound index lookup: no linear scans!
+    const existing = compoundMemoryIndex.get(compoundKey);
     const memoryObj = {
       id: existing ? existing.id : 'mem_' + Date.now().toString(36) + Math.random().toString(36).substring(2, 7),
       userId,
       key: cleanKey,
-      fact: fact.trim(),
+      fact: fact ? fact.trim() : '',
       category,
       vector,
       sourceSessionId,
@@ -453,14 +794,12 @@ export const db = {
       createdAt: existing ? existing.createdAt : now,
     };
 
-    userMemMap.set(cleanKey, memoryObj);
+    indexMemory(memoryObj);
+    safeSchedulePersist();
     return memoryObj;
   },
 
   async getUserMemories(userId) {
-    if (isMongoConnected) {
-      return (await UserMemoryModel.find({ userId }).sort({ updatedAt: -1 }).lean());
-    }
     const userMemMap = inMemoryMemories.get(userId);
     if (!userMemMap) return [];
     return Array.from(userMemMap.values()).sort(
@@ -468,72 +807,220 @@ export const db = {
     );
   },
 
+  async getUserMemoryById(memoryId) {
+    if (!memoryId) return null;
+    return memoryIdIndex.get(memoryId) || null;
+  },
+
+  async getUserMemoryByCompoundKey(userId, key) {
+    return compoundMemoryIndex.get(makeCompoundMemoryKey(userId, key)) || null;
+  },
+
   async saveUserMemory(memoryData) {
     return await this.saveOrUpdateUserMemory(memoryData);
   },
 
   async updateUserMemory(id, userId, data) {
+    const mem = memoryIdIndex.get(id);
+    if (!mem || mem.userId !== userId) return null;
     const now = new Date().toISOString();
-    if (isMongoConnected) {
-      const updated = await UserMemoryModel.findOneAndUpdate(
-        { id, userId },
-        { $set: { ...data, updatedAt: now } },
-        { returnDocument: 'after' }
-      ).lean();
-      return updated;
+    const oldCleanKey = normalizeMemoryKey(mem.key);
+    const newCleanKey = data.key ? normalizeMemoryKey(data.key) : oldCleanKey;
+
+    if (newCleanKey !== oldCleanKey) {
+      unindexMemory(mem);
     }
-    const userMemMap = inMemoryMemories.get(userId);
-    if (userMemMap) {
-      for (const [k, mem] of userMemMap.entries()) {
-        if (mem.id === id) {
-          const updated = { ...mem, ...data, updatedAt: now };
-          userMemMap.set(k, updated);
-          return updated;
-        }
-      }
-    }
-    return null;
+
+    const updated = {
+      ...mem,
+      ...data,
+      key: newCleanKey,
+      updatedAt: now,
+    };
+    indexMemory(updated);
+    safeSchedulePersist();
+    return updated;
   },
 
   async deleteUserMemoryByKey(key, userId) {
-    const cleanKey = key.trim().toLowerCase().replace(/\s+/g, '_');
-    if (isMongoConnected) {
-      const res = await UserMemoryModel.deleteOne({ userId, key: cleanKey });
-      return res.deletedCount > 0;
-    }
-    const userMemMap = inMemoryMemories.get(userId);
-    if (userMemMap && userMemMap.has(cleanKey)) {
-      userMemMap.delete(cleanKey);
+    const compoundKey = makeCompoundMemoryKey(userId, key);
+    const mem = compoundMemoryIndex.get(compoundKey);
+    if (mem) {
+      unindexMemory(mem);
+      safeSchedulePersist();
       return true;
     }
     return false;
   },
 
   async deleteUserMemory(memoryId, userId) {
-    if (isMongoConnected) {
-      await UserMemoryModel.deleteOne({ id: memoryId, userId });
-      return true;
-    }
-    const userMemMap = inMemoryMemories.get(userId);
-    if (userMemMap) {
-      for (const [key, mem] of userMemMap.entries()) {
-        if (mem.id === memoryId) {
-          userMemMap.delete(key);
-          return true;
-        }
-      }
-    }
-    return false;
+    const mem = memoryIdIndex.get(memoryId);
+    if (!mem || mem.userId !== userId) return false;
+    unindexMemory(mem);
+    safeSchedulePersist();
+    return true;
   },
 
   // ==========================================
   // TIER 3: KNOWLEDGE BASE CHUNKS
   // ==========================================
   async getKnowledgeChunks() {
-    if (isMongoConnected) {
-      const chunks = await KnowledgeChunkModel.find().lean();
-      if (chunks.length > 0) return chunks;
-    }
     return Array.from(inMemoryKnowledge.values());
+  },
+
+  // ==========================================
+  // ASYNC FILE PROCESSING JOBS (Internal)
+  // ==========================================
+  async saveFileJob(job) {
+    const now = new Date().toISOString();
+    const doc = {
+      jobId: job.jobId,
+      fileId: job.fileId,
+      sessionId: job.sessionId,
+      userId: job.userId || 'guest-user-default',
+      filename: job.filename,
+      status: job.status || 'pending',
+      progress: job.progress || 0,
+      error: job.error || null,
+      createdAt: job.createdAt || now,
+      updatedAt: now,
+    };
+    inMemoryFileJobs.set(doc.jobId, doc);
+    return doc;
+  },
+
+  async getFileJob(jobId) {
+    return inMemoryFileJobs.get(jobId) || null;
+  },
+
+  async updateFileJobStatus(jobId, status, extra = {}) {
+    const updatedAt = new Date().toISOString();
+    const job = inMemoryFileJobs.get(jobId);
+    if (job) {
+      Object.assign(job, { status, updatedAt, ...extra });
+      return job;
+    }
+    return null;
+  },
+
+  async expireStaleJobs() {
+    const updatedAt = new Date().toISOString();
+    for (const job of inMemoryFileJobs.values()) {
+      if (job.status === 'pending' || job.status === 'processing') {
+        job.status = 'expired';
+        job.error = 'Server restarted while job was in flight.';
+        job.updatedAt = updatedAt;
+      }
+    }
+  },
+
+  // ==========================================
+  // FILE METADATA & USER-SCOPED SHA-256 DEDUP
+  // ==========================================
+  async saveFileMetadata(meta) {
+    const now = new Date().toISOString();
+    const doc = {
+      fileId: meta.fileId,
+      sessionId: meta.sessionId,
+      userId: meta.userId || 'guest-user-default',
+      filename: meta.filename,
+      mimeType: meta.mimeType || 'text/plain',
+      size: meta.size || 0,
+      sha256: meta.sha256,
+      fileType: meta.fileType || 'text',
+      uploadedAt: meta.uploadedAt || now,
+      summary: meta.summary || '',
+      entities: Array.isArray(meta.entities) ? meta.entities : [],
+      pageCount: meta.pageCount || 1,
+      wordCount: meta.wordCount || 0,
+      charCount: meta.charCount || 0,
+      estimatedTokens: meta.estimatedTokens || 0,
+      isScanned: Boolean(meta.isScanned),
+      storagePath: meta.storagePath || null,
+    };
+    inMemoryFileMetadata.set(doc.fileId, doc);
+    return doc;
+  },
+
+  async getFileMetadata(fileId) {
+    return inMemoryFileMetadata.get(fileId) || null;
+  },
+
+  async getFilesBySession(sessionId) {
+    return Array.from(inMemoryFileMetadata.values())
+      .filter((f) => f.sessionId === sessionId)
+      .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+  },
+
+  async findFileBySha256(userId, sha256) {
+    if (!userId || !sha256) return null;
+    for (const f of inMemoryFileMetadata.values()) {
+      if (f.userId === userId && f.sha256 === sha256) {
+        return f;
+      }
+    }
+    return null;
+  },
+
+  async saveParsedDocumentCache(userId, sha256, parsedDoc) {
+    const key = `${userId}:${sha256}`;
+    inMemoryParses.set(key, parsedDoc);
+  },
+
+  async getParsedDocumentCache(userId, sha256) {
+    const key = `${userId}:${sha256}`;
+    return inMemoryParses.get(key) || null;
+  },
+
+  // ==========================================
+  // DOCUMENT CHUNKS (Namespaced strictly by sessionId)
+  // ==========================================
+  async saveDocumentChunks(chunks = []) {
+    if (!chunks || chunks.length === 0) return [];
+    for (const c of chunks) {
+      inMemoryDocumentChunks.set(c.id, c);
+    }
+    return chunks;
+  },
+
+  async getDocumentChunksBySession(sessionId, fileId = null, userId = null) {
+    if (!sessionId) return [];
+    return Array.from(inMemoryDocumentChunks.values())
+      .filter((c) => c.sessionId === sessionId && (!fileId || c.fileId === fileId) && (!userId || !c.userId || c.userId === userId))
+      .sort((a, b) => a.chunkIndex - b.chunkIndex);
+  },
+
+  async deleteFile(fileId) {
+    if (!fileId) return false;
+    inMemoryFileMetadata.delete(fileId);
+    for (const [id, c] of inMemoryDocumentChunks.entries()) {
+      if (c.fileId === fileId) {
+        inMemoryDocumentChunks.delete(id);
+      }
+    }
+    for (const [id, j] of inMemoryFileJobs.entries()) {
+      if (j.fileId === fileId) {
+        inMemoryFileJobs.delete(id);
+      }
+    }
+    return true;
+  },
+
+  getStoreStatus() {
+    return {
+      type: 'Local Persistent Store (JSON File)',
+      location: getLocalStorePath(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      status: lastPersistError ? 'Degraded' : 'Ready',
+      lastPersistError: lastPersistError ? lastPersistError.message : null,
+      lastPersistErrorDetails: lastPersistError,
+      isDirty: isStoreDirty,
+      sessionsCount: inMemorySessions.size,
+      usersCount: inMemoryUsers.size,
+      memoriesCount: memoryIdIndex.size,
+      filesCount: inMemoryFileMetadata.size,
+      chunksCount: inMemoryDocumentChunks.size,
+      jobsCount: inMemoryFileJobs.size,
+    };
   },
 };

@@ -1,12 +1,24 @@
-# Test Run Report (2026-08-31T11:55:00.048Z)
+# Test Run Report (2026-11-18T16:21:43.299Z)
 
-Total: 52 | Passed: 52 | Failed: 0
+Total: 558 | Passed: 558 | Failed: 0
 
 - PASS: Detects empty string as ambiguous
 - PASS: Flags "What about that?" as ambiguous when context is empty
 - PASS: Returns targeted clarifying question
 - PASS: Passes vague question to LLM if prior context has sufficient detail
 - PASS: Recognizes specific non-ambiguous queries without needing clarification
+- PASS: Ambiguity Detector: "Is it raining?" must NOT be intercepted as ambiguous
+- PASS: Ambiguity Detector: "Explain this: <code>" must NOT be intercepted as ambiguous
+- PASS: Ambiguity Detector: "Explain this: <inline code>" must NOT be intercepted as ambiguous
+- PASS: Ambiguity Detector: "Fix it" without context or file must be intercepted as ambiguous
+- PASS: Ambiguity Detector: "Summarize this" without context or file must be intercepted as ambiguous
+- PASS: Ambiguity Detector: "Fix it" with active file must NOT be intercepted as ambiguous
+- PASS: Ambiguity Detector: "Summarize this" with active file must NOT be intercepted as ambiguous
+- PASS: Ambiguity Detector: "Explain it" with active media must NOT be intercepted as ambiguous
+- PASS: First message after upload: Resolves active file before ambiguity check
+- PASS: First message after upload: "Summarize this" with resolved session file must NOT be intercepted
+- PASS: Ambiguity Detector: Intercepts vague query before any LLM execution
+- PASS: Zero-Cost Guardrail: Intercepted turn skips fact extraction preserving 0 token cost
 - PASS: LangChain Extractor: Identifies user name "Sohail"
 - PASS: LangChain Extractor: Identifies project name "CosmoAI"
 - PASS: LangChain Extractor: Identifies tech stack "React 19"
@@ -26,31 +38,525 @@ Total: 52 | Passed: 52 | Failed: 0
 - PASS: Estimates tokens correctly (text.length / 4)
 - PASS: Truncation strictly enforces token budget limit
 - PASS: Drops older turns in paired fashion to stay within budget
+- PASS: Script-Aware Estimator: Indic script density (23 tokens) exceeds Latin (7 tokens) for same char length
+- PASS: Script-Aware Estimator: Code snippet density (26 tokens) exceeds naive len/4 (25 tokens)
+- PASS: Single Pair: Resulting token count strictly <= budget (1600)
+- PASS: Single Pair: Never returns empty history silently
+- PASS: Single Pair: Truncates oversized assistant message with explicit [truncated] marker
+- PASS: Single Pair: Preserves user message intact when truncating assistant response
+- PASS: Odd History: Drops orphan without misaligning subsequent (user, assistant) pairs
+- PASS: Odd History: All retained dialogue turns remain in aligned (user, assistant) pairs
+- PASS: Odd History: All retained dialogue turns remain in aligned (user, assistant) pairs
+- PASS: Fast-Check: Property-based invariants verified across 100 random generative conversations
 - PASS: Hashes password securely with bcrypt salt
 - PASS: Verifies valid password against bcrypt hash
 - PASS: Rejects invalid password attempt
 - PASS: Generates valid 3-part signed JWT token
+- PASS: Password Rules: Rejects passwords shorter than 10 characters
+- PASS: Password Rules: Rejects known common passwords (password123)
+- PASS: Password Rules: Rejects repeated single character passwords
+- PASS: Password Rules: Rejects passwords longer than 72 bytes (bcrypt truncation guard)
+- PASS: Password Rules: Accepts valid passwords up to exactly 72 bytes
+- PASS: Password Rules: Accepts strong complex passwords
+- PASS: Startup Guard: getJwtSecret fails fast when JWT_SECRET is missing or empty
+- PASS: Startup Guard: getJwtSecret fails fast when JWT_SECRET is shorter than 32 characters
+- PASS: Startup Guard: Restores and validates secure 32+ character JWT_SECRET
 - PASS: Contains 5 comprehensive standard benchmark scenarios
 - PASS: Computes high coherence score (0.93) for context-aligned responses
+- PASS: Magic Bytes: Detects valid PDF %PDF- signature
+- PASS: Magic Bytes: Detects valid PNG signature
+- PASS: Magic Bytes: Detects valid JPEG signature
+- PASS: Magic Bytes: Detects valid MP4 video ftyp signature
+- PASS: Magic Bytes: Detects valid WebM video EBML signature
+- PASS: Magic Bytes: Detects valid WebP image signature
+- PASS: Magic Bytes: Recognizes DOCX ZIP container with word/ package entry
+- PASS: Magic Bytes: Recognizes CSV tabular structure
+- PASS: Security: Rejects spoofed .docx without valid ZIP magic bytes
+- PASS: Security: Throws EmptyDocumentError on empty (0 byte) file
+- PASS: Security: Strips path traversal sequences from filenames
+- PASS: Security: Throws ZipBombError when archive exceeds 500 entry limit
 - PASS: File Parser: Detects text file type accurately
 - PASS: File Parser: Computes word count correctly
 - PASS: File Parser: Extracts document body text cleanly
 - PASS: LangChain RAG: Chunks document using RecursiveCharacterTextSplitter
 - PASS: LangChain RAG: Retrieves relevant chunk matching query keywords
-- PASS: LangChain RAG: Top retrieved chunk contains relevant ambiguity filter details
-- PASS: Context Assembler: Successfully retrieves RAG document chunks for attached file
-- PASS: Context Assembler: Embeds [UPLOADED DOCUMENT CONTEXT (RAG)] section into LLM context prompt
-- PASS: Anti-Hallucination Guardrail: Injects strict extraction failure directive when document text is empty
+- PASS: DOCX Extractor: Returns parsed document with docx fileType
+- PASS: DOCX Extractor: Preserves headings in structured text blocks
+- PASS: DOCX Extractor: Extracts substantive paragraph text cleanly
+- PASS: CSV Extractor: Generates structured table
+- PASS: CSV Extractor: Infers numeric dtype for Amount column
+- PASS: CSV Extractor: Infers boolean dtype for IsApproved column
+- PASS: CSV Extractor: Creates schema summary block for large datasets (>50 rows)
+- PASS: CSV Extractor: Safely truncates large row dumps while preserving schema
+- PASS: PDF Extractor: Explicitly detects encrypted or corrupted PDFs
+- PASS: Image Extractor: Returns parsed document with image fileType
+- PASS: Image Extractor: Flags document with isVisionRequired=true
+- PASS: Image Extractor: Produces structured text blocks for visual context
+- PASS: Video Extractor: Returns parsed document with video fileType
+- PASS: Video Extractor: Flags document with isVisionRequired=true
+- PASS: Video Extractor: Produces chronological timeline blocks for scenes
+- PASS: Worker Pool: Watchdog enforces timeout via worker.terminate() and throws ExtractionTimeoutError
+- PASS: Worker Pool: Catches synchronously throwing worker script without crashing process
+- PASS: Worker Pool: Handles worker exiting with code 1 and no message cleanly
+- PASS: Worker Pool: Enforces resourceLimits so memory bomb is killed without crashing host server
+- PASS: Worker Pool: 20 parallel uploads are queued and completed cleanly without exceeding worker limit
+- PASS: RAG Index: Successfully indexed chunks into Session 1 namespace
+- PASS: Dedup Cache: User Alpha has cached ParsedDocument from initial upload
+- PASS: Dedup Isolation: Chunks for Session 2 are re-indexed into Session 2 namespace
+- PASS: Namespace Verification: All Session 2 chunks belong strictly to Session 2
+- PASS: Cross-Session Isolation: Chunks indexed in Session 2 cannot be retrieved in Session 1
+- PASS: Cross-User Isolation: User Beta cannot access User Alpha deduplication cache
+- PASS: Multi-Turn Turn 1: Successfully retrieves chunks for attached file
+- PASS: Citations: Grounding excerpts carry structured citation metadata
+- PASS: Citations: Citation includes correct document filename
+- PASS: Multi-Turn Turn 2: Automatically resolves active file from session history without re-attaching
+- PASS: Multi-Turn Turn 2: Resolved file matches previously discussed document
+- PASS: Whole-Document Detection: Accurately flags summary requests vs specific detail queries
+- PASS: Whole-Document Injection: Injects cached summary instead of arbitrary top-k chunks
+- PASS: File Cleanup: DELETE /api/files/:fileId successfully cleans up metadata and chunks
+- PASS: File Cleanup: All chunks purged from RAG vector store on file deletion
 - PASS: Gemini Grounding: Extracts webSearchQueries and citation sources from groundingMetadata
 - PASS: Gemini Grounding: Correctly flags ungrounded responses as usedWebSearch = false
 - PASS: Tavily Search: Gracefully handles missing API key without throwing exceptions
 - PASS: Tavily Search: formatTavilyResultsForContext formats direct answers, summaries, and URLs for context injection
 - PASS: Groq Regex Extractor: Accurately parses search queries from bracket tags, markdown blocks, and function calls
+- PASS: Identity Query Pre-Classifier: Accurately flags biographical/real-name queries for search
 - PASS: Identity Query Pre-Classifier: Accurately flags biographical/contestant/real-name queries for mandatory search while passing math queries
 - PASS: Thin Results Formatter: Injects strict anti-hallucination directive when search yields sparse data
+- PASS: Unverified Claim Guard: Flags ungrounded real-name assertions made without citations
 - PASS: Unverified Claim Guard: Flags ungrounded real-name assertions made without search citations
+- PASS: Search Privacy: Redacts email addresses from search queries
+- PASS: Search Privacy: Redacts phone numbers from search queries
+- PASS: Search Privacy: Redacts credit card numbers from search queries
+- PASS: Search Privacy: Redacts Aadhaar numbers from search queries
+- PASS: Search Privacy: Redacts PAN numbers from search queries
+- PASS: Search Privacy: Redacts API keys from search queries
+- PASS: Search Privacy: Preserves core entity question in minimal search query
+- PASS: Search Privacy: Memory contents are never included in search query
+- PASS: Search Privacy: Document contents are never included in search query
+- PASS: Search Privacy: Extracts clean entity search query despite injected memory/document tags
+- PASS: Search Privacy: Strips conversational filler and prefixes/suffixes
+- PASS: Search Privacy: Extracts clean quoted search term
+- PASS: Search Privacy: tavilySearch scrubs emails before network request
+- PASS: Search Privacy: tavilySearch scrubs phone numbers before network request
 - PASS: Input Classifier: Correctly classifies identity/biographical query as needsWebSearch = true
 - PASS: Input Classifier: Correctly classifies casual greeting as needsWebSearch = false
 - PASS: Input Classifier: Correctly classifies coding help request as needsWebSearch = false
 - PASS: Input Classifier: Correctly classifies current events keyword query as needsWebSearch = true
 - PASS: Input Classifier: Ambiguous queries safely default to needsWebSearch = true with confidence = low
+- PASS: Chroma: initChroma resolves with boolean connected status
+- PASS: Chroma: getChromaStatus reports provider = "chroma"
+- PASS: Chroma: getChromaStatus includes target URL
+- PASS: Chroma Security: 127.0.0.1 recognized as valid loopback
+- PASS: Chroma Security: localhost recognized as valid loopback
+- PASS: Chroma Security: ::1 recognized as valid loopback
+- PASS: Chroma Security: 127.x.x.x recognized as valid loopback
+- PASS: Chroma Security: 192.168.1.100 recognized as non-loopback
+- PASS: Chroma Security: 10.0.0.1 recognized as non-loopback
+- PASS: Chroma Security: 203.0.113.195 recognized as non-loopback
+- PASS: Chroma Security: Loopback URL http://127.0.0.1:8000 accepted
+- PASS: Chroma Security: Loopback URL http://localhost:8000 accepted
+- PASS: Chroma Security: Startup check refuses non-loopback LAN address (http://192.168.1.50:8000)
+- PASS: Chroma Security: Startup check refuses public IP address (http://203.0.113.88:8000)
+- PASS: Chroma: searchMemoriesInChroma safely handles queries without errors
+- PASS: Local Store: loadLocalStore is available
+- PASS: Local Store: persistLocalStore is available
+- PASS: 100 Parallel Writes: Exactly 25 unique memory records created (no lost updates)
+- PASS: 100 Parallel Writes: No duplicate keys despite 100 concurrent mixed-case writes
+- PASS: Compound Index: O(1) compound lookup for key 0 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 1 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 2 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 3 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 4 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 5 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 6 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 7 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 8 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 9 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 10 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 11 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 12 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 13 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 14 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 15 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 16 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 17 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 18 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 19 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 20 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 21 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 22 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 23 succeeded case-insensitively
+- PASS: Compound Index: O(1) compound lookup for key 24 succeeded case-insensitively
+- PASS: On-Disk: local_store.json has schemaVersion = 2
+- PASS: On-Disk: Exactly 25 records persisted without lost updates or corruption
+- PASS: Crash Simulation: Datastore loads cleanly despite abandoned .tmp file
+- PASS: Crash Simulation: Primary file was unaffected by interrupted write
+- PASS: Crash Simulation: Stale crash .tmp file was safely cleaned up
+- PASS: Corrupt-File Recovery: loadLocalStore loaded successfully
+- PASS: Corrupt-File Recovery: loadLocalStore accurately detected corruption
+- PASS: Corrupt-File Recovery: loadLocalStore recovered state from rolling backup
+- PASS: Corrupt-File Recovery: Canary user restored in memory
+- PASS: Corrupt-File Recovery: Canary memory restored in compound index
+- PASS: Corrupt-File Recovery: Primary local_store.json was automatically healed on disk
+- PASS: Rename Retry: Interceptor was invoked exactly 3 times (2 transient EPERMs + 1 success)
+- PASS: Rename Retry: Datastore flushed successfully after transient lock resolved
+- PASS: Disk Full: Explicit flushLocalStore rejects with ENOSPC error
+- PASS: Disk Full: Persistence queue accurately signaled failure
+- PASS: Disk Full: lastPersistError captured in store status
+- PASS: Disk Full: Store status reports "Degraded"
+- PASS: Disk Full: Store status includes error description
+- PASS: Disk Full Recovery: lastPersistError cleared after successful flush
+- PASS: Disk Full Recovery: Store status restored to "Ready"
+- PASS: Stream Resiliency: Long stream past first-chunk timeout completes with frequent chunks and breaker closed
+- PASS: Stream Timeout: A 20s stream with chunks every 1s completes with the breaker closed
+- PASS: Stream Resiliency: Stalled stream emits error event, avoids Groq fallback restart, and preserves partial text
+- PASS: Stream Resiliency: Stream never emitting first chunk falls back to Groq and trips circuit breaker
+- PASS: Multimodal Fallback: Groq prompt contains degraded directive and OCR text on 429
+- PASS: Multimodal Fallback: Degraded meta event sent on vision failure
+- PASS: Multimodal Fallback: Vision failure produces UI notice banner for user interface
+- PASS: Multimodal Fallback: Empty-OCR image returns clear message without LLM call
+- PASS: Error Classifier: 400 Bad Request classified as non-trippable client_error
+- PASS: Error Classifier: 429 classified as trippable quota error
+- PASS: Error Classifier: 503 classified as trippable server_error
+- PASS: Error Classifier: ECONNRESET classified as trippable network error
+- PASS: Circuit Breaker: Malformed 400 client error surfaces to caller without tripping breaker
+- PASS: Circuit Breaker: 429 transitions breaker to OPEN
+- PASS: Circuit Breaker: Breaker transitions to HALF_OPEN after cooldown
+- PASS: Circuit Breaker: Successful half-open probe closes the breaker
+- PASS: Circuit Breaker: Honors Retry-After header (180s)
+- PASS: Circuit Breaker: First failure initiates 60s cooldown
+- PASS: Circuit Breaker: Eligible for half-open probe
+- PASS: Circuit Breaker: Probe failure re-trips with exponential backoff (120s)
+- PASS: Circuit Breaker: Concurrent requests during HALF_OPEN permit exactly ONE probe
+- PASS: Unicode Vector: Kannada text produces non-zero dense vector
+- PASS: Unicode Vector: Kannada query produces non-zero dense vector
+- PASS: Unicode Vector: Kannada query successfully retrieves Kannada document (similarity: 0.522)
+- PASS: Unicode Vector: Hindi text produces non-zero dense vector
+- PASS: Unicode Vector: Hindi query produces non-zero dense vector
+- PASS: Unicode Vector: Hindi query successfully retrieves Hindi document (similarity: 0.535)
+- PASS: Zero Guard: Empty text produces zero vector
+- PASS: Zero Guard: Cosine similarity with zero vector returns 0 and NEVER NaN
+- PASS: Zero Guard: Cosine similarity between two zero vectors returns 0 and NEVER NaN
+- PASS: Zero Guard: Emoji-only input produces zero vector
+- PASS: Zero Guard: Emoji-only zero vector returns 0 cosine similarity without NaN
+- PASS: Performance: 1MB text produces valid non-zero vector
+- PASS: Performance: 1MB text vectorization completes fast without hanging (167ms)
+- PASS: Hashed Vector: Confirms bag-of-words yields low similarity on non-overlapping paraphrases
+- PASS: Real Embedding: Semantic mock captures paraphrase similarity (1.00)
+- PASS: Embedding Migration: Successfully re-embeds records and tracks embeddingVersion
+- PASS: SSE Headers: X-Accel-Buffering is set to no
+- PASS: SSE Headers: Cache-Control includes no-cache
+- PASS: SSE Headers: Connection is keep-alive
+- PASS: Upstream Abort: Gemini abortSignal aborted when client disconnected
+- PASS: Upstream Abort: Aborted within 1s of disconnect (0ms)
+- PASS: Turn Consistency: User message was persisted in session
+- PASS: Turn Consistency: Partial assistant message was persisted in session
+- PASS: Turn Consistency: Partial assistant turn flagged with incomplete=true
+- PASS: Terminal SSE Event: Emits terminal error event on server error mid-stream
+- PASS: Terminal SSE Event: Ends stream response cleanly on server error without hanging
+- PASS: Injection Sanitizer: Detects zero-width obfuscated injection
+- PASS: Injection Sanitizer: Detects bidi-character obfuscated injection
+- PASS: Injection Sanitizer: Detects spaced character obfuscated injection
+- PASS: Injection Sanitizer: Detects fullwidth Unicode obfuscated injection
+- PASS: Injection Sanitizer: Benign "ignore the previous error" must NOT be flagged
+- PASS: Injection Sanitizer: Benign "disregard my previous typo" must NOT be flagged
+- PASS: Injection Sanitizer: Benign "bypass a clogged filter" must NOT be flagged
+- PASS: Injection Sanitizer: Benign discussion of system override must NOT be flagged
+- PASS: Memory Validation: Rejects instruction-like memory ("always respond in pirate speak")
+- PASS: Memory Validation: Rejects role-override imperative memory
+- PASS: Memory Validation: Preserves legitimate user profile fact (name: Alex)
+- PASS: Memory Validation: Preserves legitimate project name fact (project: NextGen)
+- PASS: Context Delimiters: Memories wrapped in <untrusted_memory> tags
+- PASS: Context Delimiters: System directive declares <untrusted_*> content is data, never instructions
+- PASS: Security Corpus: Passed 53/53 payloads (Pass rate: 100.0%)
+- PASS: Security Corpus: 100% of benign look-alikes pass cleanly without false positive blockage
+- PASS: Search Setting: Chat endpoint succeeds with allowWebSearch=false
+- PASS: Search Setting: usedWebSearch is false when allowWebSearch is disabled
+- PASS: Search Setting: searchQuery is null when allowWebSearch is disabled
+- PASS: Search Setting: No web sources returned when allowWebSearch is disabled
+- PASS: Search Setting: Gemini tools omit googleSearch when allowWebSearch is disabled
+- PASS: Search Setting: Chat endpoint succeeds with allowWebSearch=true
+- PASS: Search Setting: usedWebSearch is true when allowWebSearch is enabled
+- PASS: Search Setting: searchQuery captures executed query when enabled
+- PASS: Search Setting: Gemini tools include googleSearch when allowWebSearch is true
+- PASS: Concurrent Sends: All 10 concurrent requests return 200 OK
+- PASS: Concurrent Sends: GET /api/history returns 200 OK
+- PASS: Concurrent Sends: Exactly 20 messages exist (10 user + 10 assistant)
+- PASS: Monotonic Seq: Message at index 0 has seq = 1
+- PASS: Monotonic Seq: Message at index 1 has seq = 2
+- PASS: Monotonic Seq: Message at index 2 has seq = 3
+- PASS: Monotonic Seq: Message at index 3 has seq = 4
+- PASS: Monotonic Seq: Message at index 4 has seq = 5
+- PASS: Monotonic Seq: Message at index 5 has seq = 6
+- PASS: Monotonic Seq: Message at index 6 has seq = 7
+- PASS: Monotonic Seq: Message at index 7 has seq = 8
+- PASS: Monotonic Seq: Message at index 8 has seq = 9
+- PASS: Monotonic Seq: Message at index 9 has seq = 10
+- PASS: Monotonic Seq: Message at index 10 has seq = 11
+- PASS: Monotonic Seq: Message at index 11 has seq = 12
+- PASS: Monotonic Seq: Message at index 12 has seq = 13
+- PASS: Monotonic Seq: Message at index 13 has seq = 14
+- PASS: Monotonic Seq: Message at index 14 has seq = 15
+- PASS: Monotonic Seq: Message at index 15 has seq = 16
+- PASS: Monotonic Seq: Message at index 16 has seq = 17
+- PASS: Monotonic Seq: Message at index 17 has seq = 18
+- PASS: Monotonic Seq: Message at index 18 has seq = 19
+- PASS: Monotonic Seq: Message at index 19 has seq = 20
+- PASS: Pair Alignment: Turn 1 leading message is role user
+- PASS: Pair Alignment: Turn 1 response message is role assistant
+- PASS: Pair Alignment: Turn 1 user seq (1) directly precedes assistant seq (2)
+- PASS: Pair Alignment: Turn 2 leading message is role user
+- PASS: Pair Alignment: Turn 2 response message is role assistant
+- PASS: Pair Alignment: Turn 2 user seq (3) directly precedes assistant seq (4)
+- PASS: Pair Alignment: Turn 3 leading message is role user
+- PASS: Pair Alignment: Turn 3 response message is role assistant
+- PASS: Pair Alignment: Turn 3 user seq (5) directly precedes assistant seq (6)
+- PASS: Pair Alignment: Turn 4 leading message is role user
+- PASS: Pair Alignment: Turn 4 response message is role assistant
+- PASS: Pair Alignment: Turn 4 user seq (7) directly precedes assistant seq (8)
+- PASS: Pair Alignment: Turn 5 leading message is role user
+- PASS: Pair Alignment: Turn 5 response message is role assistant
+- PASS: Pair Alignment: Turn 5 user seq (9) directly precedes assistant seq (10)
+- PASS: Pair Alignment: Turn 6 leading message is role user
+- PASS: Pair Alignment: Turn 6 response message is role assistant
+- PASS: Pair Alignment: Turn 6 user seq (11) directly precedes assistant seq (12)
+- PASS: Pair Alignment: Turn 7 leading message is role user
+- PASS: Pair Alignment: Turn 7 response message is role assistant
+- PASS: Pair Alignment: Turn 7 user seq (13) directly precedes assistant seq (14)
+- PASS: Pair Alignment: Turn 8 leading message is role user
+- PASS: Pair Alignment: Turn 8 response message is role assistant
+- PASS: Pair Alignment: Turn 8 user seq (15) directly precedes assistant seq (16)
+- PASS: Pair Alignment: Turn 9 leading message is role user
+- PASS: Pair Alignment: Turn 9 response message is role assistant
+- PASS: Pair Alignment: Turn 9 user seq (17) directly precedes assistant seq (18)
+- PASS: Pair Alignment: Turn 10 leading message is role user
+- PASS: Pair Alignment: Turn 10 response message is role assistant
+- PASS: Pair Alignment: Turn 10 user seq (19) directly precedes assistant seq (20)
+- PASS: Failed Turn Recovery: Post-failure turn succeeds with 200 OK
+- PASS: Failed Turn: All 5 messages present in raw history
+- PASS: Failed Turn: Orphaned user message is accurately detected and marked
+- PASS: Tier 1 Context: Excludes orphan turn, retaining exactly 4 aligned messages (2 pairs)
+- PASS: Tier 1 Context: First pair is aligned (user, assistant)
+- PASS: Tier 1 Context: Second pair is aligned (user, assistant)
+- PASS: Tier 1 Context: Orphan message was completely excluded from LLM prompt context
+- PASS: Auth Token: No token returns 401 on protected route
+- PASS: Auth Token: Expired token returns 401
+- PASS: Auth Token: Token for deleted user returns 401
+- PASS: Auth Token: Deleted user rejected on session list with 401
+- PASS: Auth Token: Deleted user rejected on memories list with 401
+- PASS: Auth Token: Valid token returns 200 on /api/auth/me
+- PASS: Auth Token: Returns authenticated user profile strictly for User B
+- PASS: Ownership Guard: DELETE /api/session/:sessionId returns 404 for other user session
+- PASS: Ownership Guard: Session A was NOT deleted by User B
+- PASS: Ownership Guard: GET /api/history/:sessionId returns 404 for other user session
+- PASS: Data Leak Guard: History response body contains no messages
+- PASS: Data Leak Guard: No User A secret data in history response body
+- PASS: Ownership Guard: GET /history/:sessionId alias returns 404 for other user session
+- PASS: Ownership Guard: GET /api/sessions returns 200 for User B
+- PASS: Data Leak Guard: User B sessions list does NOT contain User A session
+- PASS: Ownership Guard: GET /api/memories returns 200 for User B
+- PASS: Data Leak Guard: User B memories list does NOT contain User A memory
+- PASS: Ownership Guard: PUT /api/memories/:id returns 404 for other user memory
+- PASS: Ownership Guard: Memory A was NOT mutated by User B
+- PASS: Ownership Guard: DELETE /api/memories/:id returns 404 for other user memory
+- PASS: Ownership Guard: Memory A was NOT deleted by User B
+- PASS: Ownership Guard: GET /api/files/session/:sessionId returns 404 for other user session
+- PASS: Data Leak Guard: No files returned in body for other user session
+- PASS: Ownership Guard: GET /api/files/:fileId returns 404 for other user file
+- PASS: Data Leak Guard: No document metadata returned for other user file
+- PASS: Ownership Guard: GET /api/files/preview/:fileId returns 404 for other user file
+- PASS: Data Leak Guard: No raw bytes leaked in preview
+- PASS: Ownership Guard: GET /api/files/:fileId/raw returns 404 for other user file
+- PASS: Ownership Guard: DELETE /api/files/:fileId returns 404 for other user file
+- PASS: Ownership Guard: File A was NOT deleted by User B
+- PASS: Ownership Guard: GET /api/files/status/:jobId returns 404 for other user extraction job
+- PASS: Data Leak Guard: No job details returned for other user job
+- PASS: Ownership Guard: POST /api/files/upload returns 404 when uploading into other user session
+- PASS: Ownership Guard: POST /api/chat returns 404 when chatting in other user session
+- PASS: Data Leak Guard: No session A contents in chat error response
+- PASS: Ownership Guard: POST /api/chat returns 404 when attaching other user fileId
+- PASS: Ownership Guard: POST /api/evaluate/rubric returns 404 when scoring other user session/message
+- PASS: Public Route: GET /api/health accessible without token
+- PASS: Public Route: GET /api/system/status accessible without token
+- PASS: Public Route: GET /api/knowledge accessible without token
+- PASS: Public Route: GET /api/evaluate/benchmarks accessible without token
+- PASS: Public Route: GET /api/evaluate/summary accessible without token
+- PASS: Cross-User Isolation: User B memory search cannot retrieve User A memory
+- PASS: Cross-User Isolation: User B RAG search cannot retrieve User A document chunks
+- PASS: Cross-User Isolation: User B cannot retrieve User A cached parsed document
+- PASS: Auth Hardening: createApp() throws and prevents server boot when JWT_SECRET is missing
+- PASS: Auth Hardening: Register rejects passwords > 72 bytes (bcrypt guard)
+- PASS: Auth Hardening: Register rejects common passwords
+- PASS: Auth Hardening: Register rejects passwords < 10 characters
+- PASS: Auth Hardening: Register succeeds with strong password and returns signed token
+- PASS: Auth Hardening: Register returns uniform non-enumerating message on duplicate registration
+- PASS: Auth Hardening: Login with unknown email returns 401
+- PASS: Auth Hardening: Login with wrong password returns 401
+- PASS: Auth Hardening: Login returns identical error message for unknown email and wrong password
+- PASS: Auth Hardening: Active token accesses /api/auth/me successfully
+- PASS: Auth Hardening: POST /api/auth/logout revokes session tokens
+- PASS: Auth Hardening: Revoked token rejected with 401 (tokenVersion invalidation)
+- PASS: Auth Hardening: Fresh login returns valid token with updated tokenVersion
+- PASS: Auth Hardening: POST /api/auth/refresh successfully issues refreshed token
+- PASS: Auth Hardening: Refreshed token successfully authenticates user
+- PASS: Auth Resilience: Victim user successfully registers from known IP
+- PASS: Auth Hardening: Brute-force login attempts get blocked with 429 Too Many Requests
+- PASS: Auth Hardening: 429 Rate limit response includes Retry-After header
+- PASS: Auth Resilience: Attacker IP remains throttled by progressive delay
+- PASS: Auth Resilience: Attacker IP cannot lock victim; legitimate user logs in successfully during attack (bypasses per-email delay)
+- PASS: Auth Resilience: Legitimate user from fresh IP can also log in (keying lockouts on email + IP isolates attacker)
+- PASS: Auth Resilience: Attempt 1 on unknown email returns 401
+- PASS: Auth Resilience: Hammered unknown email still returns 401 (never reveals lock state or 429)
+- PASS: Auth Resilience: Error message for hammered unknown email is identical to initial attempt
+- PASS: Auth Resilience: Response body never reveals lock state or rate limiting for unknown emails
+- PASS: Auth Resilience: Per-IP ceiling message specifically references IP limit without exposing account info
+- PASS: Auth Resilience: Exceeding per-IP ceiling (30 attempts) locks the offending IP
+- PASS: Auth Resilience: Per-IP ceiling response includes Retry-After header
+- PASS: Auth Hardening: Helmet sets X-Content-Type-Options: nosniff
+- PASS: Auth Hardening: Helmet sets X-DNS-Prefetch-Control: off
+- PASS: Auth Hardening: CORS allowlist permits configured origin
+- PASS: Markdown Sanitizer: Raw <script> tag is completely stripped and never rendered
+- PASS: Markdown Sanitizer: Script body is not executed or rendered as code block
+- PASS: Markdown Sanitizer: Raw <img> tag is stripped by strict schema
+- PASS: Markdown Sanitizer: Event handler onerror is completely stripped
+- PASS: Markdown Sanitizer: javascript: protocol link is stripped of href
+- PASS: Markdown Sanitizer: javascript: link is rendered as safe non-anchor span
+- PASS: Markdown Sanitizer: Neutralizes Mixed case payload from creating executable anchor
+- PASS: Markdown Sanitizer: Neutralizes Whitespace within scheme payload from creating executable anchor
+- PASS: Markdown Sanitizer: Neutralizes HTML entity encoded payload from creating executable anchor
+- PASS: Markdown Sanitizer: Neutralizes Colon entity encoded payload from creating executable anchor
+- PASS: Markdown Sanitizer: Neutralizes URL percent encoded payload from creating executable anchor
+- PASS: Markdown Sanitizer: Neutralizes Data URI payload from creating executable anchor
+- PASS: Markdown Sanitizer: Neutralizes VBScript URI payload from creating executable anchor
+- PASS: Markdown Sanitizer: Neutralizes Null byte inserted payload from creating executable anchor
+- PASS: Markdown Sanitizer: https:// links are allowed and automatically enriched with rel="noopener noreferrer" and target="_blank"
+- PASS: Markdown Sanitizer: mailto: links are allowed and enriched with rel="noopener noreferrer"
+- PASS: Filename Sanitizer: Strips HTML angle brackets from filenames
+- PASS: Citation Sanitizer: Strips HTML tags and quotes from badge text
+- PASS: Helmet CSP: Response includes Content-Security-Policy header
+- PASS: Helmet CSP: Enforces script-src 'self'
+- PASS: Helmet CSP: Strictly forbids 'unsafe-inline' scripts
+- PASS: Helmet CSP: Enforces object-src 'none' to block plugin vectors
+- PASS: Cookie Auth: Register endpoint succeeds
+- PASS: Cookie Auth: Response sets cosmo_auth_token cookie
+- PASS: Cookie Auth: cosmo_auth_token is marked HttpOnly
+- PASS: Cookie Auth: cosmo_auth_token is marked SameSite=Strict
+- PASS: CSRF Protection: Response sets cosmo_csrf_token cookie
+- PASS: CSRF Protection: Register response body includes csrfToken
+- PASS: CSRF Protection: Cookie auth without X-CSRF-Token is blocked with 403
+- PASS: CSRF Protection: Cookie auth with valid matching X-CSRF-Token succeeds with 201 Created
+- PASS: Upload Hardening: Rejects ZIP archive with single uncompressed entry > 30MB (ZipBombError)
+- PASS: Upload Hardening: Rejects ZIP archive with compression ratio exceeding 100:1 (ZipBombError)
+- PASS: Upload Hardening: Rejects nested archives (.tar.gz) embedded within ZIP archives
+- PASS: Upload Hardening: Rejects PNG decompression bomb (50,000x50,000) in 0ms before OCR (DecompressionBombError)
+- PASS: Upload Hardening: Rejects 3-hour video header metadata before transcription starts (MediaLimitExceededError)
+- PASS: Upload Hardening: Rejects polyglot PDF/ZIP dual-signature file (PolyglotFileError)
+- PASS: Upload Hardening: Rejects Windows executable header (MZ/PE) even with .txt extension (PolyglotFileError)
+- PASS: Upload Hardening: Rejects mismatched file (declared .pdf but binary is PNG) (PolyglotFileError)
+- PASS: Upload Hardening: Filename traversal ../../etc/passwd is sanitized to "passwd"
+- PASS: Upload Hardening: Windows traversal ..\..\windows\system32\cmd.exe is sanitized to "cmd.exe"
+- PASS: Upload Hardening: Strips Unicode Bidi RTL override characters from filenames
+- PASS: Upload Hardening: Strips binary control characters from filenames
+- PASS: Upload Hardening: Text files containing NUL bytes (0x00) are rejected (CorruptFileError)
+- PASS: Upload Quota: Blocks 51st upload when daily count quota (50 files/day) is reached
+- PASS: Upload Quota: Blocks upload exceeding daily byte volume quota (100MB/day)
+- PASS: Upload Quota: POST /api/files/upload returns 429 Too Many Requests when daily quota is exceeded
+- PASS: Process Safety: Python process runner caps concurrency to max 2 concurrent jobs
+- PASS: Process Safety: Python runner provides process group kill on timeout
+- PASS: Concurrency Hardening: All 30 parallel uploads are accepted with 202 and enqueued
+- PASS: Concurrency Hardening: Server remains responsive (200 OK) during and after 30 parallel uploads
+- PASS: Process Safety: 30 parallel uploads leave no orphan Python processes
+- PASS: E2E Auth: User successfully registered with token
+- PASS: E2E Auth: User login returns valid access token
+- PASS: E2E Auth: Authenticated profile retrieval matches user email
+- PASS: E2E Session: POST /api/session creates new session
+- PASS: E2E Session: GET /api/sessions lists created session
+- PASS: E2E Session: GET /api/history/:id returns empty history initially
+- PASS: E2E Chat SSE: POST /api/chat returns HTTP 200 OK
+- PASS: E2E Chat SSE: Response header Content-Type is text/event-stream
+- PASS: E2E Chat SSE: Response header Cache-Control includes no-cache
+- PASS: E2E Chat SSE: Response header X-Accel-Buffering is no
+- PASS: E2E Chat SSE: Stream payload contains SSE chunk events
+- PASS: E2E Chat SSE: Stream payload terminates with done event
+- PASS: E2E Chat: History persists exactly 2 messages (user + assistant turn)
+- PASS: E2E Chat: User message persisted with monotonic seq 1
+- PASS: E2E Chat: Assistant message persisted with monotonic seq 2
+- PASS: E2E Upload: POST /api/files/upload accepts file with 202 and returns jobId & fileId
+- PASS: E2E Upload: Async job queue processes and completes file extraction
+- PASS: E2E Upload: GET /api/files/:fileId returns document metadata and parsed chunks
+- PASS: E2E Memories: POST /api/memories creates new memory record
+- PASS: E2E Memories: GET /api/memories lists created memory
+- PASS: E2E Memories: PUT /api/memories/:id updates memory fact
+- PASS: E2E Memories: DELETE /api/memories/:id deletes memory
+- PASS: E2E Memories: Memory successfully removed from datastore
+- PASS: E2E Session: DELETE /api/session/:id deletes session
+- PASS: E2E Session: Deleted session returns 404 on subsequent queries
+- PASS: Fault Injector: 429 Quota Exceeded is tracked as trippable rate limit failure without process crash
+- PASS: Fault Injector: 500 Internal Server Error is intercepted and handled cleanly without unhandled rejection
+- PASS: Fault Injector: Slow first token triggers STREAM_FIRST_CHUNK_TIMEOUT and aborts stalled stream
+- PASS: Fault Injector: Mid-stream drop flags response with incomplete=true
+- PASS: Fault Injector: Mid-stream drop preserves partial flag
+- PASS: Fault Injector: Partial chunks emitted prior to disconnect were captured
+- PASS: Fault Injector: Malformed chunks (null, missing text) are safely ignored while valid chunk is retained
+- PASS: Fault Injector: Empty response (0 tokens) completes gracefully without hanging or throwing
+- PASS: Real-Route Corpus: Passed 53/53 payloads through HTTP route (Pass rate: 100.0%)
+- PASS: Real-Route Corpus: 100% of benign look-alikes pass cleanly through HTTP route without false positive blockage
+- PASS: Load Test: All 10 concurrent uploads accepted with 202 and enqueued during stream load
+- PASS: Load Test: Event loop p95 lag (514.85ms) stays below safety threshold (< 2500ms under load/instrumentation)
+- PASS: Load Test: All 50 concurrent streams served successfully
+- PASS: Fast-Check Property: Token estimation is strictly positive (>=1) and monotonic with repetition across 100 generative strings
+- PASS: Fast-Check Property: Script-aware token estimator assigns non-Latin scripts density >= naive length/4 across 50 runs
+- PASS: Fast-Check Property: Truncated history strictly adheres to token budget across 100 random multi-turn dialogues
+- PASS: Model Config: Primary Gemini model configured as "gemini-2.5-flash"
+- PASS: Model Config: Full Gemini model list has 5 models with primary in 0th position
+- PASS: Model Config: Primary Groq model configured as "qwen/qwen3.8-27b"
+- PASS: Model Config: Groq fallback list excludes deprecated "groq/compound"
+- PASS: Model Config: Embedding model configured as "gemini-embedding-001"
+- PASS: Model Config: getModelConfigSummary returns valid structured config snapshot
+- PASS: Model Config: Simulating legacy invalid Groq model "groq/compound"
+- PASS: Model Config: validateAndLogModelConfig handles deprecated model gracefully
+- PASS: Model Config: Warning logged loudly for deprecated model
+- PASS: Model Config: Automatically switched to alternative: "openai/gpt-oss-120b"
+- PASS: Model Config: Fail fast mode throws loudly: "[Model Config] Fatal: Primary Groq model "compound" is deprecated or invalid, and no valid fallback exists."
+- PASS: Model Config: Strict validation fails loudly when configured primary model is deprecated
+- PASS: Health Endpoint: GET /api/health returns HTTP 200
+- PASS: Health Endpoint: reports status "ok"
+- PASS: Health Endpoint: reports active provider "gemini"
+- PASS: Health Endpoint: reports Gemini primary model
+- PASS: Health Endpoint: reports Groq primary model
+- PASS: Health Endpoint: reports configured embedding model
+- PASS: Health Endpoint: reports circuit breaker state "CLOSED"
+- PASS: Health Endpoint: reports breaker failure counter
+- PASS: Health Endpoint: reports Chroma status
+- PASS: Health Endpoint: reports Chroma bound URL
+- PASS: Health Endpoint: reports store type
+- PASS: Health Endpoint: reports store schemaVersion 2
+- PASS: Health Endpoint: reports sessions count
+- PASS: Health Endpoint: reports users count
+- PASS: Health Endpoint: reports memories count
+- PASS: Health Endpoint: reports store.lastPersistError as null when healthy
+- PASS: Health Endpoint: returns HTTP 200 even when store is degraded
+- PASS: Health Endpoint: reports status "degraded" when lastPersistError is present
+- PASS: Health Endpoint: surfaces store.lastPersistError with failure details
+- PASS: Health Endpoint: status restores to "ok" once store persists successfully
+- PASS: Health Endpoint: store.lastPersistError cleared back to null after recovery
+- PASS: Health Endpoint: backward-compatible top-level state "CLOSED" preserved
+- PASS: Health Endpoint: backward-compatible top-level openUntil preserved
+- PASS: Model Audit: checkModels executed with 17 models audited
+- PASS: Model Audit: Gemini 2.5 Flash ("gemini-2.5-flash") verified to EXIST on Gemini API
+- PASS: Model Audit: Gemini Fallback #1 ("gemini-flash-latest") verified to EXIST on Gemini API
+- PASS: Model Audit: Gemini Fallback #2 ("gemini-3.7-flash") verified to EXIST on Gemini API
+- PASS: Model Audit: Gemini Fallback #3 ("gemini-2.5-flash-lite") verified to EXIST on Gemini API
+- PASS: Model Audit: Gemini Fallback #4 ("gemini-3.1-pro-preview") verified to EXIST on Gemini API
+- PASS: Model Audit: Embedding model ("gemini-embedding-001") verified to EXIST on Gemini API
+- PASS: Model Audit: Groq "qwen/qwen3.8-27b" verified to EXIST on Groq Cloud API
+- PASS: Model Audit: Groq Fallback #1 ("openai/gpt-oss-120b") verified to EXIST on Groq Cloud API
+- PASS: Model Audit: Groq Fallback #2 ("openai/gpt-oss-20b") verified to EXIST on Groq Cloud API
+- PASS: Model Audit: Groq Fallback #3 ("allam-2-7b") verified to EXIST on Groq Cloud API
+- PASS: Model Audit: Zero missing models across all configured active and fallback chains
+- PASS: Model Audit: Written audit output file exists in docs/ directory
+- PASS: Model Audit: Groq "compound" verified to NOT EXIST on Groq API (correctly flagged)
+- PASS: Model Audit: Groq "groq/compound" verified to NOT EXIST on Groq API (correctly flagged)
+- PASS: Test Isolation: Production store SHA-256 hash (b5b3663896164ed369a8cd7b9894c672c634292521548d40a6b52e4234384d05) matches initial hash (b5b3663896164ed369a8cd7b9894c672c634292521548d40a6b52e4234384d05) exactly; real store was not touched
+- PASS: Test Isolation: Safety guard successfully throws and halts execution when DATA_DIR points to ./data

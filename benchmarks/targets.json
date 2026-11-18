@@ -1,0 +1,120 @@
+{
+  "system_info": {
+    "expected_platform": "win32",
+    "target_hardware": "AMD Ryzen 5 5500U with Radeon Graphics (12 logical cores @ 2.10 GHz, up to 4.04 GHz boost), 7.35 GB physical RAM",
+    "target_os": "Windows 11 Home x64",
+    "target_node": "v25.2.1",
+    "target_python": "3.11.9",
+    "gpu_accelerated": false
+  },
+  "metrics": {
+    "heuristic_ambiguity_latency_ms": {
+      "id": "heuristic_ambiguity_latency_ms",
+      "metric": "Heuristic Ambiguity Interception Latency",
+      "target": "< 5.0 ms",
+      "threshold_ms": 5.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Zero-cost regex heuristic ambiguity detection latency before upstream LLM invocation"
+    },
+    "token_estimation_truncation_ms": {
+      "id": "token_estimation_truncation_ms",
+      "metric": "Token Estimation & Sliding-Window Truncation",
+      "target": "< 5.0 ms",
+      "threshold_ms": 5.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Sliding-window context budget truncation and token estimation over 20-turn dialogue"
+    },
+    "compound_index_resolution_ms": {
+      "id": "compound_index_resolution_ms",
+      "metric": "Compound Index Resolution (1,000 Lookups)",
+      "target": "< 5.0 ms",
+      "threshold_ms": 5.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "O(1) in-memory Map lookup and compound index resolution over 1,000 sequential key queries"
+    },
+    "memory_store_upsert_http_ms": {
+      "id": "memory_store_upsert_http_ms",
+      "metric": "Memory Store & Compound Upsert (E2E HTTP)",
+      "target": "< 25.0 ms",
+      "threshold_ms": 25.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "End-to-end authenticated HTTP POST /api/memory store and upsert latency"
+    },
+    "session_creation_http_ms": {
+      "id": "session_creation_http_ms",
+      "metric": "Session Creation (E2E HTTP)",
+      "target": "< 30.0 ms",
+      "threshold_ms": 30.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "End-to-end authenticated HTTP POST /api/session creation and indexing latency"
+    },
+    "system_health_endpoint_ms": {
+      "id": "system_health_endpoint_ms",
+      "metric": "System Health Endpoint (GET /api/health)",
+      "target": "< 20.0 ms",
+      "threshold_ms": 20.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Latency of GET /api/health checking provider status, breaker states, Chroma, and store status"
+    },
+    "worker_thread_pdf_extraction_ms": {
+      "id": "worker_thread_pdf_extraction_ms",
+      "metric": "Worker-Thread PDF Extraction (15-page Doc)",
+      "target": "< 1,500 ms",
+      "threshold_ms": 1500.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Worker-thread isolated document extraction and text stripping on a 15-page PDF document"
+    },
+    "image_ocr_extraction_ms": {
+      "id": "image_ocr_extraction_ms",
+      "metric": "Image OCR Extraction (Pillow + EasyOCR)",
+      "target": "< 2,000 ms",
+      "threshold_ms": 2000.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Warm deep-learning OCR extraction using Pillow, OpenCV, and EasyOCR on CPU"
+    },
+    "video_speech_transcription_ms": {
+      "id": "video_speech_transcription_ms",
+      "metric": "Video Speech Transcription (Faster-Whisper)",
+      "target": "< 5,000 ms",
+      "threshold_ms": 5000.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Warm local timestamped speech transcription via PyAV and Faster-Whisper tiny (int8) on CPU"
+    },
+    "chroma_dense_vector_query_ms": {
+      "id": "chroma_dense_vector_query_ms",
+      "metric": "Chroma Dense Vector Query (top-5 neighbors)",
+      "target": "< 50.0 ms",
+      "threshold_ms": 50.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Chroma / dense vector nearest-neighbor search for top-5 semantic memories"
+    },
+    "autocannon_load_stream_latency_ms": {
+      "id": "autocannon_load_stream_latency_ms",
+      "metric": "Autocannon Load Test (50 SSE Streams + 10 Uploads)",
+      "target": "< 1,000 ms",
+      "threshold_ms": 1000.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Autocannon 95th percentile stream round-trip latency under 50 concurrent SSE streams + 10 file uploads"
+    },
+    "event_loop_delay_full_load_ms": {
+      "id": "event_loop_delay_full_load_ms",
+      "metric": "Event Loop Delay Under Full Load (perf_hooks)",
+      "target": "< 100.0 ms",
+      "threshold_ms": 100.0,
+      "comparison": "lt",
+      "target_field": "p95",
+      "description": "Node.js event-loop p95 delay measured via perf_hooks.monitorEventLoopDelay under 50 SSE + 10 upload load (defensible chat server target)"
+    }
+  }
+}

@@ -1,6 +1,4 @@
 import React from 'react';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import {
   User,
   Bot,
@@ -9,11 +7,21 @@ import {
   Brain,
   Terminal,
   Paperclip,
+  FileText,
+  Image,
+  Film,
   Search,
   ExternalLink,
   AlertTriangle,
+  RotateCcw,
 } from 'lucide-react';
 import { CopyButton, stripMarkdown } from './CopyButton';
+import {
+  SanitizedMarkdown,
+  isSafeUrl,
+  sanitizeText,
+  sanitizeFilename,
+} from './SanitizedMarkdown';
 
 function formatMarkdownContent(text) {
   if (!text) return '';
@@ -28,10 +36,17 @@ function formatMarkdownContent(text) {
   return cleaned || text;
 }
 
-export const MessageItem = ({ message }) => {
+export const MessageItem = ({ message, onOpenRubric, onRegenerate }) => {
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
   const metadata = message.metadata;
+  const isIncompleteOrError = isAssistant && (
+    metadata?.incomplete ||
+    metadata?.error ||
+    metadata?.errorCode ||
+    message.content?.includes('⚠️') ||
+    message.content?.includes('_[generation stopped by user]_')
+  );
 
   // Plain text representation for copying full message bubble
   const plainTextToCopy = isUser ? message.content : stripMarkdown(message.content);
@@ -97,14 +112,6 @@ export const MessageItem = ({ message }) => {
               </span>
             )}
 
-            {/* Attached Document RAG Stamp */}
-            {metadata?.attachedFilename && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase">
-                <Paperclip className="w-2.5 h-2.5 text-amber-800" />
-                <span>{metadata.attachedFilename} {metadata.attachedChunksCount ? `(${metadata.attachedChunksCount} chunks)` : ''}</span>
-              </span>
-            )}
-
             {/* Long-Term Memory Retrieval Stamp */}
             {isAssistant && metadata?.retrievedMemoriesCount > 0 && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-purple-100 text-purple-950 border border-purple-300 font-bold uppercase">
@@ -123,9 +130,17 @@ export const MessageItem = ({ message }) => {
 
             {/* Web Search Indicator Badge */}
             {isAssistant && metadata?.usedWebSearch && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-sky-100 text-sky-950 border border-sky-400 font-bold uppercase">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] bg-sky-100 text-sky-950 border border-sky-400 font-bold uppercase shadow-[1px_1px_0px_0px_#0284c7]">
                 <Search className="w-3 h-3 text-sky-700" />
                 <span>Web Search</span>
+                {metadata?.searchQuery && (
+                  <span
+                    className="font-mono font-normal normal-case text-sky-800 bg-sky-50 px-1 py-0.2 rounded border border-sky-200 max-w-[200px] truncate"
+                    title={`Exact search query sent: "${sanitizeText(metadata.searchQuery)}"`}
+                  >
+                    &quot;{sanitizeText(metadata.searchQuery)}&quot;
+                  </span>
+                )}
               </span>
             )}
 
@@ -137,6 +152,50 @@ export const MessageItem = ({ message }) => {
               >
                 <AlertTriangle className="w-3 h-3 text-amber-700" />
                 <span>Unverified Fact Warning</span>
+              </span>
+            )}
+
+            {/* Incomplete / Interrupted Indicator Badge */}
+            {isAssistant && metadata?.incomplete && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-950 border border-amber-400 font-bold uppercase shadow-[1px_1px_0px_0px_#f59e0b]">
+                <AlertTriangle className="w-2.5 h-2.5 text-amber-700" />
+                <span>Incomplete</span>
+              </span>
+            )}
+
+            {/* User Attached Media/Document Pill */}
+            {isUser && metadata?.attachedFilename && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-200 text-stone-900 border border-stone-800 font-bold uppercase shadow-[1px_1px_0px_0px_#000]">
+                {metadata.attachedFileType === 'video' || /\.(mp4|mov|webm|mkv|avi)$/i.test(metadata.attachedFilename) ? (
+                  <Film className="w-3 h-3 text-sky-800" />
+                ) : metadata.attachedFileType === 'image' || /\.(png|jpe?g|webp|gif|bmp)$/i.test(metadata.attachedFilename) ? (
+                  <Image className="w-3 h-3 text-purple-800" />
+                ) : (
+                  <Paperclip className="w-3 h-3 text-stone-800" />
+                )}
+                <span>{metadata.attachedFilename}</span>
+              </span>
+            )}
+
+            {/* Assistant Grounded Badge */}
+            {isAssistant && metadata?.attachedFilename && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-950 border border-emerald-400 font-bold uppercase">
+                {metadata.attachedFileType === 'video' || /\.(mp4|mov|webm|mkv|avi)$/i.test(metadata.attachedFilename) ? (
+                  <>
+                    <Film className="w-3 h-3 text-sky-700" />
+                    <span>Grounded Video: {metadata.attachedFilename}</span>
+                  </>
+                ) : metadata.attachedFileType === 'image' || /\.(png|jpe?g|webp|gif|bmp)$/i.test(metadata.attachedFilename) ? (
+                  <>
+                    <Image className="w-3 h-3 text-purple-700" />
+                    <span>Grounded Image: {metadata.attachedFilename}</span>
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-3 h-3 text-emerald-700" />
+                    <span>Grounded: {metadata.attachedFilename}</span>
+                  </>
+                )}
               </span>
             )}
           </div>
@@ -160,85 +219,122 @@ export const MessageItem = ({ message }) => {
         {/* Content Body */}
         <div className="text-sm text-stone-900 leading-relaxed break-words">
           {isUser ? (
-            <p className="whitespace-pre-wrap font-sans text-stone-900 font-medium">{message.content}</p>
+            <div className="space-y-2">
+              <p className="whitespace-pre-wrap font-sans text-stone-900 font-medium">{message.content}</p>
+
+              {/* User Attached Image Preview */}
+              {metadata?.attachedFileId &&
+                (metadata?.attachedFileType === 'image' ||
+                  /\.(png|jpe?g|webp|gif|bmp)$/i.test(metadata?.attachedFilename || '')) && (
+                  <div className="pt-1">
+                    <a
+                      href={`/api/files/preview/${metadata.attachedFileId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block overflow-hidden rounded-lg border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917] hover:opacity-95 transition"
+                    >
+                      <img
+                        src={`/api/files/preview/${metadata.attachedFileId}`}
+                        alt={sanitizeFilename(metadata.attachedFilename || 'Attached Image')}
+                        className="max-h-56 max-w-xs object-cover rounded bg-stone-100"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </a>
+                  </div>
+                )}
+
+              {/* User Attached Video Player */}
+              {metadata?.attachedFileId &&
+                (metadata?.attachedFileType === 'video' ||
+                  /\.(mp4|mov|webm|mkv|avi)$/i.test(metadata?.attachedFilename || '')) && (
+                  <div className="pt-1 max-w-sm">
+                    <video
+                      src={`/api/files/preview/${metadata.attachedFileId}`}
+                      controls
+                      className="w-full max-h-60 rounded-lg border-2 border-stone-800 shadow-[2px_2px_0px_0px_#1C1917] bg-black"
+                    />
+                  </div>
+                )}
+            </div>
           ) : (
-            <div className="markdown-content">
-              <Markdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code({ node, inline, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    const codeString = String(children).replace(/\n$/, '');
-
-                    // Block Code Renderer
-                    if (!inline && (match || codeString.includes('\n'))) {
-                      const language = match ? match[1] : '';
-
-                      return (
-                        <div className="relative group/code my-3.5 rounded-lg overflow-hidden border-2 border-stone-900 bg-stone-950 shadow-[3px_3px_0px_0px_#1C1917]">
-                          {/* Code Header Bar with Language Label & Copy Stamp Button */}
-                          <div className="flex items-center justify-between px-3.5 py-1.5 bg-stone-900 border-b-2 border-stone-800 text-[11px] font-mono text-stone-300">
-                            <div className="flex items-center gap-2">
-                              <Terminal className="w-3.5 h-3.5 text-amber-400" />
-                              <span className="font-bold text-amber-300 uppercase tracking-wider">{language || 'CODE'}</span>
-                            </div>
-                            <CopyButton
-                              text={codeString}
-                              showLabel={true}
-                              label="COPY"
-                              copiedLabel="COPIED!"
-                              className="px-2.5 py-0.5 rounded border border-stone-700 hover:border-amber-400 bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-amber-200 text-[10px] font-mono uppercase transition-all shadow-[1px_1px_0px_0px_#000]"
-                              iconClassName="w-3 h-3"
-                            />
-                          </div>
-
-                          {/* Code Content */}
-                          <pre className="p-3.5 overflow-x-auto text-xs font-mono text-stone-100 leading-relaxed m-0 bg-stone-950">
-                            <code className={className} {...props}>
-                              {children}
-                            </code>
-                          </pre>
-                        </div>
-                      );
-                    }
-
-                    // Inline Code Renderer
-                    return (
-                      <code
-                        className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-xs font-bold border border-amber-300"
-                        {...props}
-                      >
-                        {children}
-                      </code>
-                    );
-                  },
-                }}
-              >
-                {formatMarkdownContent(message.content)}
-              </Markdown>
+            <div>
+              <SanitizedMarkdown content={formatMarkdownContent(message.content)} />
 
               {/* Web Search Sources / Citations */}
               {isAssistant && metadata?.sources && metadata.sources.length > 0 && (
                 <div className="mt-3.5 pt-2.5 border-t border-stone-200">
-                  <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-stone-600 uppercase tracking-wider mb-2">
-                    <Search className="w-3 h-3 text-sky-600" />
-                    <span>Verified Web Sources ({metadata.sources.length}):</span>
+                  <div className="flex items-center justify-between gap-1.5 text-[11px] font-mono font-bold text-stone-600 uppercase tracking-wider mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Search className="w-3 h-3 text-sky-600" />
+                      <span>Verified Web Sources ({metadata.sources.length}):</span>
+                    </div>
+                    {metadata?.searchQuery && (
+                      <span
+                        className="text-[10px] font-normal normal-case text-stone-500 italic truncate max-w-[260px]"
+                        title={`Exact search query sent: "${sanitizeText(metadata.searchQuery)}"`}
+                      >
+                        Query: &quot;{sanitizeText(metadata.searchQuery)}&quot;
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {metadata.sources.map((source, idx) => (
-                      <a
-                        key={idx}
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-stone-100 hover:bg-sky-50 text-stone-700 hover:text-sky-900 border border-stone-300 hover:border-sky-400 transition-colors max-w-full truncate shadow-[1px_1px_0px_0px_#e7e5e4]"
-                        title={source.url}
-                      >
-                        <span className="truncate max-w-[220px]">{source.title || source.url}</span>
-                        <ExternalLink className="w-2.5 h-2.5 flex-shrink-0 text-stone-400" />
-                      </a>
-                    ))}
+                    {metadata.sources.map((source, idx) => {
+                      if (!isSafeUrl(source.url)) return null;
+                      const safeTitle = sanitizeText(source.title) || sanitizeText(source.url);
+                      return (
+                        <a
+                          key={idx}
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono bg-stone-100 hover:bg-sky-50 text-stone-700 hover:text-sky-900 border border-stone-300 hover:border-sky-400 transition-colors max-w-full truncate shadow-[1px_1px_0px_0px_#e7e5e4]"
+                          title={sanitizeText(source.url)}
+                        >
+                          <span className="truncate max-w-[220px]">{safeTitle}</span>
+                          <ExternalLink className="w-2.5 h-2.5 flex-shrink-0 text-stone-400" />
+                        </a>
+                      );
+                    })}
                   </div>
+                </div>
+              )}
+
+              {/* Document Sources & Page/Section Citations */}
+              {isAssistant && metadata?.citations && metadata.citations.length > 0 && (
+                <div className="mt-3.5 pt-2.5 border-t border-stone-200">
+                  <div className="flex items-center gap-1.5 text-[11px] font-mono font-bold text-emerald-800 uppercase tracking-wider mb-2">
+                    <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Document Citations ({metadata.citations.length}):</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {metadata.citations.map((c, idx) => {
+                      const safeFilename = sanitizeFilename(c.filename || 'Document');
+                      const pageLabel = c.page ? `Page ${sanitizeText(String(c.page))}` : null;
+                      const sectionLabel = c.heading ? `Section: ${sanitizeText(c.heading)}` : (c.section ? sanitizeText(c.section) : null);
+                      const sheetLabel = c.sheet ? `Sheet: ${sanitizeText(c.sheet)}` : null;
+                      const details = [pageLabel, sheetLabel, sectionLabel].filter(Boolean).join(' · ');
+                      return (
+                        <span
+                          key={idx}
+                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-950 border border-emerald-300 shadow-[1px_1px_0px_0px_#10b981]"
+                          title={`Excerpt from ${safeFilename}`}
+                        >
+                          <span className="font-bold">{safeFilename}</span>
+                          {details && <span className="text-emerald-700">({details})</span>}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Degraded Vision Notice Banner */}
+              {isAssistant && metadata?.degraded && (
+                <div className="mt-2.5 p-2 rounded bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-2 font-mono">
+                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
+                  <span>Vision unavailable: Responded using extracted OCR text / transcript only.</span>
                 </div>
               )}
 
@@ -247,6 +343,25 @@ export const MessageItem = ({ message }) => {
                 <div className="mt-2.5 p-2 rounded bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center gap-2 font-mono">
                   <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
                   <span>{metadata.unverifiedWarning}</span>
+                </div>
+              )}
+
+              {/* Incomplete / Error Retry Action Banner */}
+              {isAssistant && isIncompleteOrError && typeof onRegenerate === 'function' && (
+                <div className="mt-3 pt-2.5 border-t border-stone-200 flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5 text-xs text-amber-900 font-mono">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                    <span>Response was interrupted or stopped.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onRegenerate(message)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono font-bold uppercase border-2 border-stone-800 bg-amber-200 hover:bg-amber-300 text-stone-900 shadow-[1px_1px_0px_0px_#000] cursor-pointer transition active:translate-x-0.5 active:translate-y-0.5"
+                    title="Retry or regenerate response"
+                  >
+                    <RotateCcw className="w-3 h-3 text-stone-900" />
+                    <span>Retry / Regenerate</span>
+                  </button>
                 </div>
               )}
             </div>

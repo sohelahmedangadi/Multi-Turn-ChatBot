@@ -19,9 +19,18 @@ export default defineConfig(() => {
       port: 3000,
       proxy: {
         '/api': {
-          target: 'http://localhost:5000',
+          target: 'http://127.0.0.1:5000',
           changeOrigin: true,
           secure: false,
+          ws: true,
+          configure: (proxy, _options) => {
+            proxy.on('error', (err, _req, _res) => {
+              // Suppress noisy socket resets during polling
+              if (err.code !== 'ECONNRESET' && err.code !== 'ECONNREFUSED') {
+                console.warn('[proxy error]', err.message);
+              }
+            });
+          },
         },
       },
       hmr: process.env.DISABLE_HMR !== 'true',

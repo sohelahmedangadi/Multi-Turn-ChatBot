@@ -13,6 +13,7 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingText, setStreamingText] = useState('');
+  const [isDegradedVision, setIsDegradedVision] = useState(false);
   const [systemStatus, setSystemStatus] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('auth_token'));
@@ -20,6 +21,21 @@ export default function App() {
   const [systemPrompt, setSystemPrompt] = useState(
     'You are an intelligent, helpful, and concise conversational AI assistant. Maintain context across multi-turn dialogues and deliver accurate, structured responses.'
   );
+  const [allowWebSearch, setAllowWebSearch] = useState(() => {
+    try {
+      const saved = localStorage.getItem('cosmo_allow_web_search');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleWebSearch = (enabled) => {
+    setAllowWebSearch(enabled);
+    try {
+      localStorage.setItem('cosmo_allow_web_search', String(enabled));
+    } catch (e) {}
+  };
 
   // Modals
   const [isEvalModalOpen, setIsEvalModalOpen] = useState(false);
@@ -189,7 +205,7 @@ export default function App() {
     }
   };
 
-  const handleSendMessage = async (text, fileId = null) => {
+  const handleSendMessage = async (text, fileId = null, attachedFilename = null) => {
     if (!text.trim() || isLoading) return;
 
     let targetSessionId = currentSessionId;
@@ -226,12 +242,14 @@ export default function App() {
       metadata: {
         tokensEstimated: Math.ceil(text.length / 4),
         attachedFileId: fileId || null,
+        attachedFilename: attachedFilename || null,
       },
     };
 
     setMessages((prev) => [...prev, tempUserMsg]);
     setIsLoading(true);
     setStreamingText('');
+    setIsDegradedVision(false);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -250,6 +268,7 @@ export default function App() {
           systemPrompt,
           stream: true,
           fileId: fileId || undefined,
+          allowWebSearch,
         }),
       });
 
@@ -262,6 +281,7 @@ export default function App() {
       const decoder = new TextDecoder('utf-8');
       let buffer = '';
       let accumulatedText = '';
+      let currentEvent = 'message';
 
       if (reader) {
         while (true) {
@@ -274,6 +294,10 @@ export default function App() {
 
           for (const line of lines) {
             const trimmed = line.trim();
+            if (trimmed.startsWith('event: ')) {
+              currentEvent = trimmed.substring(7).trim();
+              continue;
+            }
             if (trimmed.startsWith('data: ')) {
               let data = null;
               try {
@@ -284,10 +308,19 @@ export default function App() {
 
               if (!data) continue;
 
+              if (currentEvent === 'meta' || data.type === 'meta' || data.degraded) {
+                if (data.degraded) {
+                  setIsDegradedVision(true);
+                }
+              }
+
               if (data.type === 'chunk') {
                 accumulatedText += data.text;
                 setStreamingText(accumulatedText);
               } else if (data.type === 'done') {
+                if (data.degraded) {
+                  setIsDegradedVision(true);
+                }
                 if (data.assistantMessage) {
                   setMessages((prev) => {
                     const confirmedUserMsg = data.userMessage || tempUserMsg;
@@ -306,23 +339,29 @@ export default function App() {
                 setStreamingText('');
                 fetchSessions();
                 fetchMemoryCount();
-              } else if (data.type === 'error') {
+              } else if (data.type === 'error' || currentEvent === 'error') {
                 setStreamingText('');
                 const errorMsg = {
                   id: 'msg_err_' + Date.now(),
                   sessionId: targetSessionId,
                   role: 'assistant',
-                  content: `⚠️ **Generation Notice:** ${data.error || 'The provider encountered a temporary rate limit or quota delay. Please retry in a few moments.'}`,
+                  content: accumulatedText
+                    ? `${accumulatedText}\n\n⚠️ **Generation Interrupted:** ${data.message || data.error || 'Connection closed prematurely.'}`
+                    : `⚠️ **Generation Notice:** ${data.message || data.error || 'The provider encountered a temporary error or rate limit. Please retry in a few moments.'}`,
                   timestamp: new Date().toISOString(),
                   metadata: {
                     provider: 'gemini',
                     latencyMs: 0,
+                    incomplete: true,
+                    error: true,
+                    errorCode: data.code || 'STREAM_ERROR',
                   },
                 };
                 setMessages((prev) => [...prev, errorMsg]);
                 setIsLoading(false);
                 return;
               }
+              currentEvent = 'message';
             }
           }
         }
@@ -339,6 +378,8 @@ export default function App() {
           metadata: {
             provider: 'gemini',
             latencyMs: 0,
+            incomplete: true,
+            error: true,
           },
         };
         setMessages((prev) => [...prev, errorMsg]);
@@ -347,6 +388,31 @@ export default function App() {
       setIsLoading(false);
       setStreamingText('');
       abortControllerRef.current = null;
+    }
+  };
+
+  const handleRegenerate = (failedMessage) => {
+    if (isLoading) return;
+    const msgIndex = messages.findIndex((m) => m.id === failedMessage?.id);
+    let targetUserMsg = null;
+    if (msgIndex > 0) {
+      for (let i = msgIndex - 1; i >= 0; i--) {
+        if (messages[i].role === 'user') {
+          targetUserMsg = messages[i];
+          break;
+        }
+      }
+    } else {
+      const userMessages = messages.filter((m) => m.role === 'user');
+      targetUserMsg = userMessages[userMessages.length - 1] || null;
+    }
+
+    if (targetUserMsg && targetUserMsg.content) {
+      handleSendMessage(
+        targetUserMsg.content,
+        targetUserMsg.metadata?.attachedFileId,
+        targetUserMsg.metadata?.attachedFilename
+      );
     }
   };
 
@@ -379,7 +445,17 @@ export default function App() {
     fetchMemoryCount();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (token) {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (e) {
+        // Suppress network errors on logout
+      }
+    }
     localStorage.removeItem('auth_token');
     setToken(null);
     setCurrentUser(null);
@@ -414,7 +490,11 @@ export default function App() {
         messages={messages}
         isLoading={isLoading}
         streamingText={streamingText}
+        isDegradedVision={isDegradedVision}
+        allowWebSearch={allowWebSearch}
+        onToggleWebSearch={handleToggleWebSearch}
         onSendMessage={handleSendMessage}
+        onRegenerate={handleRegenerate}
         onStopStreaming={handleStopStreaming}
         onOpenRubric={(msgId) => setRubricTargetMessageId(msgId)}
         onOpenMemoryModal={() => setIsMemoryModalOpen(true)}

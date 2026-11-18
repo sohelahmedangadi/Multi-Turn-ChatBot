@@ -1,0 +1,56 @@
+name: CI & Scheduled Model Catalog Audit
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Run every Monday at 00:00 UTC to catch newly retired LLM model IDs
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  audit-and-test:
+    name: Model Audit & Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Run Live Model Catalog Audit (Strict)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MODEL_AUDIT_STRICT: "true"
+        run: npm run check:models -- --strict
+
+      - name: Run Test Suite
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          JWT_SECRET: "ci_testing_secret_key_minimum_32_characters_long_12345"
+          NODE_ENV: "test"
+        run: npm test
+
+      - name: Archive Model Audit Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: model-audit-report
+          path: docs/model-audit-*.txt
+          retention-days: 30

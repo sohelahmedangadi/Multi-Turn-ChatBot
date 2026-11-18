@@ -1,0 +1,49 @@
+======================================================================
+COSMOAI LIVE LLM MODEL CATALOG AUDIT REPORT
+======================================================================
+Generated at: 2026-11-18T16:21:43.256Z (2026-11-18)
+Audit mode:   STANDARD
+Gemini API:   CONNECTED (64 models discovered)
+Groq API:     CONNECTED (11 models discovered)
+----------------------------------------------------------------------
+
+### 1. CONFIGURED ACTIVE & FALLBACK CHAIN VERIFICATION
+
+| Provider | Model ID | Role | Status | Live Catalog Status |
+|:---------|:---------|:-----|:------:|:--------------------|
+| GEMINI | `gemini-2.5-flash` | Primary Chat Model (Default) | ✅ ACTIVE | Active on Google GenAI API |
+| GEMINI | `gemini-flash-latest` | Gemini Fallback #1 | ✅ ACTIVE | Active on Google GenAI API |
+| GEMINI | `gemini-3.7-flash` | Gemini Fallback #2 | ✅ ACTIVE | Active on Google GenAI API |
+| GEMINI | `gemini-2.5-flash-lite` | Gemini Fallback #3 | ✅ ACTIVE | Active on Google GenAI API |
+| GEMINI | `gemini-3.1-pro-preview` | Gemini Fallback #4 | ✅ ACTIVE | Active on Google GenAI API |
+| GEMINI | `gemini-embedding-001` | Configured Embedding Model | ✅ ACTIVE | Active on Google GenAI API |
+| GROQ | `qwen/qwen3.8-27b` | Groq Primary / Fact Extraction | ✅ ACTIVE | Active on Groq Cloud API |
+| GROQ | `openai/gpt-oss-120b` | Groq Fallback #1 | ✅ ACTIVE | Active on Groq Cloud API |
+| GROQ | `openai/gpt-oss-20b` | Groq Fallback #2 | ✅ ACTIVE | Active on Groq Cloud API |
+| GROQ | `allam-2-7b` | Groq Fallback #3 | ✅ ACTIVE | Active on Groq Cloud API |
+
+### 2. DEPRECATED & SUNSET MODEL GUARDS (VERIFIED ABSENT)
+
+| Provider | Model ID | Original Role | Expected | Actual Result |
+|:---------|:---------|:--------------|:--------:|:--------------|
+| GEMINI | `text-embedding-004` | Legacy Embedding Model (Deprecated) | ABSENT | ✅ ABSENT (Pass) (Confirmed absent (legacy/deprecated ID)) |
+| GROQ | `compound` | Groq Deprecated Target in README | ABSENT | ✅ ABSENT (Pass) (Confirmed absent (legacy/deprecated ID)) |
+| GROQ | `groq/compound` | Legacy Groq Fallback ID | ABSENT | ✅ ABSENT (Pass) (Confirmed absent (legacy/deprecated ID)) |
+| GROQ | `groq/compound-mini` | Legacy Groq Fallback ID | ABSENT | ✅ ABSENT (Pass) (Confirmed absent (legacy/deprecated ID)) |
+| GROQ | `qwen/qwen3.6-27b` | Legacy Groq Fallback ID | ABSENT | ✅ ABSENT (Pass) (Confirmed absent (legacy/deprecated ID)) |
+
+### 3. CONFIGURED MODELS STATUS
+
+✅ All configured Gemini primary/fallback models and Groq primary/fallback models are 100% active and verified in the provider live catalogs.
+
+### 4. LIVE DISCOVERED CATALOG SUMMARY
+
+Total Gemini models available on API: 64
+Total Groq models available on API:   11
+Total Codebase models audited:        17
+Configured Active Models:             10
+Configured Missing Count:             0
+
+======================================================================
+AUDIT RESULT: PASSED (0 missing configured models)
+======================================================================

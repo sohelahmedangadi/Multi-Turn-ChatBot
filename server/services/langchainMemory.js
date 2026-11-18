@@ -1,6 +1,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
+import { getGroqPrimaryModel } from '../config/models.js';
 
 // Extract Facts Prompt Template
 const FACT_EXTRACTION_PROMPT = PromptTemplate.fromTemplate(`
@@ -39,6 +40,98 @@ Each object must have:
 
 JSON Output:
 `);
+
+// Allowlist categories, length caps, and security rules for memory validation
+export const ALLOWED_MEMORY_CATEGORIES = new Set(['profile', 'project', 'preference', 'tech_stack', 'other']);
+export const MAX_MEMORY_KEY_LENGTH = 50;
+export const MAX_MEMORY_FACT_LENGTH = 200;
+
+// Patterns identifying instruction-like imperatives, assistant directives, role phrasing, or prompt injection
+const INSTRUCTION_OR_IMPERATIVE_PATTERNS = [
+  /\b(?:always|never|must|should)\s+(?:say|respond|reply|output|act|pretend|behave|speak|ignore|disregard|do\s+not|dont)\b/i,
+  /\b(?:you\s+must|you\s+should|you\s+are|you\s+will|your\s+role\s+is|act\s+as|pretend\s+to\s+be)\b/i,
+  /\b(?:system\s+prompt|system\s+instruction|developer\s+mode|jailbreak|bypass)\b/i,
+  /\b(?:override|disregard|ignore)\s+(?:all\s+)?(?:instructions|rules|filters|prompts|directives)\b/i,
+  /^(?:say|print|echo|repeat|reveal|forget\s+all|delete\s+all)\b/i,
+  /\b(?:user\s+must\s+be\s+addressed\s+as\s+system|assistant\s+must)\b/i,
+  /<\/?(?:untrusted_[a-z0-9_-]+|system|instruction|prompt)>/i,
+  /\b(?:pirate\s+speak|evil\s+mode|chaos\s+mode)\b/i,
+];
+
+/**
+ * Validates memory facts before storage:
+ * - Rejects instruction-like phrasing aimed at assistant
+ * - Caps key and fact length
+ * - Enforces category allowlist
+ * - Logs rejections
+ */
+export function validateMemoryFact(item) {
+  if (!item || typeof item !== 'object') {
+    return { valid: false, reason: 'Item is not an object' };
+  }
+
+  // Key validation
+  if (!item.key || typeof item.key !== 'string') {
+    return { valid: false, reason: 'Missing or non-string key' };
+  }
+  const cleanKey = item.key.trim().toLowerCase();
+  if (cleanKey.length < 2 || cleanKey.length > MAX_MEMORY_KEY_LENGTH) {
+    return { valid: false, reason: `Key length ${cleanKey.length} out of bounds (2-${MAX_MEMORY_KEY_LENGTH})` };
+  }
+  if (!/^[a-z0-9_]+$/.test(cleanKey)) {
+    return { valid: false, reason: 'Key contains invalid characters (must be alphanumeric snake_case)' };
+  }
+
+  // Category allowlist
+  const category = (item.category || 'other').toLowerCase();
+  if (!ALLOWED_MEMORY_CATEGORIES.has(category)) {
+    return { valid: false, reason: `Category "${item.category}" is not in allowlist (${Array.from(ALLOWED_MEMORY_CATEGORIES).join(', ')})` };
+  }
+
+  // Fact validation
+  if (!item.fact || typeof item.fact !== 'string') {
+    return { valid: false, reason: 'Missing or non-string fact' };
+  }
+  const cleanFact = item.fact.trim();
+  if (cleanFact.length < 3 || cleanFact.length > MAX_MEMORY_FACT_LENGTH) {
+    return { valid: false, reason: `Fact length ${cleanFact.length} out of bounds (3-${MAX_MEMORY_FACT_LENGTH})` };
+  }
+
+  // Imperative & instruction-like rejection
+  for (const pattern of INSTRUCTION_OR_IMPERATIVE_PATTERNS) {
+    if (pattern.test(cleanFact) || pattern.test(cleanKey)) {
+      return { valid: false, reason: `Fact contains instruction-like or imperative phrasing matching ${pattern}` };
+    }
+  }
+
+  return {
+    valid: true,
+    sanitizedItem: {
+      ...item,
+      key: cleanKey,
+      fact: cleanFact,
+      category,
+    },
+  };
+}
+
+export function filterAndValidateFacts(facts) {
+  if (!Array.isArray(facts)) return [];
+  const validFacts = [];
+  for (const f of facts) {
+    if (f.action === 'delete') {
+      validFacts.push(f);
+      continue;
+    }
+    const check = validateMemoryFact(f);
+    if (check.valid) {
+      validFacts.push(check.sanitizedItem);
+    } else {
+      console.warn(`[Memory Validation] Rejected invalid memory fact key="${f?.key}": "${f?.fact}" (reason: ${check.reason})`);
+    }
+  }
+  return validFacts;
+}
 
 /**
  * Fast Rule-Based Fallback Parser
@@ -157,7 +250,7 @@ export async function extractFactsWithLangChain(userMessage, existingMemories = 
         configuration: {
           baseURL: 'https://api.groq.com/openai/v1',
         },
-        modelName: 'qwen/qwen3.8-27b',
+        modelName: getGroqPrimaryModel(),
         temperature: 0.1,
         maxTokens: 512,
       });
@@ -183,7 +276,7 @@ export async function extractFactsWithLangChain(userMessage, existingMemories = 
       if (jsonStart !== -1 && jsonEnd !== -1) {
         const parsed = JSON.parse(cleaned.substring(jsonStart, jsonEnd + 1));
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          return filterAndValidateFacts(parsed);
         }
       }
     } catch (llmErr) {
@@ -191,6 +284,6 @@ export async function extractFactsWithLangChain(userMessage, existingMemories = 
     }
   }
 
-  // 2. Resilient Rule-Based Fallback
-  return fastRuleBasedExtractor(userMessage);
+  // 2. Resilient Rule-Based Fallback with Validation
+  return filterAndValidateFacts(fastRuleBasedExtractor(userMessage));
 }

@@ -1,5 +1,14 @@
 import { db } from '../db/store.js';
-import { extractFactsWithLangChain } from './langchainMemory.js';
+import { extractFactsWithLangChain, validateMemoryFact } from './langchainMemory.js';
+import {
+  isChromaAvailable,
+  upsertMemoryToChroma,
+  deleteMemoryFromChroma,
+  searchMemoriesInChroma,
+  searchKnowledgeInChroma,
+  tokenizeTextUnicode,
+  calculateDenseCosineSimilarity,
+} from './chromaService.js';
 
 // Configurable Token Limits
 export const MEMORY_MAX_TOKENS = Number(process.env.MEMORY_MAX_TOKENS) || 300;
@@ -7,17 +16,12 @@ export const KNOWLEDGE_MAX_TOKENS = Number(process.env.KNOWLEDGE_MAX_TOKENS) || 
 export const CONTEXT_MAX_TOKENS = Number(process.env.CONTEXT_MAX_TOKENS) || 3500;
 
 /**
- * Lightweight Text Vectorizer & Dense Embedding Generator
+ * Lightweight Unicode-Aware Text Vectorizer (TF map)
  */
 export function vectorizeText(text) {
   if (!text || typeof text !== 'string') return {};
 
-  const tokens = text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter((w) => w.length > 2);
-
+  const tokens = tokenizeTextUnicode(text);
   const freqMap = {};
   for (const t of tokens) {
     freqMap[t] = (freqMap[t] || 0) + 1;
@@ -27,10 +31,15 @@ export function vectorizeText(text) {
 }
 
 /**
- * Cosine Similarity between two term vector frequency maps
+ * Cosine Similarity between two term vector frequency maps or dense float arrays
+ * Strictly guards zero vectors: never returns NaN (returns 0)
  */
 export function calculateVectorCosineSimilarity(vecA, vecB) {
   if (!vecA || !vecB) return 0;
+  if (Array.isArray(vecA) && Array.isArray(vecB)) {
+    return calculateDenseCosineSimilarity(vecA, vecB);
+  }
+
   const termsA = typeof vecA === 'object' && !Array.isArray(vecA) ? vecA : {};
   const termsB = typeof vecB === 'object' && !Array.isArray(vecB) ? vecB : {};
 
@@ -45,7 +54,7 @@ export function calculateVectorCosineSimilarity(vecA, vecB) {
     normB += count * count;
   }
 
-  if (normA === 0 || normB === 0) return 0;
+  if (normA <= 0 || normB <= 0) return 0;
 
   for (const [term, countA] of Object.entries(termsA)) {
     if (termsB[term]) {
@@ -53,7 +62,9 @@ export function calculateVectorCosineSimilarity(vecA, vecB) {
     }
   }
 
-  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  const result = dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+  if (Number.isNaN(result) || !Number.isFinite(result)) return 0;
+  return result;
 }
 
 /**
@@ -77,18 +88,38 @@ export async function processAndSaveUserMemories(userId, text, sessionId) {
   for (const item of facts) {
     if (item.action === 'delete') {
       await db.deleteUserMemoryByKey(item.key, userId);
+      if (isChromaAvailable()) {
+        await deleteMemoryFromChroma(userId, item.key);
+      }
       continue;
     }
 
+    const check = validateMemoryFact(item);
+    if (!check.valid) {
+      console.warn(`[Memory Manager] Skipping invalid memory write key="${item.key}": "${item.fact}" (${check.reason})`);
+      continue;
+    }
+
+    const sanitized = check.sanitizedItem;
     const memory = await db.saveOrUpdateUserMemory({
       userId,
-      key: item.key,
-      fact: item.fact,
-      category: item.category || 'general',
+      key: sanitized.key,
+      fact: sanitized.fact,
+      category: sanitized.category || 'other',
       sourceSessionId: sessionId,
-      vector: vectorizeText(item.fact + ' ' + item.key),
+      vector: vectorizeText(sanitized.fact + ' ' + sanitized.key),
     });
     savedMemories.push(memory);
+
+    if (isChromaAvailable()) {
+      await upsertMemoryToChroma({
+        userId,
+        key: item.key,
+        fact: item.fact,
+        category: item.category || 'general',
+        memoryId: memory.id,
+      });
+    }
   }
 
   return savedMemories;
@@ -100,6 +131,31 @@ export async function processAndSaveUserMemories(userId, text, sessionId) {
 export async function searchUserMemories(userId, query, maxTokens = MEMORY_MAX_TOKENS, topK = 8) {
   if (!userId || !query) return [];
 
+  // 1. High-performance Chroma DB Vector Search when available
+  if (isChromaAvailable()) {
+    try {
+      const chromaResults = await searchMemoriesInChroma(userId, query, topK);
+      if (chromaResults && chromaResults.length > 0) {
+        const selected = [];
+        let tokenCount = 0;
+        for (const mem of chromaResults) {
+          if (selected.length >= topK) break;
+          const tokensEst = Math.ceil(mem.fact.length / 4);
+          if (tokenCount + tokensEst <= maxTokens) {
+            selected.push(mem);
+            tokenCount += tokensEst;
+          }
+        }
+        if (selected.length > 0) {
+          return selected;
+        }
+      }
+    } catch (chromaErr) {
+      console.warn('[MemoryManager] Chroma query notice, falling back to local vector:', chromaErr.message);
+    }
+  }
+
+  // 2. Built-in Local Term Vector & Cosine Similarity Ranking (Offline & Fallback)
   const allMemories = await db.getUserMemories(userId);
   if (!allMemories || allMemories.length === 0) return [];
 
@@ -236,6 +292,31 @@ export async function searchPreviousChatHistory(userId, currentSessionId, query,
 export async function searchKnowledgeBase(query, maxTokens = KNOWLEDGE_MAX_TOKENS, topK = 2) {
   if (!query) return [];
 
+  // 1. High-performance Chroma DB Search when available
+  if (isChromaAvailable()) {
+    try {
+      const chromaChunks = await searchKnowledgeInChroma(query, topK);
+      if (chromaChunks && chromaChunks.length > 0) {
+        const selected = [];
+        let tokenCount = 0;
+        for (const chunk of chromaChunks) {
+          if (selected.length >= topK) break;
+          const tokensEst = Math.ceil(chunk.content.length / 4);
+          if (tokenCount + tokensEst <= maxTokens) {
+            selected.push(chunk);
+            tokenCount += tokensEst;
+          }
+        }
+        if (selected.length > 0) {
+          return selected;
+        }
+      }
+    } catch (chromaErr) {
+      console.warn('[MemoryManager] Chroma knowledge search notice:', chromaErr.message);
+    }
+  }
+
+  // 2. Built-in Local Term Vector & Cosine Similarity Ranking (Offline & Fallback)
   const chunks = await db.getKnowledgeChunks();
   if (!chunks || chunks.length === 0) return [];
 

@@ -8,7 +8,7 @@ Comprehensive technical breakdown of all architectural components, services, and
 
 The application is structured into decoupled, modular workspaces:
 - **`client/` (Frontend)**: Single Page Application powered by React 19, Tailwind CSS v4, Lucide React, and Vite with hot module replacement and dev API proxying.
-- **`server/` (Backend)**: Express API gateway featuring LangChain 3-tier memory, Multimodal RAG document analysis, ambiguity heuristics, dual-engine failover streaming, and the automated 39-point test suite.
+- **`server/` (Backend)**: Express API gateway featuring LangChain 3-tier memory, Multimodal RAG document analysis, worker thread extraction pool, ambiguity heuristics, dual-engine failover streaming, and the automated 77-point test suite.
 
 ---
 
@@ -62,26 +62,90 @@ The system implements a hierarchical 3-tier memory engine designed to provide ri
 
 ---
 
-## 3. LangChain RAG & Multimodal Document Analysis Engine (`server/services/fileParser.js` & `server/services/ragService.js`)
+## 3. Asynchronous File Upload & Multimodal Analysis Architecture (`server/services/extractors/` & `server/services/ragService.js`)
 
-- **Multi-Format Document Extractor (`parseFileContent`)**:
-  - **PDF Documents**: Direct text extraction with internal metadata header filtering via `pdf-parse`.
-  - **Images & Multimodal OCR**: Direct image analysis (`.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp`, `.gif`) and PowerPoint rasterized slide OCR via **Gemini 2.5 Flash Vision**.
-  - **Text & Markdown**: Full plaintext parsing for `.txt`, `.md`, and `.markdown`.
-  - **Structured Datasets**: Parsing of tabular data (`.csv`) and nested object structures (`.json`, `.yaml`, `.yml`).
-  - **Source Code Files**: Full multi-language syntax extraction (`.js`, `.jsx`, `.ts`, `.tsx`, `.py`, `.java`, `.cpp`, `.c`, `.rs`, `.go`, `.html`, `.css`, `.sql`).
-- **LangChain Recursive Text Chunking**:
-  - Leverages `@langchain/textsplitters` (`RecursiveCharacterTextSplitter`) with an 800-character chunk size and 150-character overlap window.
-- **Semantic Keyword & Proximity Retrieval (`retrieveRelevantChunks`)**:
-  - Automatically scores and ranks document chunks based on query keyword frequency and co-occurrence proximity.
-  - Dynamically retrieves top-ranking excerpts and injects them into the `[UPLOADED DOCUMENT CONTEXT (RAG)]` prompt section.
-- **Strict Anti-Hallucination Guardrails**:
-  - If a file produces empty or unreadable content, the system intercepts and strictly forbids the LLM from hallucinating or guessing based on the filename.
-  - Mandates substantive content focus, forbidding the model from outputting creation dates, font properties, or dictionary metadata headers.
-- **Tactile UI Attachment Dock & Drag-and-Drop**:
-  - Drag-and-drop document upload with active attachment chip preview, upload progress indicators, and instant removal button.
+CosmoAI provides an asynchronous, worker-thread-isolated document ingestion and multi-turn conversational analysis engine designed for enterprise stability, strict tenant isolation, and low latency.
 
----
+```text
+                  Incoming Document Upload (POST /api/files/upload)
+                                        │
+                                        ▼
+                  ┌───────────────────────────────────────────────┐
+                  │          Magic Bytes & Security Guard         │
+                  │  - %PDF-, PNG, JPEG, PK (DOCX), CSV delimiter │
+                  │  - Path traversal & sanitization (<id>.bin)   │
+                  │  - Zip-bomb defense (50MB / 500 entry limit)  │
+                  └──────────────────────┬────────────────────────┘
+                                         │
+                                         ▼
+                  ┌───────────────────────────────────────────────┐
+                  │    User-Scoped SHA-256 Deduplication Cache    │
+                  │  - Scoped by (userId, sha256)                 │
+                  └──────────┬────────────────────────┬───────────┘
+                             │ CACHE HIT              │ CACHE MISS
+                             ▼                        ▼
+               ┌───────────────────────────┐  ┌───────────────────────────────┐
+               │ Reuse Extracted Document  │  │   Async Queue & Worker Pool   │
+               │ (ParsedDocument schema)   │  │   - node:worker_threads       │
+               └─────────────┬─────────────┘  │   - 15s Watchdog Termination  │
+                             │                └───────────────┬───────────────┘
+                             │                                │
+                             ▼                                ▼
+               ┌──────────────────────────────────────────────────────────────┐
+               │           Re-Chunk & Session-Scoped Indexing                 │
+               │  - 350-token structure-aware chunks (50-token overlap)       │
+               │  - Strict namespace isolation: chunks never leak sessions    │
+               │  - Pre-computed document summary caching                     │
+               └──────────────────────────────┬───────────────────────────────┘
+                                              │
+                                              ▼
+               ┌──────────────────────────────────────────────────────────────┐
+               │            Multi-Turn Dialogue RAG & Citations               │
+               │  - Automatic recency-based follow-up resolution              │
+               │  - Whole-document query detection (summary vs chunk search)  │
+               │  - Hybrid cosine vector + BM25 keyword retrieval             │
+               │  - 2,400-token context budget & citation UI metadata pills   │
+               └──────────────────────────────────────────────────────────────┘
+```
+
+### 3.1 Upload Validation & Defensive Boundaries (`fileValidator.js`)
+- **Magic Bytes Verification**: Inspects leading binary bytes to prevent MIME-type spoofing:
+  - PDF: `%PDF-` (`0x25 0x50 0x44 0x46 0x2D`)
+  - PNG: `\x89PNG\r\n\x1a\n` (`0x89 0x50 0x4E 0x47`)
+  - JPEG: `\xFF\xD8\xFF` (`0xFF 0xD8 0xFF`)
+  - DOCX: PK ZIP container signature (`0x50 0x4B 0x03 0x04`) containing required `word/` package entries.
+  - CSV: Delimiter frequency and row-column consistency validation.
+- **Zip Bomb & Archive Safety**: Limits extracted size to 50MB and archive entry count to 500 entries, throwing `ZipBombError` when limits are breached.
+- **Disk Isolation & Path Traversal Defense**: Strips directory sequences (`../../`, `..\..\`) and stores raw files outside the web root under `uploads_storage/<fileId>.bin`.
+- **Upload Rate Limiting**: Enforces a strict 10 uploads / 5 minutes ceiling per user/IP.
+
+### 3.2 Asynchronous Worker Pool & CPU Watchdog (`workerPool.js` & `asyncJobQueue.js`)
+- **Non-Blocking Architecture**: Upload returns `HTTP 202 Accepted` immediately with a `jobId`, allowing the client to poll `GET /api/files/status/:jobId` without blocking the main event loop.
+- **CPU Isolation with `node:worker_threads`**: Parsing of large or complex documents runs in isolated worker threads, keeping Express responsive (< 5ms API latency).
+- **Watchdog Timeout Enforcement**: Active 15,000ms timer calls `worker.terminate()` if parsing enters a synchronous CPU lock or catastrophic regex backtracking, safely throwing `ExtractionTimeoutError`.
+
+### 3.3 Structure-Preserving Extractors (`server/services/extractors/`)
+- **DOCX Extractor (`docxExtractor.js`)**: Pure-JS parser leveraging `mammoth` with an OpenXML fallback, preserving heading hierarchies (`Heading 1`, `Heading 2`), paragraphs, and formatted tables in the structured text representation.
+- **CSV Tabular Extractor (`sheetExtractor.js`)**:
+  - RFC-4180 compliant CSV parser with quote escaping.
+  - Automated column data type inference (`number`, `string`, `date`, `boolean`).
+  - Automated schema summary generation for large datasets (> 50 rows) with column statistics and sample head/tail rows to prevent token exhaustion.
+- **PDF Extractor (`pdfExtractor.js`)**:
+  - `pdf-parse` text extraction with encrypted/corrupt document detection (`EncryptedPdfError`).
+  - Document-level scanned PDF rule: if &ge; 60% of pages yield `< 80` characters, seamlessly triggers **Gemini 2.5 Flash Vision OCR**.
+- **Images & Multimodal OCR (`imageExtractor.js`)**: Direct image extraction with high-accuracy transcription via Gemini Vision.
+
+### 3.4 User-Scoped Deduplication & Session Namespace Isolation
+- **Tenant & Session Security**: Deduplication lookups are strictly partitioned by `(userId, sha256)`.
+- **Zero Cross-Session Chunk Leakage**: When a document hash is reused, only the extracted `ParsedDocument` object is retrieved from the cache. The chunks are strictly re-chunked and re-indexed into the target session's vector store namespace, ensuring chunks never leak across sessions or users.
+
+### 3.5 Hybrid RAG, Citations & Multi-Turn Context Follow-Up (`ragService.js` & `contextManager.js`)
+- **Structure-Aware Chunking**: 350 tokens per chunk (~1,400 characters) with a 50-token overlap, preserving semantic paragraph boundaries.
+- **Hybrid Retrieval**: Combines term-frequency cosine similarity and BM25 keyword matching within a dedicated **2,400-token RAG budget** (accommodating 6–8 top-ranking chunks).
+- **Whole-Document Detection (`isWholeDocumentQuery`)**: Accurately recognizes summarization and overview requests (e.g., *"summarize this document"*, *"overview of the file"*), injecting pre-computed document summaries instead of arbitrary top-k snippets.
+- **Multi-Turn Recency Follow-Up**: Automatically resolves file references in follow-up queries (*"What was their conclusion?"*) using the most recently attached file in the dialogue thread without requiring re-upload.
+- **Structured Citations**: Emits detailed citation metadata (`[Doc: filename, Page/Section]`) streamed over SSE and rendered as interactive citation pills in the client.
+- **Lifecycle Cleanup (`DELETE /api/files/:fileId`)**: Completely cleans up metadata, disk storage, and vector store chunks upon user deletion.
 
 ## 4. Real-Time Web Search Grounding & Tavily Fallback (`server/services/webSearchService.js` & `server/services/llmProvider.js`)
 
